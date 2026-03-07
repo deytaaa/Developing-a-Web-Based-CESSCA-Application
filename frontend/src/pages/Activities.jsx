@@ -447,7 +447,7 @@ const Activities = () => {
                     name="orgId"
                     value={formData.orgId}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white"
                     required
                   >
                     <option value="">Select organization...</option>
@@ -470,7 +470,7 @@ const Activities = () => {
                     name="activityTitle"
                     value={formData.activityTitle}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white"
                     required
                   />
                 </div>
@@ -484,7 +484,7 @@ const Activities = () => {
                     value={formData.description}
                     onChange={handleInputChange}
                     rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white"
                   />
                 </div>
 
@@ -497,7 +497,7 @@ const Activities = () => {
                       name="activityType"
                       value={formData.activityType}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white"
                       required
                     >
                       <option value="seminar">Seminar</option>
@@ -519,7 +519,7 @@ const Activities = () => {
                       name="venue"
                       value={formData.venue}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white"
                     />
                   </div>
                 </div>
@@ -534,7 +534,7 @@ const Activities = () => {
                       name="startDate"
                       value={formData.startDate}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white"
                       required
                     />
                   </div>
@@ -548,7 +548,7 @@ const Activities = () => {
                       name="endDate"
                       value={formData.endDate}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white"
                       required
                     />
                   </div>
@@ -565,7 +565,7 @@ const Activities = () => {
                       value={formData.targetParticipants}
                       onChange={handleInputChange}
                       min="1"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white"
                     />
                   </div>
 
@@ -580,7 +580,7 @@ const Activities = () => {
                       onChange={handleInputChange}
                       min="0"
                       step="0.01"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white"
                     />
                   </div>
                 </div>
@@ -641,7 +641,7 @@ const Activities = () => {
                   <select
                     value={reviewData.status}
                     onChange={(e) => setReviewData(prev => ({ ...prev, status: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white"
                     required
                   >
                     <option value="approved">Approve</option>
@@ -657,7 +657,7 @@ const Activities = () => {
                     value={reviewData.remarks}
                     onChange={(e) => setReviewData(prev => ({ ...prev, remarks: e.target.value }))}
                     rows="4"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-gray-900 bg-white"
                     placeholder="Add any remarks or feedback..."
                   />
                 </div>

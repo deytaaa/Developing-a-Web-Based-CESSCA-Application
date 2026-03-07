@@ -139,6 +139,25 @@ CREATE TABLE activity_attendance (
     INDEX idx_user_id (user_id)
 );
 
+CREATE TABLE organization_gallery (
+    gallery_id INT PRIMARY KEY AUTO_INCREMENT,
+    org_id INT NOT NULL,
+    activity_id INT,
+    album_name VARCHAR(100),
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    image_url VARCHAR(255) NOT NULL,
+    uploaded_by INT NOT NULL,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    photo_order INT DEFAULT 1,
+    FOREIGN KEY (org_id) REFERENCES organizations(org_id) ON DELETE CASCADE,
+    FOREIGN KEY (activity_id) REFERENCES organization_activities(activity_id) ON DELETE SET NULL,
+    FOREIGN KEY (uploaded_by) REFERENCES users(user_id) ON DELETE CASCADE,
+    INDEX idx_org_id (org_id),
+    INDEX idx_activity_id (activity_id),
+    INDEX idx_album_name (album_name)
+);
+
 -- ============================================
 -- ALUMNI MANAGEMENT
 -- ============================================

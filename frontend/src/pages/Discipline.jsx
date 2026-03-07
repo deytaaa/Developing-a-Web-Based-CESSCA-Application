@@ -157,7 +157,7 @@ const Discipline = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Case Type</label>
               <select
-                className="block w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white"
                 value={formData.caseType}
                 onChange={(e) => setFormData({ ...formData, caseType: e.target.value })}
               >
@@ -172,7 +172,7 @@ const Discipline = () => {
               <input
                 type="text"
                 required
-                className="block w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white"
                 value={formData.subject}
                 onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
               />
@@ -183,7 +183,7 @@ const Discipline = () => {
               <textarea
                 required
                 rows="4"
-                className="block w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />

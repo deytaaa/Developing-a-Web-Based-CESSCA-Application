@@ -7,7 +7,7 @@ import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { organizationService } from '../services/organizationService';
 import { useAuth } from '../contexts/AuthContext';
-import { FiSettings } from 'react-icons/fi';
+import { FiSettings, FiUsers } from 'react-icons/fi';
 
 const Organizations = () => {
   const { user } = useAuth();
@@ -84,6 +84,21 @@ const Organizations = () => {
                 className="hover:shadow-lg transition h-full flex flex-col"
                 contentClassName="flex flex-col flex-1"
               >
+                {/* Organization Logo */}
+                <div className="flex items-center justify-center mb-4">
+                  <div className="w-24 h-24 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
+                    {org.logo_url ? (
+                      <img 
+                        src={`http://localhost:5000${org.logo_url}`} 
+                        alt={org.org_name} 
+                        className="w-full h-full object-cover" 
+                      />
+                    ) : (
+                      <FiUsers className="text-4xl text-green-600" />
+                    )}
+                  </div>
+                </div>
+
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-semibold text-gray-900">{org.org_acronym}</h3>

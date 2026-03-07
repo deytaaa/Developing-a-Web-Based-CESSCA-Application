@@ -739,7 +739,7 @@ const Admin = () => {
             <input
               type="text"
               required
-              className="block w-full px-3 py-2 border border-gray-300 rounded-lg"
+              className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg"
               value={announcementForm.title}
               onChange={(e) => setAnnouncementForm({ ...announcementForm, title: e.target.value })}
             />
@@ -750,7 +750,7 @@ const Admin = () => {
             <textarea
               required
               rows={4}
-              className="block w-full px-3 py-2 border border-gray-300 rounded-lg"
+              className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg"
               value={announcementForm.content}
               onChange={(e) => setAnnouncementForm({ ...announcementForm, content: e.target.value })}
             />
@@ -760,7 +760,7 @@ const Admin = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
               <select
-                className="block w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg"
                 value={announcementForm.announcement_type}
                 onChange={(e) => setAnnouncementForm({ ...announcementForm, announcement_type: e.target.value })}
               >
@@ -775,7 +775,7 @@ const Admin = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
               <select
-                className="block w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg"
                 value={announcementForm.priority}
                 onChange={(e) => setAnnouncementForm({ ...announcementForm, priority: e.target.value })}
               >
@@ -789,7 +789,7 @@ const Admin = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Target Audience</label>
             <select
-              className="block w-full px-3 py-2 border border-gray-300 rounded-lg"
+              className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg"
               value={announcementForm.target_audience}
               onChange={(e) => setAnnouncementForm({ ...announcementForm, target_audience: e.target.value })}
             >
@@ -823,7 +823,7 @@ const Admin = () => {
             <input
               type="text"
               required
-              className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               value={orgForm.org_name}
               onChange={(e) => setOrgForm({ ...orgForm, org_name: e.target.value })}
               placeholder="e.g., Supreme Student Council"
@@ -836,7 +836,7 @@ const Admin = () => {
               type="text"
               required
               maxLength={10}
-              className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               value={orgForm.org_acronym}
               onChange={(e) => setOrgForm({ ...orgForm, org_acronym: e.target.value.toUpperCase() })}
               placeholder="e.g., SSC"
@@ -848,7 +848,7 @@ const Admin = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
               <select
                 required
-                className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 value={orgForm.org_type}
                 onChange={(e) => setOrgForm({ ...orgForm, org_type: e.target.value })}
               >
@@ -864,7 +864,7 @@ const Admin = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
               <select
                 required
-                className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 value={orgForm.status}
                 onChange={(e) => setOrgForm({ ...orgForm, status: e.target.value })}
               >
@@ -879,7 +879,7 @@ const Admin = () => {
             <textarea
               required
               rows={3}
-              className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               value={orgForm.description}
               onChange={(e) => setOrgForm({ ...orgForm, description: e.target.value })}
               placeholder="Brief description of the organization..."
@@ -890,7 +890,7 @@ const Admin = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Mission</label>
             <textarea
               rows={2}
-              className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               value={orgForm.mission}
               onChange={(e) => setOrgForm({ ...orgForm, mission: e.target.value })}
               placeholder="Organization's mission statement..."
@@ -901,7 +901,7 @@ const Admin = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Vision</label>
             <textarea
               rows={2}
-              className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               value={orgForm.vision}
               onChange={(e) => setOrgForm({ ...orgForm, vision: e.target.value })}
               placeholder="Organization's vision statement..."

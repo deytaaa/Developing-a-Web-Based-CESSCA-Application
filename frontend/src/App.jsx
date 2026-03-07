@@ -52,7 +52,7 @@ function App() {
           <Route path="/gallery" element={<ProtectedRoute><Gallery /></ProtectedRoute>} />
           
           {/* Analytics */}
-          <Route path="/analytics" element={<ProtectedRoute roles={['officer', 'cessca_staff', 'admin']}><Analytics /></ProtectedRoute>} />
+          <Route path="/analytics" element={<ProtectedRoute roles={['cessca_staff', 'admin']}><Analytics /></ProtectedRoute>} />
           
           {/* Admin */}
           <Route path="/admin" element={<ProtectedRoute roles={['admin', 'cessca_staff']}><Admin /></ProtectedRoute>} />

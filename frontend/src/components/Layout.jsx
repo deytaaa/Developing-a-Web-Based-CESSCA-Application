@@ -26,7 +26,7 @@ const Layout = ({ children }) => {
     { name: 'Discipline', href: '/discipline', icon: FiAlertCircle, roles: ['student', 'officer', 'cessca_staff', 'admin'] },
     { name: 'Sports & Arts', href: '/sports', icon: FiTrendingUp, roles: ['student', 'officer', 'cessca_staff', 'admin'] },
     { name: 'Gallery', href: '/gallery', icon: FiTrendingUp, roles: ['all'] },
-    { name: 'Analytics', href: '/analytics', icon: FiBarChart2, roles: ['officer', 'admin'] },
+    { name: 'Analytics', href: '/analytics', icon: FiBarChart2, roles: ['cessca_staff', 'admin'] },
     { name: 'Administration', href: '/admin', icon: FiSettings, roles: ['cessca_staff', 'admin'] },
   ];
 

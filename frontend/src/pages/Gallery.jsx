@@ -30,6 +30,7 @@ const Gallery = () => {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
+  const [expandedDescriptions, setExpandedDescriptions] = useState(new Set());
 
   const categories = [
     { value: '', label: 'All Categories' },
@@ -87,8 +88,9 @@ const Gallery = () => {
       previews.push(URL.createObjectURL(file));
     }
 
-    setImageFiles(validFiles);
-    setImagePreviews(previews);
+    // Append new files to existing ones instead of replacing
+    setImageFiles([...imageFiles, ...validFiles]);
+    setImagePreviews([...imagePreviews, ...previews]);
   };
 
   const removeImage = (index) => {
@@ -225,6 +227,18 @@ const Gallery = () => {
     return variants[category] || 'secondary';
   };
 
+  const toggleDescription = (albumId) => {
+    setExpandedDescriptions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(albumId)) {
+        newSet.delete(albumId);
+      } else {
+        newSet.add(albumId);
+      }
+      return newSet;
+    });
+  };
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -326,7 +340,24 @@ const Gallery = () => {
                     )}
                   </div>
                   {album.description && (
-                    <p className="text-xs text-gray-600 mb-2 line-clamp-2">{album.description}</p>
+                    <div className="mb-2">
+                      <p className={`text-xs text-gray-600 ${
+                        expandedDescriptions.has(album.album_id) ? '' : 'line-clamp-2'
+                      }`}>
+                        {album.description}
+                      </p>
+                      {album.description.length > 80 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleDescription(album.album_id);
+                          }}
+                          className="text-green-600 hover:text-green-800 text-xs font-medium mt-1"
+                        >
+                          {expandedDescriptions.has(album.album_id) ? 'Read Less' : 'Read More'}
+                        </button>
+                      )}
+                    </div>
                   )}
                   <div className="flex flex-wrap gap-1 mb-2">
                     <Badge variant={getCategoryBadgeVariant(album.category)} className="text-xs">
@@ -549,7 +580,7 @@ const Gallery = () => {
       {/* Album Viewer Modal */}
       {showImageModal && selectedAlbum && albumPhotos.length > 0 && getCurrentPhoto() && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50"
           onKeyDown={(e) => {
             if (e.key === 'ArrowLeft') navigatePhoto('prev');
             if (e.key === 'ArrowRight') navigatePhoto('next');
@@ -557,11 +588,12 @@ const Gallery = () => {
           }}
           tabIndex={0}
         >
-          <div className="max-w-6xl w-full h-full flex flex-col">
-            <div className="flex justify-between items-start mb-4">
-              <div className="text-white">
-                <h3 className="text-2xl font-bold mb-2">{selectedAlbum.title}</h3>
-                <div className="flex flex-wrap gap-2 mb-2">
+          <div className="w-full h-full flex flex-col">
+            {/* Header */}
+            <div className="flex justify-between items-start px-6 py-4 bg-black bg-opacity-50">
+              <div className="text-white flex-1">
+                <h3 className="text-xl font-bold mb-1">{selectedAlbum.title}</h3>
+                <div className="flex flex-wrap gap-2 items-center">
                   <Badge variant={getCategoryBadgeVariant(selectedAlbum.category)}>
                     {selectedAlbum.category}
                   </Badge>
@@ -572,26 +604,22 @@ const Gallery = () => {
                       Featured
                     </Badge>
                   )}
-                  <Badge variant="info">
-                    Photo {currentPhotoIndex + 1} of {albumPhotos.length}
-                  </Badge>
+                  {albumPhotos.length > 1 && (
+                    <span className="text-sm text-gray-300">
+                      {currentPhotoIndex + 1} / {albumPhotos.length}
+                    </span>
+                  )}
+                  <span className="text-sm text-gray-400">
+                    • {selectedAlbum.uploaded_by_first_name} {selectedAlbum.uploaded_by_last_name}
+                  </span>
                 </div>
-                {selectedAlbum.description && (
-                  <p className="text-gray-300 text-sm mb-2">{selectedAlbum.description}</p>
-                )}
-                <p className="text-gray-400 text-sm">
-                  Uploaded by {selectedAlbum.uploaded_by_first_name} {selectedAlbum.uploaded_by_last_name} • {new Date(selectedAlbum.uploaded_at).toLocaleDateString()}
-                </p>
-                {selectedAlbum.event_name && (
-                  <p className="text-gray-400 text-sm">Event: {selectedAlbum.event_name}</p>
-                )}
               </div>
               <div className="flex space-x-2">
                 {canUpload && (
                   <>
                     <button
                       onClick={() => handleToggleFeatured(getCurrentPhoto().gallery_id, getCurrentPhoto().featured)}
-                      className={`px-3 py-2 rounded-md ${
+                      className={`px-3 py-2 rounded-md transition-colors ${
                         getCurrentPhoto().featured
                           ? 'bg-gold-600 hover:bg-gold-700'
                           : 'bg-gray-600 hover:bg-gray-700'
@@ -602,7 +630,7 @@ const Gallery = () => {
                     </button>
                     <button
                       onClick={() => handleDeletePhoto(getCurrentPhoto().gallery_id)}
-                      className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                      className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
                       title="Delete Photo"
                     >
                       <FiTrash2 />
@@ -616,22 +644,24 @@ const Gallery = () => {
                     setAlbumPhotos([]);
                     setCurrentPhotoIndex(0);
                   }}
-                  className="px-3 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
-                  title="Close"
+                  className="px-3 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+                  title="Close (Esc)"
                 >
-                  <FiX className="text-2xl" />
+                  <FiX className="text-xl" />
                 </button>
               </div>
             </div>
-            <div className="flex items-center justify-center flex-1 relative overflow-hidden">
+
+            {/* Image Container */}
+            <div className="flex items-center justify-center flex-1 relative px-4 py-6">
               {/* Previous Button */}
-              {albumPhotos.length > 1 && (
+              {albumPhotos.length > 1 && currentPhotoIndex > 0 && (
                 <button
                   onClick={() => navigatePhoto('prev')}
-                  className="absolute left-4 z-10 p-3 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full transition-all"
+                  className="absolute left-6 z-10 p-4 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full transition-all backdrop-blur-sm"
                   title="Previous Photo (←)"
                 >
-                  <FiChevronLeft className="text-3xl" />
+                  <FiChevronLeft className="text-2xl" />
                 </button>
               )}
 
@@ -639,36 +669,48 @@ const Gallery = () => {
               <img
                 src={`http://localhost:5000${getCurrentPhoto().image_url}`}
                 alt={selectedAlbum.title}
-                className="max-h-full max-w-full object-contain rounded-lg"
+                className="max-h-full max-w-full object-contain"
+                style={{ maxHeight: 'calc(100vh - 220px)' }}
               />
 
               {/* Next Button */}
-              {albumPhotos.length > 1 && (
+              {albumPhotos.length > 1 && currentPhotoIndex < albumPhotos.length - 1 && (
                 <button
                   onClick={() => navigatePhoto('next')}
-                  className="absolute right-4 z-10 p-3 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full transition-all"
+                  className="absolute right-6 z-10 p-4 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full transition-all backdrop-blur-sm"
                   title="Next Photo (→)"
                 >
-                  <FiChevronRight className="text-3xl" />
+                  <FiChevronRight className="text-2xl" />
                 </button>
               )}
             </div>
 
-            {/* Photo Navigation Dots */}
+            {/* Thumbnail Strip */}
             {albumPhotos.length > 1 && (
-              <div className="flex justify-center mt-4 gap-2">
-                {albumPhotos.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentPhotoIndex(index)}
-                    className={`w-2 h-2 rounded-full transition-all ${
-                      index === currentPhotoIndex
-                        ? 'bg-white w-8'
-                        : 'bg-gray-500 hover:bg-gray-400'
-                    }`}
-                    title={`Photo ${index + 1}`}
-                  />
-                ))}
+              <div className="bg-black bg-opacity-60 px-6 py-4">
+                <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'thin' }}>
+                  {albumPhotos.map((photo, index) => (
+                    <button
+                      key={photo.gallery_id}
+                      onClick={() => setCurrentPhotoIndex(index)}
+                      className={`flex-shrink-0 relative transition-all ${
+                        index === currentPhotoIndex
+                          ? 'ring-4 ring-blue-500 scale-110'
+                          : 'opacity-60 hover:opacity-100'
+                      }`}
+                      title={photo.title}
+                    >
+                      <img
+                        src={`http://localhost:5000${photo.image_url}`}
+                        alt={photo.title}
+                        className="w-20 h-20 object-cover rounded"
+                      />
+                      {index === currentPhotoIndex && (
+                        <div className="absolute inset-0 border-2 border-blue-500 rounded"></div>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>

@@ -105,4 +105,49 @@ export const organizationService = {
     const response = await api.delete(`/organizations/${orgId}/members/${memberId}`);
     return response.data;
   },
+
+  // Logo Management
+  uploadLogo: async (orgId, file) => {
+    const formData = new FormData();
+    formData.append('logo', file);
+    const response = await api.post(`/organizations/${orgId}/logo`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  deleteLogo: async (orgId) => {
+    const response = await api.delete(`/organizations/${orgId}/logo`);
+    return response.data;
+  },
+
+  // Gallery Management
+  getGallery: async (orgId, params = {}) => {
+    const response = await api.get(`/organizations/${orgId}/gallery`, { params });
+    return response.data;
+  },
+
+  uploadGalleryPhoto: async (orgId, photoData) => {
+    const formData = new FormData();
+    formData.append('image', photoData.image);
+    formData.append('title', photoData.title);
+    if (photoData.description) formData.append('description', photoData.description);
+    if (photoData.album_name) formData.append('album_name', photoData.album_name);
+    if (photoData.activity_id) formData.append('activity_id', photoData.activity_id);
+    if (photoData.photo_order) formData.append('photo_order', photoData.photo_order);
+
+    const response = await api.post(`/organizations/${orgId}/gallery`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  deleteGalleryPhoto: async (orgId, galleryId) => {
+    const response = await api.delete(`/organizations/${orgId}/gallery/${galleryId}`);
+    return response.data;
+  },
 };

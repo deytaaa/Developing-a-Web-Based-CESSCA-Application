@@ -4,6 +4,9 @@ const { body, validationResult } = require('express-validator');
 const { pool } = require('../config/database');
 const auth = require('../middleware/auth');
 const roleCheck = require('../middleware/roleCheck');
+const upload = require('../middleware/upload');
+const path = require('path');
+const fs = require('fs');
 
 // Get all organizations
 router.get('/', async (req, res) => {
@@ -161,7 +164,7 @@ router.post('/', auth, roleCheck('cessca_staff', 'admin'), [
 // Update organization (CESSCA/Admin only)
 router.put('/:id', auth, roleCheck('cessca_staff', 'admin'), async (req, res) => {
     try {
-        const { org_name, org_acronym, org_type, description, mission, vision, status } = req.body;
+        const { org_name, org_acronym, org_type, description, mission, vision, status, founded_date } = req.body;
 
         // Check if organization exists
         const [existing] = await pool.query('SELECT org_id FROM organizations WHERE org_id = ?', [req.params.id]);
@@ -169,12 +172,15 @@ router.put('/:id', auth, roleCheck('cessca_staff', 'admin'), async (req, res) =>
             return res.status(404).json({ success: false, message: 'Organization not found' });
         }
 
+        // Convert empty string to null for date field
+        const foundedDate = founded_date && founded_date.trim() !== '' ? founded_date : null;
+
         await pool.query(
             `UPDATE organizations 
              SET org_name = ?, org_acronym = ?, org_type = ?, description = ?, 
-                 mission = ?, vision = ?, status = ?, updated_at = NOW()
+                 mission = ?, vision = ?, status = ?, founded_date = ?, updated_at = NOW()
              WHERE org_id = ?`,
-            [org_name, org_acronym, org_type, description, mission, vision, status, req.params.id]
+            [org_name, org_acronym, org_type, description, mission, vision, status, foundedDate, req.params.id]
         );
 
         res.json({
@@ -809,6 +815,259 @@ router.get('/:id/potential-officers', auth, roleCheck('cessca_staff', 'admin'), 
             success: false, 
             message: 'Failed to fetch potential officers',
             error: error.message 
+        });
+    }
+});
+
+// Upload organization logo (CESSCA/Admin only)
+router.post('/:id/logo', auth, roleCheck('cessca_staff', 'admin'), upload.single('logo'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'No file uploaded'
+            });
+        }
+
+        // Check if organization exists
+        const [existing] = await pool.query(
+            'SELECT logo_url FROM organizations WHERE org_id = ?',
+            [req.params.id]
+        );
+
+        if (existing.length === 0) {
+            return res.status(404).json({ success: false, message: 'Organization not found' });
+        }
+
+        // Delete old logo if exists
+        if (existing[0]?.logo_url) {
+            const oldPath = path.join(__dirname, '..', existing[0].logo_url);
+            if (fs.existsSync(oldPath)) {
+                fs.unlinkSync(oldPath);
+            }
+        }
+
+        // Update organization with new logo path
+        const logoPath = `/uploads/${req.file.filename}`;
+        await pool.query(
+            'UPDATE organizations SET logo_url = ?, updated_at = NOW() WHERE org_id = ?',
+            [logoPath, req.params.id]
+        );
+
+        res.json({
+            success: true,
+            message: 'Organization logo uploaded successfully',
+            logo_url: logoPath
+        });
+
+    } catch (error) {
+        console.error('Organization logo upload error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to upload organization logo',
+            error: error.message
+        });
+    }
+});
+
+// Delete organization logo (CESSCA/Admin only)
+router.delete('/:id/logo', auth, roleCheck('cessca_staff', 'admin'), async (req, res) => {
+    try {
+        const [organization] = await pool.query(
+            'SELECT logo_url FROM organizations WHERE org_id = ?',
+            [req.params.id]
+        );
+
+        if (organization.length === 0) {
+            return res.status(404).json({ success: false, message: 'Organization not found' });
+        }
+
+        if (organization[0]?.logo_url) {
+            const oldPath = path.join(__dirname, '..', organization[0].logo_url);
+            if (fs.existsSync(oldPath)) {
+                fs.unlinkSync(oldPath);
+            }
+        }
+
+        await pool.query(
+            'UPDATE organizations SET logo_url = NULL, updated_at = NOW() WHERE org_id = ?',
+            [req.params.id]
+        );
+
+        res.json({
+            success: true,
+            message: 'Organization logo deleted successfully'
+        });
+
+    } catch (error) {
+        console.error('Delete organization logo error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete organization logo',
+            error: error.message
+        });
+    }
+});
+
+// Get organization gallery
+router.get('/:id/gallery', async (req, res) => {
+    try {
+        const { album_name, activity_id } = req.query;
+        
+        let query = `
+            SELECT og.*, 
+                   up.first_name, up.last_name,
+                   oa.activity_title
+            FROM organization_gallery og
+            LEFT JOIN users u ON og.uploaded_by = u.user_id
+            LEFT JOIN user_profiles up ON u.user_id = up.user_id
+            LEFT JOIN organization_activities oa ON og.activity_id = oa.activity_id
+            WHERE og.org_id = ?
+        `;
+        const params = [req.params.id];
+
+        if (album_name) {
+            query += ' AND og.album_name = ?';
+            params.push(album_name);
+        }
+
+        if (activity_id) {
+            query += ' AND og.activity_id = ?';
+            params.push(activity_id);
+        }
+
+        query += ' ORDER BY og.uploaded_at DESC, og.photo_order ASC';
+
+        const [photos] = await pool.query(query, params);
+
+        // Get unique album names for this organization
+        const [albums] = await pool.query(
+            'SELECT DISTINCT album_name, COUNT(*) as photo_count FROM organization_gallery WHERE org_id = ? AND album_name IS NOT NULL GROUP BY album_name',
+            [req.params.id]
+        );
+
+        res.json({
+            success: true,
+            count: photos.length,
+            photos,
+            albums
+        });
+
+    } catch (error) {
+        console.error('Get organization gallery error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch gallery',
+            error: error.message
+        });
+    }
+});
+
+// Upload photo to organization gallery
+router.post('/:id/gallery', auth, upload.single('image'), async (req, res) => {
+    try {
+        const orgId = req.params.id;
+        const { title, description, album_name, activity_id, photo_order } = req.body;
+
+        // Verify user is officer of this org, CESSCA staff, or admin
+        const userRole = req.user.role;
+        if (!['cessca_staff', 'admin'].includes(userRole)) {
+            const [isOfficer] = await pool.query(
+                'SELECT officer_id FROM organization_officers WHERE org_id = ? AND user_id = ? AND status = "active"',
+                [orgId, req.user.userId]
+            );
+
+            if (isOfficer.length === 0) {
+                return res.status(403).json({ success: false, message: 'Not authorized to upload photos for this organization' });
+            }
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'Image file is required' });
+        }
+
+        const imageUrl = `/uploads/${req.file.filename}`;
+
+        const [result] = await pool.query(
+            `INSERT INTO organization_gallery 
+             (org_id, activity_id, album_name, title, description, image_url, uploaded_by, photo_order) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [orgId, activity_id || null, album_name || null, title, description || null, imageUrl, req.user.userId, photo_order || 1]
+        );
+
+        const [newPhoto] = await pool.query(
+            `SELECT og.*, up.first_name, up.last_name 
+             FROM organization_gallery og
+             LEFT JOIN users u ON og.uploaded_by = u.user_id
+             LEFT JOIN user_profiles up ON u.user_id = up.user_id
+             WHERE og.gallery_id = ?`,
+            [result.insertId]
+        );
+
+        res.status(201).json({
+            success: true,
+            message: 'Photo uploaded successfully',
+            photo: newPhoto[0]
+        });
+
+    } catch (error) {
+        console.error('Upload gallery photo error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to upload photo',
+            error: error.message
+        });
+    }
+});
+
+// Delete photo from organization gallery
+router.delete('/:id/gallery/:galleryId', auth, async (req, res) => {
+    try {
+        const { id: orgId, galleryId } = req.params;
+
+        // Verify user is officer of this org, CESSCA staff, or admin
+        const userRole = req.user.role;
+        if (!['cessca_staff', 'admin'].includes(userRole)) {
+            const [isOfficer] = await pool.query(
+                'SELECT officer_id FROM organization_officers WHERE org_id = ? AND user_id = ? AND status = "active"',
+                [orgId, req.user.userId]
+            );
+
+            if (isOfficer.length === 0) {
+                return res.status(403).json({ success: false, message: 'Not authorized to delete photos for this organization' });
+            }
+        }
+
+        // Get photo details
+        const [photo] = await pool.query(
+            'SELECT * FROM organization_gallery WHERE gallery_id = ? AND org_id = ?',
+            [galleryId, orgId]
+        );
+
+        if (photo.length === 0) {
+            return res.status(404).json({ success: false, message: 'Photo not found' });
+        }
+
+        // Delete file from filesystem
+        const imagePath = path.join(__dirname, '..', photo[0].image_url);
+        if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+        }
+
+        // Delete from database
+        await pool.query('DELETE FROM organization_gallery WHERE gallery_id = ?', [galleryId]);
+
+        res.json({
+            success: true,
+            message: 'Photo deleted successfully'
+        });
+
+    } catch (error) {
+        console.error('Delete gallery photo error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete photo',
+            error: error.message
         });
     }
 });
