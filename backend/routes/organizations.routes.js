@@ -608,6 +608,64 @@ router.put('/activities/:activityId/review', auth, roleCheck('cessca_staff', 'ad
     }
 });
 
+// Delete activity (Officer who created it OR CESSCA/Admin)
+router.delete('/activities/:activityId', auth, roleCheck('officer', 'cessca_staff', 'admin'), async (req, res) => {
+    try {
+        // Get activity details
+        const [activity] = await pool.query(
+            'SELECT activity_id, submitted_by, status FROM organization_activities WHERE activity_id = ?',
+            [req.params.activityId]
+        );
+
+        if (activity.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Activity not found' 
+            });
+        }
+
+        const activityData = activity[0];
+
+        // Check permissions
+        const isCessca = ['cessca_staff', 'admin'].includes(req.user.role);
+        const isOwner = activityData.submitted_by === req.user.userId;
+
+        if (!isCessca && !isOwner) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'You can only delete your own activities' 
+            });
+        }
+
+        // Officers can only delete pending activities
+        if (!isCessca && activityData.status !== 'pending') {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'You can only delete pending activities. This activity has already been reviewed.' 
+            });
+        }
+
+        // Delete the activity
+        await pool.query(
+            'DELETE FROM organization_activities WHERE activity_id = ?',
+            [req.params.activityId]
+        );
+
+        res.json({
+            success: true,
+            message: 'Activity deleted successfully'
+        });
+
+    } catch (error) {
+        console.error('Delete activity error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to delete activity',
+            error: error.message 
+        });
+    }
+});
+
 // Add officer to organization (CESSCA/Admin only)
 router.post('/:id/officers', auth, roleCheck('cessca_staff', 'admin'), [
     body('userId').isInt(),

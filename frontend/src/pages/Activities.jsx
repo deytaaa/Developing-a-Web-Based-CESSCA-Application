@@ -8,7 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { 
   FiCalendar, FiMapPin, FiClock, FiUsers, FiDollarSign, 
   FiPlus, FiX, FiCheck, FiXCircle, FiAlertCircle,
-  FiFilter, FiFileText
+  FiFilter, FiFileText, FiTrash2
 } from 'react-icons/fi';
 
 const Activities = () => {
@@ -157,6 +157,20 @@ const Activities = () => {
     setSelectedActivity(activity);
     setReviewData({ status: 'approved', remarks: '' });
     setShowReviewModal(true);
+  };
+
+  const handleDeleteActivity = async (activityId) => {
+    if (!confirm('Are you sure you want to delete this activity?')) return;
+
+    try {
+      await organizationService.deleteActivity(activityId);
+      alert('Activity deleted successfully!');
+      loadData();
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to delete activity';
+      alert(errorMessage);
+    }
   };
 
   const resetForm = () => {
@@ -373,15 +387,30 @@ const Activities = () => {
                     </div>
                   </div>
 
-                  {/* Review Button for CESSCA Staff */}
-                  {isCessca && activity.status === 'pending' && (
-                    <button
-                      onClick={() => openReviewModal(activity)}
-                      className="ml-4 px-4 py-2 bg-gold-600 text-white rounded-lg hover:bg-gold-700"
-                    >
-                      Review
-                    </button>
-                  )}
+                  {/* Action Buttons */}
+                  <div className="ml-4 flex gap-2">
+                    {/* Review Button for CESSCA Staff */}
+                    {isCessca && activity.status === 'pending' && (
+                      <button
+                        onClick={() => openReviewModal(activity)}
+                        className="px-4 py-2 bg-gold-600 text-white rounded-lg hover:bg-gold-700 transition"
+                      >
+                        Review
+                      </button>
+                    )}
+
+                    {/* Delete Button */}
+                    {((isOfficer && activity.submitted_by === user.userId && activity.status === 'pending') || isCessca) && (
+                      <button
+                        onClick={() => handleDeleteActivity(activity.activity_id)}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2"
+                        title="Delete Activity"
+                      >
+                        <FiTrash2 />
+                        Delete
+                      </button>
+                    )}
+                  </div>
                 </div>
               </Card>
             ))

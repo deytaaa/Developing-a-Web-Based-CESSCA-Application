@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -9,12 +9,45 @@ import { disciplineService } from '../services/disciplineService';
 const Discipline = () => {
   const { user } = useAuth();
   const [showModal, setShowModal] = useState(false);
+  const [cases, setCases] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     caseType: 'complaint',
     subject: '',
     description: '',
     isAnonymous: false,
   });
+
+  useEffect(() => {
+    fetchCases();
+  }, []);
+
+  const fetchCases = async () => {
+    try {
+      setLoading(true);
+      const data = await disciplineService.getCases();
+      setCases(data.cases || []);
+    } catch (error) {
+      console.error('Failed to fetch cases:', error);
+      setCases([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    const statusStyles = {
+      pending: 'bg-yellow-100 text-yellow-800',
+      'in-progress': 'bg-blue-100 text-blue-800',
+      resolved: 'bg-green-100 text-green-800',
+    };
+
+    return (
+      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}>
+        {status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ')}
+      </span>
+    );
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,6 +56,7 @@ const Discipline = () => {
       setShowModal(false);
       alert('Case submitted successfully');
       setFormData({ caseType: 'complaint', subject: '', description: '', isAnonymous: false });
+      fetchCases(); // Reload cases after submission
     } catch (error) {
       alert('Failed to submit case');
     }
@@ -42,9 +76,67 @@ const Discipline = () => {
 
         <Card>
           <p className="text-gray-600">
-            View and manage discipline cases and consultation requests
+            {user.role === 'cessca_staff' || user.role === 'admin' 
+              ? 'View and manage all discipline cases and consultation requests' 
+              : 'View your submitted cases and their current status'}
           </p>
         </Card>
+
+        {loading ? (
+          <Card>
+            <p className="text-center text-gray-500">Loading cases...</p>
+          </Card>
+        ) : cases.length === 0 ? (
+          <Card>
+            <p className="text-center text-gray-500">No cases found</p>
+          </Card>
+        ) : (
+          <div className="grid gap-4">
+            {cases.map((caseItem) => (
+              <Card key={caseItem.case_id} className="hover:shadow-lg transition-shadow cursor-pointer">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {caseItem.subject}
+                      </h3>
+                      {getStatusBadge(caseItem.status)}
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 mb-2">
+                      Case #{caseItem.case_number}
+                    </p>
+                    
+                    <p className="text-sm text-gray-700 mb-3 line-clamp-2">
+                      {caseItem.description}
+                    </p>
+                    
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <span className="capitalize">
+                        Type: {caseItem.case_type.replace('_', ' ')}
+                      </span>
+                      <span>
+                        Submitted: {new Date(caseItem.created_at).toLocaleDateString()}
+                      </span>
+                      {caseItem.is_anonymous ? (
+                        <span className="text-orange-600 font-medium">Anonymous</span>
+                      ) : (
+                        <span>
+                          By: {caseItem.complainant_first_name} {caseItem.complainant_last_name}
+                        </span>
+                      )}
+                      {(caseItem.assigned_first_name || caseItem.assigned_last_name) && (
+                        <span className="text-blue-600">
+                          Assigned to: {caseItem.assigned_first_name} {caseItem.assigned_last_name}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
 
         <Modal
           isOpen={showModal}

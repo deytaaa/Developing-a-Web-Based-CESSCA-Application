@@ -69,6 +69,11 @@ export const organizationService = {
     return response.data;
   },
 
+  deleteActivity: async (activityId) => {
+    const response = await api.delete(`/organizations/activities/${activityId}`);
+    return response.data;
+  },
+
   // Officer Management
   addOfficer: async (orgId, officerData) => {
     const response = await api.post(`/organizations/${orgId}/officers`, officerData);
