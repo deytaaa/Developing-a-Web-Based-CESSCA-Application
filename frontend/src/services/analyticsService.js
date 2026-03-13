@@ -6,6 +6,11 @@ export const analyticsService = {
     return response.data;
   },
 
+  getStudentDashboard: async () => {
+    const response = await api.get('/analytics/student-dashboard');
+    return response.data;
+  },
+
   getOrganizationStats: async (params = {}) => {
     const response = await api.get('/analytics/organizations/stats', { params });
     return response.data;

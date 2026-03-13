@@ -67,6 +67,20 @@ router.get('/dashboard', auth, roleCheck('cessca_staff', 'admin', 'officer'), as
              GROUP BY current_employment_status`
         );
 
+        // Service Requests statistics
+        const [serviceRequestStats] = await pool.query(
+            `SELECT status, COUNT(*) as count
+             FROM service_requests
+             GROUP BY status`
+        );
+
+        // Help Desk statistics
+        const [helpDeskStats] = await pool.query(
+            `SELECT status, COUNT(*) as count
+             FROM help_desk_tickets
+             GROUP BY status`
+        );
+
         res.json({
             success: true,
             dashboard: {
@@ -79,7 +93,9 @@ router.get('/dashboard', auth, roleCheck('cessca_staff', 'admin', 'officer'), as
                 disciplineStats,
                 pendingRegistrations: recentUsers,
                 upcomingEvents,
-                alumniStats
+                alumniStats,
+                serviceRequestStats,
+                helpDeskStats
             }
         });
 
@@ -88,6 +104,120 @@ router.get('/dashboard', auth, roleCheck('cessca_staff', 'admin', 'officer'), as
         res.status(500).json({ 
             success: false, 
             message: 'Failed to fetch dashboard data',
+            error: error.message 
+        });
+    }
+});
+
+// Student dashboard statistics
+router.get('/student-dashboard', auth, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        // Organizations joined
+        const [myOrganizations] = await pool.query(
+            `SELECT o.org_id, o.org_name, o.org_acronym, o.org_type, om.joined_date, om.membership_status
+             FROM organization_members om
+             JOIN organizations o ON om.org_id = o.org_id
+             WHERE om.user_id = ? AND om.membership_status = 'active'
+             ORDER BY om.joined_date DESC`,
+            [userId]
+        );
+
+        // Service Requests submitted
+        const [myServiceRequests] = await pool.query(
+            `SELECT status, COUNT(*) as count
+             FROM service_requests
+             WHERE user_id = ?
+             GROUP BY status`,
+            [userId]
+        );
+
+        // Recent service requests
+        const [recentRequests] = await pool.query(
+            `SELECT request_id, request_type, purpose, status, created_at
+             FROM service_requests
+             WHERE user_id = ?
+             ORDER BY created_at DESC
+             LIMIT 5`,
+            [userId]
+        );
+
+        // Help Desk Tickets submitted
+        const [myHelpDeskTickets] = await pool.query(
+            `SELECT status, COUNT(*) as count
+             FROM help_desk_tickets
+             WHERE user_id = ?
+             GROUP BY status`,
+            [userId]
+        );
+
+        // Recent help desk tickets
+        const [recentTickets] = await pool.query(
+            `SELECT ticket_id, ticket_number, subject, status, created_at
+             FROM help_desk_tickets
+             WHERE user_id = ?
+             ORDER BY created_at DESC
+             LIMIT 5`,
+            [userId]
+        );
+
+        // Discipline cases
+        const [myCases] = await pool.query(
+            `SELECT case_id, case_number, subject, status, created_at
+             FROM discipline_cases
+             WHERE student_id = ?
+             ORDER BY created_at DESC
+             LIMIT 5`,
+            [userId]
+        );
+
+        // Upcoming organization activities
+        const [upcomingActivities] = await pool.query(
+            `SELECT oa.activity_id, oa.activity_title, oa.activity_type, oa.start_date, oa.end_date,
+                    o.org_name, o.org_acronym
+             FROM organization_activities oa
+             JOIN organizations o ON oa.org_id = o.org_id
+             JOIN organization_members om ON o.org_id = om.org_id
+             WHERE om.user_id = ? AND om.membership_status = 'active'
+               AND oa.status = 'approved' AND oa.start_date >= CURDATE()
+             ORDER BY oa.start_date ASC
+             LIMIT 10`,
+            [userId]
+        );
+
+        // Upcoming sports events
+        const [upcomingSports] = await pool.query(
+            `SELECT event_id, event_name, event_type, event_date, venue, status
+             FROM sports_events
+             WHERE status IN ('upcoming', 'registration_open') AND event_date >= CURDATE()
+             ORDER BY event_date ASC
+             LIMIT 5`
+        );
+
+        res.json({
+            success: true,
+            dashboard: {
+                organizations: myOrganizations,
+                serviceRequests: {
+                    stats: myServiceRequests,
+                    recent: recentRequests
+                },
+                helpDesk: {
+                    stats: myHelpDeskTickets,
+                    recent: recentTickets
+                },
+                disciplineCases: myCases,
+                upcomingActivities,
+                upcomingSports
+            }
+        });
+
+    } catch (error) {
+        console.error('Get student dashboard error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to fetch student dashboard data',
             error: error.message 
         });
     }

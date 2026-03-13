@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   FiHome, FiUsers, FiAward, FiAlertCircle, FiTrendingUp,
-  FiBarChart2, FiSettings, FiLogOut, FiMenu, FiX, FiUser, FiCalendar
+  FiBarChart2, FiSettings, FiLogOut, FiMenu, FiX, FiUser, FiCalendar, FiFileText, FiHelpCircle
 } from 'react-icons/fi';
 import ptcLogo from '../assets/images/logo-ptc.png';
 
@@ -22,11 +22,17 @@ const Layout = ({ children }) => {
     { name: 'Dashboard', href: '/', icon: FiHome, roles: ['all'] },
     { name: 'Organizations', href: '/organizations', icon: FiUsers, roles: ['student', 'officer', 'cessca_staff', 'admin'] },
     { name: 'Activities', href: '/activities', icon: FiCalendar, roles: ['officer', 'cessca_staff', 'admin'] },
-    { name: 'Alumni', href: '/alumni', icon: FiAward, roles: ['alumni', 'cessca_staff', 'admin'] },
+    // Student Services - Different for students vs staff
+    { name: 'Student Services', href: '/service-requests', icon: FiFileText, roles: ['student', 'officer'] },
+    { name: 'Manage Student Services', href: '/admin/service-requests', icon: FiFileText, roles: ['cessca_staff', 'admin'] },
+    // Support Center - Different for students vs staff
+    { name: 'Support Center', href: '/help-desk', icon: FiHelpCircle, roles: ['student', 'officer'] },
+    { name: 'Manage Support Center', href: '/admin/help-desk', icon: FiHelpCircle, roles: ['cessca_staff', 'admin'] },
     { name: 'Discipline', href: '/discipline', icon: FiAlertCircle, roles: ['student', 'officer', 'cessca_staff', 'admin'] },
-    { name: 'Sports & Arts', href: '/sports', icon: FiTrendingUp, roles: ['student', 'officer', 'cessca_staff', 'admin'] },
-    { name: 'Gallery', href: '/gallery', icon: FiTrendingUp, roles: ['all'] },
-    { name: 'Analytics', href: '/analytics', icon: FiBarChart2, roles: ['cessca_staff', 'admin'] },
+    { name: 'Alumni', href: '/alumni', icon: FiAward, roles: ['alumni', 'cessca_staff', 'admin'] },
+    // Sports & Arts, Analytics & Gallery accessible via Dashboard quick links for staff
+    { name: 'Sports & Arts', href: '/sports', icon: FiTrendingUp, roles: ['student', 'officer'] },
+    { name: 'Gallery', href: '/gallery', icon: FiTrendingUp, roles: ['student', 'officer', 'alumni'] },
     { name: 'Administration', href: '/admin', icon: FiSettings, roles: ['cessca_staff', 'admin'] },
   ];
 
@@ -34,7 +40,22 @@ const Layout = ({ children }) => {
     (item) => item.roles.includes('all') || item.roles.includes(user?.role)
   );
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => {
+    if (path === '/') {
+      return location.pathname === path;
+    }
+    // For exact matching on specific admin routes
+    if (path === '/admin') {
+      return location.pathname === '/admin' || location.pathname.startsWith('/admin/users');
+    }
+    if (path === '/admin/service-requests') {
+      return location.pathname.startsWith('/admin/service-requests');
+    }
+    if (path === '/admin/help-desk') {
+      return location.pathname.startsWith('/admin/help-desk');
+    }
+    return location.pathname.startsWith(path);
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">

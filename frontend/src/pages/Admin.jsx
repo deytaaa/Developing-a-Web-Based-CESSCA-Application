@@ -41,6 +41,7 @@ const Admin = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
   const [showOrgModal, setShowOrgModal] = useState(false);
+  const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [editingOrg, setEditingOrg] = useState(null);
   const [announcementForm, setAnnouncementForm] = useState({
     title: '',
@@ -57,6 +58,17 @@ const Admin = () => {
     mission: '',
     vision: '',
     status: 'active',
+  });
+  const [createUserForm, setCreateUserForm] = useState({
+    email: '',
+    password: '',
+    role: 'student',
+    first_name: '',
+    middle_name: '',
+    last_name: '',
+    student_id: '',
+    course: '',
+    contact_number: '',
   });
 
   useEffect(() => {
@@ -209,6 +221,29 @@ const Admin = () => {
       loadUsers();
     } catch (error) {
       alert('Failed to delete user');
+    }
+  };
+
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    try {
+      await adminService.createUser(createUserForm);
+      alert('User created successfully!');
+      setShowCreateUserModal(false);
+      setCreateUserForm({
+        email: '',
+        password: '',
+        role: 'student',
+        first_name: '',
+        middle_name: '',
+        last_name: '',
+        student_id: '',
+        course: '',
+        contact_number: '',
+      });
+      loadUsers();
+    } catch (error) {
+      alert(error.response?.data?.message || 'Failed to create user');
     }
   };
 
@@ -428,17 +463,25 @@ const Admin = () => {
                 {/* All Users - Admin Only */}
                 {currentUser?.role === 'admin' && (
                   <Card>
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                      All Users Management ({allUsers.filter((user) => {
-                        const search = searchTerm.toLowerCase();
-                        return (
-                          user.first_name?.toLowerCase().includes(search) ||
-                          user.last_name?.toLowerCase().includes(search) ||
-                          user.email?.toLowerCase().includes(search) ||
-                          user.student_id?.toLowerCase().includes(search)
-                        );
-                      }).length})
-                    </h2>
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold text-gray-900">
+                        All Users Management ({allUsers.filter((user) => {
+                          const search = searchTerm.toLowerCase();
+                          return (
+                            user.first_name?.toLowerCase().includes(search) ||
+                            user.last_name?.toLowerCase().includes(search) ||
+                            user.email?.toLowerCase().includes(search) ||
+                            user.student_id?.toLowerCase().includes(search)
+                          );
+                        }).length})
+                      </h2>
+                      <Button
+                        variant="primary"
+                        onClick={() => setShowCreateUserModal(true)}
+                      >
+                        <FiPlus className="mr-2" /> Create User
+                      </Button>
+                    </div>
                     {allUsers.filter((user) => {
                       const search = searchTerm.toLowerCase();
                       return (
@@ -914,6 +957,154 @@ const Admin = () => {
             </Button>
             <Button type="submit" variant="primary">
               {editingOrg ? 'Update Organization' : 'Create Organization'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Create User Modal */}
+      <Modal
+        isOpen={showCreateUserModal}
+        onClose={() => setShowCreateUserModal(false)}
+        title="Create New User"
+      >
+        <form onSubmit={handleCreateUser} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                required
+                className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                value={createUserForm.email}
+                onChange={(e) => setCreateUserForm({ ...createUserForm, email: e.target.value })}
+                placeholder="user@example.com"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Password <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                value={createUserForm.password}
+                onChange={(e) => setCreateUserForm({ ...createUserForm, password: e.target.value })}
+                placeholder="Minimum 6 characters"
+              />
+              <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Role <span className="text-red-500">*</span>
+              </label>
+              <select
+                required
+                className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                value={createUserForm.role}
+                onChange={(e) => setCreateUserForm({ ...createUserForm, role: e.target.value })}
+              >
+                <option value="student">Student</option>
+                <option value="officer">Officer</option>
+                <option value="alumni">Alumni</option>
+                <option value="cessca_staff">CESSCA Staff</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                First Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                value={createUserForm.first_name}
+                onChange={(e) => setCreateUserForm({ ...createUserForm, first_name: e.target.value })}
+                placeholder="First name"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Last Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                value={createUserForm.last_name}
+                onChange={(e) => setCreateUserForm({ ...createUserForm, last_name: e.target.value })}
+                placeholder="Last name"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Middle Name
+              </label>
+              <input
+                type="text"
+                className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                value={createUserForm.middle_name}
+                onChange={(e) => setCreateUserForm({ ...createUserForm, middle_name: e.target.value })}
+                placeholder="Middle name (optional)"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Student ID
+              </label>
+              <input
+                type="text"
+                className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                value={createUserForm.student_id}
+                onChange={(e) => setCreateUserForm({ ...createUserForm, student_id: e.target.value })}
+                placeholder="Student ID (optional)"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Course
+              </label>
+              <input
+                type="text"
+                className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                value={createUserForm.course}
+                onChange={(e) => setCreateUserForm({ ...createUserForm, course: e.target.value })}
+                placeholder="Course (optional)"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Contact Number
+              </label>
+              <input
+                type="tel"
+                className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                value={createUserForm.contact_number}
+                onChange={(e) => setCreateUserForm({ ...createUserForm, contact_number: e.target.value })}
+                placeholder="Contact number (optional)"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => setShowCreateUserModal(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary">
+              Create User
             </Button>
           </div>
         </form>

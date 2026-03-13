@@ -19,6 +19,14 @@ import Gallery from './pages/Gallery';
 import Analytics from './pages/Analytics';
 import Admin from './pages/Admin';
 import Profile from './pages/Profile';
+import ServiceRequests from './pages/ServiceRequests';
+import NewServiceRequest from './pages/NewServiceRequest';
+import ServiceRequestDetails from './pages/ServiceRequestDetails';
+import AdminServiceRequests from './pages/AdminServiceRequests';
+import HelpDesk from './pages/HelpDesk';
+import NewTicket from './pages/NewTicket';
+import TicketDetails from './pages/TicketDetails';
+import AdminHelpDesk from './pages/AdminHelpDesk';
 
 function App() {
   return (
@@ -53,6 +61,20 @@ function App() {
           
           {/* Analytics */}
           <Route path="/analytics" element={<ProtectedRoute roles={['cessca_staff', 'admin']}><Analytics /></ProtectedRoute>} />
+          
+          {/* Service Requests */}
+          <Route path="/service-requests" element={<ProtectedRoute><ServiceRequests /></ProtectedRoute>} />
+          <Route path="/service-requests/new" element={<ProtectedRoute><NewServiceRequest /></ProtectedRoute>} />
+          <Route path="/service-requests/:id" element={<ProtectedRoute><ServiceRequestDetails /></ProtectedRoute>} />
+          <Route path="/admin/service-requests" element={<ProtectedRoute roles={['cessca_staff', 'admin']}><AdminServiceRequests /></ProtectedRoute>} />
+          <Route path="/admin/service-requests/:id" element={<ProtectedRoute roles={['cessca_staff', 'admin']}><ServiceRequestDetails /></ProtectedRoute>} />
+          
+          {/* Help Desk */}
+          <Route path="/help-desk" element={<ProtectedRoute><HelpDesk /></ProtectedRoute>} />
+          <Route path="/help-desk/new" element={<ProtectedRoute><NewTicket /></ProtectedRoute>} />
+          <Route path="/help-desk/:id" element={<ProtectedRoute><TicketDetails /></ProtectedRoute>} />
+          <Route path="/admin/help-desk" element={<ProtectedRoute roles={['cessca_staff', 'admin']}><AdminHelpDesk /></ProtectedRoute>} />
+          <Route path="/admin/help-desk/:id" element={<ProtectedRoute roles={['cessca_staff', 'admin']}><TicketDetails /></ProtectedRoute>} />
           
           {/* Admin */}
           <Route path="/admin" element={<ProtectedRoute roles={['admin', 'cessca_staff']}><Admin /></ProtectedRoute>} />

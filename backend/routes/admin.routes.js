@@ -112,6 +112,92 @@ router.put('/users/:id/approve', auth, roleCheck('admin', 'cessca_staff'), [
     }
 });
 
+// Create user directly (Admin only)
+router.post('/users/create', auth, roleCheck('admin'), [
+    body('email').isEmail(),
+    body('password').isLength({ min: 6 }),
+    body('role').isIn(['student', 'officer', 'alumni', 'cessca_staff', 'admin']),
+    body('first_name').notEmpty(),
+    body('last_name').notEmpty()
+], async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ success: false, errors: errors.array() });
+        }
+
+        const { 
+            email, 
+            password, 
+            role, 
+            first_name, 
+            middle_name, 
+            last_name, 
+            student_id,
+            course,
+            contact_number
+        } = req.body;
+
+        // Check if email already exists
+        const [existingUser] = await pool.query(
+            'SELECT user_id FROM users WHERE email = ?',
+            [email]
+        );
+
+        if (existingUser.length > 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Email already exists' 
+            });
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create user account
+        const [userResult] = await pool.query(
+            'INSERT INTO users (email, password, role, status) VALUES (?, ?, ?, ?)',
+            [email, hashedPassword, role, 'active']
+        );
+
+        const userId = userResult.insertId;
+
+        // Create user profile
+        await pool.query(
+            `INSERT INTO user_profiles (user_id, first_name, middle_name, last_name, student_id, course, contact_number)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [userId, first_name, middle_name || null, last_name, student_id || null, course || null, contact_number || null]
+        );
+
+        // Log activity
+        await pool.query(
+            `INSERT INTO activity_logs (user_id, action, entity_type, entity_id, description)
+             VALUES (?, 'create_user', 'user', ?, ?)`,
+            [req.user.userId, userId, `Created ${role} account for ${first_name} ${last_name}`]
+        );
+
+        res.status(201).json({
+            success: true,
+            message: 'User created successfully',
+            user: {
+                user_id: userId,
+                email,
+                role,
+                first_name,
+                last_name
+            }
+        });
+
+    } catch (error) {
+        console.error('Create user error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to create user',
+            error: error.message 
+        });
+    }
+});
+
 // Update user role (Admin only)
 router.put('/users/:id/role', auth, roleCheck('admin'), [
     body('role').isIn(['student', 'officer', 'alumni', 'cessca_staff', 'admin'])

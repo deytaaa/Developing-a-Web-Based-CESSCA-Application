@@ -309,13 +309,36 @@ router.post('/:id/education', auth, roleCheck('alumni'), [
             return res.status(400).json({ success: false, errors: errors.array() });
         }
 
+        // Check if alumni profile exists
+        const [alumniCheck] = await pool.query(
+            'SELECT alumni_id, user_id FROM alumni_profiles WHERE alumni_id = ?',
+            [req.params.id]
+        );
+
+        if (alumniCheck.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Alumni profile not found. Please complete your alumni profile first.' 
+            });
+        }
+
+        // Verify ownership or admin
+        if (req.user.role !== 'admin' && req.user.role !== 'cessca_staff') {
+            if (alumniCheck[0].user_id !== req.user.userId) {
+                return res.status(403).json({ 
+                    success: false, 
+                    message: 'Access denied' 
+                });
+            }
+        }
+
         const { degreeLevel, degreeProgram, institution, startDate, completionDate, status } = req.body;
 
         const [result] = await pool.query(
             `INSERT INTO alumni_education 
              (alumni_id, degree_level, degree_program, institution, start_date, completion_date, status)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [req.params.id, degreeLevel, degreeProgram, institution, startDate, completionDate, status]
+            [req.params.id, degreeLevel, degreeProgram, institution, startDate || null, completionDate || null, status || 'ongoing']
         );
 
         res.status(201).json({
@@ -326,6 +349,12 @@ router.post('/:id/education', auth, roleCheck('alumni'), [
 
     } catch (error) {
         console.error('Add education error:', error);
+        console.error('Error details:', {
+            alumni_id: req.params.id,
+            body: req.body,
+            errorMessage: error.message,
+            errorCode: error.code
+        });
         res.status(500).json({ 
             success: false, 
             message: 'Failed to add education record',
