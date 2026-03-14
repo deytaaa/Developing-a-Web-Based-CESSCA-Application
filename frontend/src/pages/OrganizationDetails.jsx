@@ -829,8 +829,8 @@ const OrganizationDetails = () => {
 
         {activeTab === 'activities' && (
           <div className="space-y-4">
-            {/* Add Activity Button for Officers/CESSCA/Admin */}
-            {user && (user.role === 'officer' || user.role === 'cessca_staff' || user.role === 'admin') && (
+            {/* Add Activity Button for Officers only */}
+            {user && user.role === 'officer' && (
               <Card>
                 <div className="flex items-center justify-between">
                   <div>

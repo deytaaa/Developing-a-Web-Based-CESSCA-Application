@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -8,6 +9,7 @@ import { disciplineService } from '../services/disciplineService';
 
 const Discipline = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -93,8 +95,11 @@ const Discipline = () => {
         ) : (
           <div className="grid gap-4">
             {cases.map((caseItem) => (
-              <Card key={caseItem.case_id} className="hover:shadow-lg transition-shadow cursor-pointer">
-                <div className="flex items-start justify-between">
+              <Card key={caseItem.case_id} className="hover:shadow-lg transition-shadow">
+                <div
+                  className="flex items-start justify-between cursor-pointer"
+                  onClick={() => navigate(`/discipline/cases/${caseItem.case_id}`)}
+                >
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-semibold text-gray-900">

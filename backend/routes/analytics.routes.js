@@ -67,20 +67,6 @@ router.get('/dashboard', auth, roleCheck('cessca_staff', 'admin', 'officer'), as
              GROUP BY current_employment_status`
         );
 
-        // Service Requests statistics
-        const [serviceRequestStats] = await pool.query(
-            `SELECT status, COUNT(*) as count
-             FROM service_requests
-             GROUP BY status`
-        );
-
-        // Help Desk statistics
-        const [helpDeskStats] = await pool.query(
-            `SELECT status, COUNT(*) as count
-             FROM help_desk_tickets
-             GROUP BY status`
-        );
-
         res.json({
             success: true,
             dashboard: {
@@ -93,9 +79,7 @@ router.get('/dashboard', auth, roleCheck('cessca_staff', 'admin', 'officer'), as
                 disciplineStats,
                 pendingRegistrations: recentUsers,
                 upcomingEvents,
-                alumniStats,
-                serviceRequestStats,
-                helpDeskStats
+                alumniStats
             }
         });
 
@@ -124,52 +108,14 @@ router.get('/student-dashboard', auth, async (req, res) => {
             [userId]
         );
 
-        // Service Requests submitted
-        const [myServiceRequests] = await pool.query(
-            `SELECT status, COUNT(*) as count
-             FROM service_requests
-             WHERE user_id = ?
-             GROUP BY status`,
-            [userId]
-        );
-
-        // Recent service requests
-        const [recentRequests] = await pool.query(
-            `SELECT request_id, request_type, purpose, status, created_at
-             FROM service_requests
-             WHERE user_id = ?
-             ORDER BY created_at DESC
-             LIMIT 5`,
-            [userId]
-        );
-
-        // Help Desk Tickets submitted
-        const [myHelpDeskTickets] = await pool.query(
-            `SELECT status, COUNT(*) as count
-             FROM help_desk_tickets
-             WHERE user_id = ?
-             GROUP BY status`,
-            [userId]
-        );
-
-        // Recent help desk tickets
-        const [recentTickets] = await pool.query(
-            `SELECT ticket_id, ticket_number, subject, status, created_at
-             FROM help_desk_tickets
-             WHERE user_id = ?
-             ORDER BY created_at DESC
-             LIMIT 5`,
-            [userId]
-        );
-
         // Discipline cases
         const [myCases] = await pool.query(
             `SELECT case_id, case_number, subject, status, created_at
              FROM discipline_cases
-             WHERE student_id = ?
+             WHERE complainant_id = ? OR respondent_id = ?
              ORDER BY created_at DESC
              LIMIT 5`,
-            [userId]
+            [userId, userId]
         );
 
         // Upcoming organization activities
@@ -199,14 +145,6 @@ router.get('/student-dashboard', auth, async (req, res) => {
             success: true,
             dashboard: {
                 organizations: myOrganizations,
-                serviceRequests: {
-                    stats: myServiceRequests,
-                    recent: recentRequests
-                },
-                helpDesk: {
-                    stats: myHelpDeskTickets,
-                    recent: recentTickets
-                },
                 disciplineCases: myCases,
                 upcomingActivities,
                 upcomingSports

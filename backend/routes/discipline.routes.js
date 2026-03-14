@@ -52,7 +52,7 @@ router.post('/cases', auth, roleCheck('student', 'officer'), [
 });
 
 // Get cases (filtered by role)
-router.get('/cases', auth, async (req, res) => {
+router.get('/cases', auth, roleCheck('student', 'officer', 'cessca_staff', 'admin'), async (req, res) => {
     try {
         const { status, caseType, priority } = req.query;
         
@@ -130,7 +130,7 @@ router.get('/cases', auth, async (req, res) => {
 });
 
 // Get case by ID
-router.get('/cases/:id', auth, async (req, res) => {
+router.get('/cases/:id', auth, roleCheck('student', 'officer', 'cessca_staff', 'admin'), async (req, res) => {
     try {
         const [cases] = await pool.query(
             `SELECT dc.*, 
@@ -288,8 +288,57 @@ router.put('/cases/:id/assign', auth, roleCheck('cessca_staff', 'admin'), [
     }
 });
 
+// Delete own pending case (Student/Officer only)
+router.delete('/cases/:id', auth, roleCheck('student', 'officer'), async (req, res) => {
+    try {
+        const [cases] = await pool.query(
+            'SELECT case_id, complainant_id, is_anonymous, status FROM discipline_cases WHERE case_id = ?',
+            [req.params.id]
+        );
+
+        if (cases.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Case not found'
+            });
+        }
+
+        const caseData = cases[0];
+
+        if (caseData.complainant_id !== req.user.userId) {
+            return res.status(403).json({
+                success: false,
+                message: caseData.is_anonymous
+                    ? 'Anonymous cases cannot be deleted by user ownership check'
+                    : 'You can only delete your own submitted case'
+            });
+        }
+
+        if (caseData.status !== 'pending') {
+            return res.status(400).json({
+                success: false,
+                message: 'Only pending cases can be deleted'
+            });
+        }
+
+        await pool.query('DELETE FROM discipline_cases WHERE case_id = ?', [req.params.id]);
+
+        res.json({
+            success: true,
+            message: 'Case deleted successfully'
+        });
+    } catch (error) {
+        console.error('Delete case error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete case',
+            error: error.message
+        });
+    }
+});
+
 // Add case update/note
-router.post('/cases/:id/updates', auth, [
+router.post('/cases/:id/updates', auth, roleCheck('student', 'officer', 'cessca_staff', 'admin'), [
     body('updateType').isIn(['note', 'action', 'status_change', 'resolution']),
     body('updateContent').notEmpty().trim()
 ], async (req, res) => {
@@ -377,7 +426,7 @@ router.post('/consultations', auth, roleCheck('cessca_staff', 'admin'), [
 });
 
 // Get consultation schedules
-router.get('/consultations', auth, async (req, res) => {
+router.get('/consultations', auth, roleCheck('student', 'officer', 'cessca_staff', 'admin'), async (req, res) => {
     try {
         let query = `
             SELECT cs.*, 

@@ -1,5 +1,18 @@
 import api from './api';
 
+const mapEventPayload = (data = {}) => ({
+  eventName: data.event_name,
+  eventType: data.event_type,
+  description: data.description,
+  venue: data.location,
+  eventDate: data.event_date,
+  startTime: data.event_time || null,
+  endTime: data.end_time || null,
+  status: data.status || 'upcoming',
+  organizer: data.organizer || null,
+  targetParticipants: data.max_participants ? String(data.max_participants) : null,
+});
+
 export const sportsService = {
   getEvents: async (params = {}) => {
     const response = await api.get('/sports/events', { params });
@@ -12,12 +25,17 @@ export const sportsService = {
   },
 
   createEvent: async (data) => {
-    const response = await api.post('/sports/events', data);
+    const response = await api.post('/sports/events', mapEventPayload(data));
     return response.data;
   },
 
   updateEvent: async (id, data) => {
-    const response = await api.put(`/sports/events/${id}`, data);
+    const response = await api.put(`/sports/events/${id}`, mapEventPayload(data));
+    return response.data;
+  },
+
+  deleteEvent: async (id) => {
+    const response = await api.delete(`/sports/events/${id}`);
     return response.data;
   },
 

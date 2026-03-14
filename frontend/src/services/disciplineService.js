@@ -37,6 +37,11 @@ export const disciplineService = {
     return response.data;
   },
 
+  deleteCase: async (id) => {
+    const response = await api.delete(`/discipline/cases/${id}`);
+    return response.data;
+  },
+
   scheduleConsultation: async (data) => {
     const response = await api.post('/discipline/consultations', data);
     return response.data;

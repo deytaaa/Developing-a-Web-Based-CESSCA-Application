@@ -20,10 +20,7 @@ async function runMigrations() {
         console.log('✓ Connected to database');
 
         // Migration files
-        const migrations = [
-            '../database/migrations/add_service_requests_module.sql',
-            '../database/migrations/add_help_desk_module.sql'
-        ];
+        const migrations = [];
 
         for (const migrationFile of migrations) {
             const migrationPath = path.join(__dirname, migrationFile);
@@ -39,7 +36,11 @@ async function runMigrations() {
             }
         }
 
-        console.log('\n✓ All migrations completed!');
+        if (migrations.length === 0) {
+            console.log('\nℹ No pending migrations to run.');
+        } else {
+            console.log('\n✓ All migrations completed!');
+        }
 
     } catch (error) {
         console.error('✗ Migration failed:', error.message);

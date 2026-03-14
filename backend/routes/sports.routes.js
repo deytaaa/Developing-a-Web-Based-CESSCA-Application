@@ -193,6 +193,37 @@ router.put('/events/:id', auth, roleCheck('cessca_staff', 'admin'), async (req, 
     }
 });
 
+// Delete event (CESSCA/Admin only)
+router.delete('/events/:id', auth, roleCheck('cessca_staff', 'admin'), async (req, res) => {
+    try {
+        const [existing] = await pool.query(
+            'SELECT event_id FROM sports_events WHERE event_id = ?',
+            [req.params.id]
+        );
+
+        if (existing.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Event not found'
+            });
+        }
+
+        await pool.query('DELETE FROM sports_events WHERE event_id = ?', [req.params.id]);
+
+        res.json({
+            success: true,
+            message: 'Event deleted successfully'
+        });
+    } catch (error) {
+        console.error('Delete event error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete event',
+            error: error.message
+        });
+    }
+});
+
 // Register for event
 router.post('/events/:id/register', auth, roleCheck('student', 'officer'), async (req, res) => {
     try {

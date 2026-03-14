@@ -531,7 +531,7 @@ router.get('/:id/activities', async (req, res) => {
 });
 
 // Submit activity proposal (Officer)
-router.post('/:id/activities', auth, roleCheck('officer', 'cessca_staff', 'admin'), [
+router.post('/:id/activities', auth, roleCheck('officer'), [
     body('activityTitle').notEmpty().trim(),
     body('activityType').isIn(['seminar', 'workshop', 'competition', 'social', 'fundraising', 'community_service', 'other']),
     body('startDate').isISO8601(),

@@ -16,6 +16,8 @@ const Sports = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({ status: 'all', eventType: 'all' });
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingEventId, setEditingEventId] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [formData, setFormData] = useState({
@@ -51,8 +53,14 @@ const Sports = () => {
   const handleCreateEvent = async (e) => {
     e.preventDefault();
     try {
-      await sportsService.createEvent(formData);
+      if (isEditMode && editingEventId) {
+        await sportsService.updateEvent(editingEventId, formData);
+      } else {
+        await sportsService.createEvent(formData);
+      }
       setShowCreateModal(false);
+      setIsEditMode(false);
+      setEditingEventId(null);
       setFormData({
         event_name: '',
         event_type: 'sports',
@@ -88,6 +96,37 @@ const Sports = () => {
       setShowDetailsModal(true);
     } catch (error) {
       console.error('Failed to load event details:', error);
+    }
+  };
+
+  const openEditModal = (event) => {
+    setIsEditMode(true);
+    setEditingEventId(event.event_id);
+    setFormData({
+      event_name: event.event_name || '',
+      event_type: event.event_type || 'sports',
+      description: event.description || '',
+      event_date: event.event_date ? new Date(event.event_date).toISOString().slice(0, 10) : '',
+      event_time: event.event_time || '',
+      location: event.venue || event.location || '',
+      max_participants: event.target_participants || '',
+      registration_deadline: '',
+      status: event.status || 'upcoming',
+    });
+    setShowCreateModal(true);
+  };
+
+  const handleDeleteEvent = async (eventId) => {
+    const confirmed = window.confirm('Delete this event? This action cannot be undone.');
+    if (!confirmed) return;
+
+    try {
+      await sportsService.deleteEvent(eventId);
+      alert('Event deleted successfully.');
+      loadEvents();
+    } catch (error) {
+      console.error('Failed to delete event:', error);
+      alert(error.response?.data?.message || 'Failed to delete event');
     }
   };
 
@@ -240,7 +279,7 @@ const Sports = () => {
                   <p className="text-sm text-gray-600 line-clamp-2">{event.description}</p>
 
                   {/* Actions */}
-                  <div className="flex space-x-2 pt-2">
+                  <div className="flex flex-wrap gap-2 pt-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -260,6 +299,24 @@ const Sports = () => {
                         Register
                       </Button>
                     )}
+                    {(user?.role === 'cessca_staff' || user?.role === 'admin') && (
+                      <>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => openEditModal(event)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteEvent(event.event_id)}
+                        >
+                          Delete
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </Card>
@@ -273,7 +330,9 @@ const Sports = () => {
             <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Create New Event</h2>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {isEditMode ? 'Edit Event' : 'Create New Event'}
+                  </h2>
                   <button
                     onClick={() => setShowCreateModal(false)}
                     className="text-gray-400 hover:text-gray-600"
@@ -312,6 +371,24 @@ const Sports = () => {
                       <option value="workshop">Workshop</option>
                     </select>
                   </div>
+
+                  {isEditMode && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Status
+                      </label>
+                      <select
+                        className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                        value={formData.status || 'upcoming'}
+                        onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                      >
+                        <option value="upcoming">Upcoming</option>
+                        <option value="ongoing">Ongoing</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -394,12 +471,16 @@ const Sports = () => {
 
                   <div className="flex space-x-3 pt-4">
                     <Button type="submit" variant="primary" className="flex-1">
-                      Create Event
+                      {isEditMode ? 'Save Changes' : 'Create Event'}
                     </Button>
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setShowCreateModal(false)}
+                      onClick={() => {
+                        setShowCreateModal(false);
+                        setIsEditMode(false);
+                        setEditingEventId(null);
+                      }}
                       className="flex-1"
                     >
                       Cancel
