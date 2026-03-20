@@ -19,6 +19,7 @@ import Analytics from './pages/Analytics';
 import Admin from './pages/Admin';
 import Profile from './pages/Profile';
 import About from './pages/About';
+import Achievements from './pages/Achievements';
 
 function App() {
   return (
@@ -54,6 +55,9 @@ function App() {
             
             {/* Analytics */}
             <Route path="/analytics" element={<ProtectedRoute roles={['cessca_staff', 'admin']}><Analytics /></ProtectedRoute>} />
+
+            {/* Achievements */}
+            <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
             
             {/* About / Administration */}
             <Route path="/about" element={<ProtectedRoute roles={['student', 'officer', 'alumni', 'cessca_staff', 'admin']}><About /></ProtectedRoute>} />
