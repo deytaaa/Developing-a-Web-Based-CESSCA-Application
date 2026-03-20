@@ -7,7 +7,8 @@ import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { sportsService } from '../services/sportsService';
 import { useAuth } from '../contexts/AuthContext';
-import { FiCalendar, FiMapPin, FiUsers, FiAward, FiPlus, FiClock, FiX } from 'react-icons/fi';
+import heroBg from '../assets/images/loginbg.jpg';
+import { FiCalendar, FiMapPin, FiUsers, FiAward, FiPlus, FiClock, FiX, FiImage } from 'react-icons/fi';
 
 const Sports = () => {
   const { user } = useAuth();
@@ -178,18 +179,48 @@ const Sports = () => {
   return (
     <Layout>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Sports, Culture & Arts</h1>
-            <p className="mt-1 text-gray-600">Browse and register for events, competitions, and workshops</p>
+        {/* Hero Banner */}
+        <div
+          className="relative rounded-2xl overflow-hidden h-[20rem] md:h-[23rem] border border-green-900"
+          style={{
+            backgroundImage: `linear-gradient(115deg, rgba(5, 74, 26, 0.88) 0%, rgba(0, 108, 27, 0.8) 52%, rgba(7, 64, 21, 0.88) 100%), url(${heroBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_40%,rgba(250,204,21,0.2),transparent_38%),radial-gradient(circle_at_78%_60%,rgba(34,197,94,0.22),transparent_40%)]" />
+
+          <div className="relative z-10 h-full flex items-center px-6 md:px-10">
+            <div className="max-w-2xl">
+              <p className="text-yellow-300 font-semibold tracking-wider uppercase text-xs md:text-sm mb-3">
+                PTC CESSCA
+              </p>
+              <h1 className="text-4xl md:text-6xl font-extrabold leading-tight text-yellow-300 drop-shadow-lg">
+                Arts, Culture,
+                <span className="block text-white">and Sports Office</span>
+              </h1>
+              <p className="text-green-100 mt-4 text-sm md:text-base max-w-xl">
+                Events, Competitions & Workshops
+              </p>
+
+              {(user?.role === 'cessca_staff' || user?.role === 'admin') && (
+                <Button
+                  variant="primary"
+                  onClick={() => setShowCreateModal(true)}
+                  className="mt-5 !bg-yellow-400 hover:!bg-yellow-300 !text-green-950 border-0"
+                >
+                  <FiPlus className="mr-2" />
+                  Create Event
+                </Button>
+              )}
+            </div>
           </div>
-          {(user?.role === 'cessca_staff' || user?.role === 'admin') && (
-            <Button variant="primary" onClick={() => setShowCreateModal(true)}>
-              <FiPlus className="mr-2" />
-              Create Event
-            </Button>
-          )}
+
+          <div className="absolute right-6 top-7 hidden md:flex gap-3 opacity-80">
+            <span className="w-7 h-11 border-2 border-yellow-400 -skew-x-[30deg]" />
+            <span className="w-7 h-11 border-2 border-yellow-400 -skew-x-[30deg]" />
+            <span className="w-7 h-11 border-2 border-yellow-400 -skew-x-[30deg]" />
+          </div>
         </div>
 
         {/* Filters */}
@@ -322,6 +353,23 @@ const Sports = () => {
               </Card>
             ))
           )}
+        </div>
+
+        {/* Gallery Cross-Link */}
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border-2 border-green-200 p-6 md:p-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-1">View Event Gallery</h3>
+              <p className="text-gray-600 text-sm">Browse photos and highlights from past events, competitions, and cultural performances</p>
+            </div>
+            <a
+              href="/gallery"
+              className="inline-flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg font-semibold whitespace-nowrap transition-colors"
+            >
+              <FiImage size={16} />
+              Go to Gallery
+            </a>
+          </div>
         </div>
 
         {/* Create Event Modal */}

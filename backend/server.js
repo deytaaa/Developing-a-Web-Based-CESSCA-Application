@@ -14,6 +14,7 @@ const disciplineRoutes = require('./routes/discipline.routes');
 const sportsRoutes = require('./routes/sports.routes');
 const adminRoutes = require('./routes/admin.routes');
 const analyticsRoutes = require('./routes/analytics.routes');
+const achievementsRoutes = require('./routes/achievements.routes');
 
 const app = express();
 
@@ -62,6 +63,7 @@ app.use('/api/discipline', disciplineRoutes);
 app.use('/api/sports', sportsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/achievements', achievementsRoutes);
 
 // 404 handler
 app.use((req, res) => {

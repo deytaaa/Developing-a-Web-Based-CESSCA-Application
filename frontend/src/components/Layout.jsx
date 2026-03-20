@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   FiHome, FiUsers, FiAward, FiAlertCircle, FiTrendingUp,
-  FiBarChart2, FiSettings, FiLogOut, FiMenu, FiX, FiUser, FiCalendar
+  FiBarChart2, FiSettings, FiLogOut, FiMenu, FiX, FiUser, FiCalendar, FiStar, FiInfo
 } from 'react-icons/fi';
 import ptcLogo from '../assets/images/logo-ptc.png';
 
@@ -24,8 +24,9 @@ const Layout = ({ children }) => {
     { name: 'Activities', href: '/activities', icon: FiCalendar, roles: ['officer', 'cessca_staff', 'admin'] },
     { name: 'Discipline', href: '/discipline', icon: FiAlertCircle, roles: ['student', 'officer', 'cessca_staff', 'admin'] },
     { name: 'Alumni', href: '/alumni', icon: FiAward, roles: ['alumni', 'cessca_staff', 'admin'] },
-    { name: 'Sports & Arts', href: '/sports', icon: FiTrendingUp, roles: ['student', 'officer', 'cessca_staff', 'admin'] },
-    { name: 'Gallery', href: '/gallery', icon: FiTrendingUp, roles: ['student', 'officer', 'alumni', 'cessca_staff', 'admin'] },
+    { name: 'Arts, Culture & Sports', href: '/sports', icon: FiTrendingUp, roles: ['student', 'officer', 'alumni', 'cessca_staff', 'admin'] },
+    { name: 'Achievements', href: '/achievements', icon: FiStar, roles: ['student', 'officer', 'alumni', 'cessca_staff', 'admin'] },
+    { name: 'About PTC', href: '/about', icon: FiInfo, roles: ['student', 'officer', 'alumni', 'cessca_staff', 'admin'] },
     { name: 'Administration', href: '/admin', icon: FiSettings, roles: ['cessca_staff', 'admin'] },
   ];
 

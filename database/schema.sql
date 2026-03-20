@@ -409,6 +409,30 @@ CREATE TABLE notifications (
 );
 
 -- ============================================
+-- SCHOOL ACHIEVEMENTS
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS school_achievements (
+    achievement_id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    achievement_date DATE NOT NULL,
+    category ENUM('academic', 'sports', 'cultural', 'community', 'other') NOT NULL,
+    award_level ENUM('international', 'national', 'regional', 'local', 'institutional') NOT NULL,
+    recipient VARCHAR(200) NULL COMMENT 'Individual, team, or department name',
+    image_url VARCHAR(255) NULL,
+    is_featured BOOLEAN DEFAULT FALSE,
+    created_by INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE RESTRICT,
+    INDEX idx_category (category),
+    INDEX idx_award_level (award_level),
+    INDEX idx_achievement_date (achievement_date),
+    INDEX idx_is_featured (is_featured)
+);
+
+-- ============================================
 -- SYSTEM LOGS & AUDIT
 -- ============================================
 

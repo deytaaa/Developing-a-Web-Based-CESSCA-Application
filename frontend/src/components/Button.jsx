@@ -21,7 +21,7 @@ const Button = ({
 
   return (
     <button
-      className={`font-medium rounded-lg transition-colors duration-200 ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`inline-flex items-center justify-center font-medium rounded-lg transition-colors duration-200 ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     >
       {children}

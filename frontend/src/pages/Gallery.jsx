@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import Badge from '../components/Badge';
+import Button from '../components/Button';
 import { sportsService } from '../services/sportsService';
 import { useAuth } from '../contexts/AuthContext';
+import heroBg from '../assets/images/artsbanner.png';
 import { FiImage, FiUpload, FiX, FiStar, FiCalendar, FiTag, FiUser, FiMaximize2, FiTrash2, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 const Gallery = () => {
@@ -242,21 +244,47 @@ const Gallery = () => {
   return (
     <Layout>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Photo Gallery</h1>
-            <p className="text-gray-600 mt-1">Browse photos from events, competitions, and activities</p>
+        {/* Hero Banner */}
+        <div
+          className="relative overflow-hidden rounded-2xl h-[20rem] md:h-[23rem] border border-green-900"
+          style={{
+            backgroundImage: `linear-gradient(115deg, rgba(5, 74, 26, 0.88) 0%, rgba(0, 108, 27, 0.8) 52%, rgba(7, 64, 21, 0.88) 100%), url(${heroBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_40%,rgba(250,204,21,0.2),transparent_38%),radial-gradient(circle_at_78%_60%,rgba(34,197,94,0.22),transparent_40%)]" />
+          <div className="relative z-10 h-full flex items-center px-6 md:px-10">
+            <div className="max-w-2xl">
+              <p className="text-yellow-300 font-semibold tracking-wider uppercase text-xs md:text-sm mb-3">
+                PTC CESSCA
+              </p>
+              <h1 className="text-4xl md:text-6xl font-extrabold leading-tight text-yellow-300 drop-shadow-lg">
+                Arts, Culture,
+                <span className="block text-white">and Sports Office</span>
+              </h1>
+              <p className="text-green-100 mt-4 text-sm md:text-base max-w-xl">
+                Gallery of campus events, performances, competitions, and student achievements.
+              </p>
+
+              {canUpload && (
+                <Button
+                  variant="primary"
+                  onClick={() => setShowUploadModal(true)}
+                  className="mt-5 !bg-yellow-400 hover:!bg-yellow-300 !text-green-950 border-0"
+                >
+                  <FiUpload className="mr-2" />
+                  Upload Photos
+                </Button>
+              )}
+            </div>
           </div>
-          {canUpload && (
-            <button
-              onClick={() => setShowUploadModal(true)}
-              className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-            >
-              <FiUpload className="mr-2" />
-              Upload Photos
-            </button>
-          )}
+
+          <div className="absolute right-6 top-7 hidden md:flex gap-3 opacity-80">
+            <span className="w-7 h-11 border-2 border-yellow-400 -skew-x-[30deg]" />
+            <span className="w-7 h-11 border-2 border-yellow-400 -skew-x-[30deg]" />
+            <span className="w-7 h-11 border-2 border-yellow-400 -skew-x-[30deg]" />
+          </div>
         </div>
 
         {/* Filters */}
@@ -381,6 +409,23 @@ const Gallery = () => {
             ))}
           </div>
         )}
+
+        {/* Sports Events Cross-Link */}
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border-2 border-green-200 p-6 md:p-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-1">View Upcoming Events</h3>
+              <p className="text-gray-600 text-sm">Explore and register for sports, cultural, and artistic events happening on campus</p>
+            </div>
+            <a
+              href="/sports"
+              className="inline-flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg font-semibold whitespace-nowrap transition-colors"
+            >
+              <FiCalendar size={16} />
+              View Events
+            </a>
+          </div>
+        </div>
       </div>
 
       {/* Upload Modal */}

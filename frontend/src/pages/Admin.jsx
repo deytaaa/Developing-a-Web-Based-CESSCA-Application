@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -15,6 +15,7 @@ import { FiCheck, FiX, FiTrash2, FiEdit, FiPlus, FiEye, FiSearch } from 'react-i
 const Admin = () => {
   const { user: currentUser } = useAuth();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   
   // Define tabs based on user role
   const allTabs = [
@@ -32,6 +33,23 @@ const Admin = () => {
   const defaultTab = tabs.length > 0 ? tabs[0].id : 'users';
   const tabParam = searchParams.get('tab') || defaultTab;
   const [activeTab, setActiveTab] = useState(tabParam);
+
+  // Sync tab with URL
+  useEffect(() => {
+    if (activeTab !== searchParams.get('tab')) {
+      navigate(`?tab=${activeTab}`, { replace: true });
+    }
+    // eslint-disable-next-line
+  }, [activeTab]);
+
+  // Update activeTab if URL changes (e.g., browser navigation)
+  useEffect(() => {
+    const urlTab = searchParams.get('tab');
+    if (urlTab && urlTab !== activeTab) {
+      setActiveTab(urlTab);
+    }
+    // eslint-disable-next-line
+  }, [searchParams]);
   const [loading, setLoading] = useState(false);
   const [pendingUsers, setPendingUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
@@ -320,6 +338,7 @@ const Admin = () => {
                     ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
+                type="button"
               >
                 {tab.label}
               </button>

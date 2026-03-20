@@ -256,23 +256,33 @@ router.get('/:id/members', auth, async (req, res) => {
 // Join organization (Student)
 router.post('/:id/join', auth, roleCheck('student', 'officer'), async (req, res) => {
     try {
-        // Check if already a member
+        // Check if already a member with active or pending status
         const [existing] = await pool.query(
-            'SELECT member_id FROM organization_members WHERE org_id = ? AND user_id = ?',
+            'SELECT member_id, membership_status FROM organization_members WHERE org_id = ? AND user_id = ?',
             [req.params.id, req.user.userId]
         );
 
-        if (existing.length > 0) {
+        // If they have an active or pending membership, reject
+        if (existing.length > 0 && (existing[0].membership_status === 'active' || existing[0].membership_status === 'pending')) {
             return res.status(400).json({ 
                 success: false, 
                 message: 'Already a member or pending approval' 
             });
         }
 
-        await pool.query(
-            'INSERT INTO organization_members (org_id, user_id, membership_status, joined_date) VALUES (?, ?, ?, CURDATE())',
-            [req.params.id, req.user.userId, 'pending']
-        );
+        // If they have an inactive membership (rejected/left before), update it back to pending
+        if (existing.length > 0 && existing[0].membership_status === 'inactive') {
+            await pool.query(
+                'UPDATE organization_members SET membership_status = "pending", joined_date = CURDATE() WHERE member_id = ?',
+                [existing[0].member_id]
+            );
+        } else {
+            // New membership request
+            await pool.query(
+                'INSERT INTO organization_members (org_id, user_id, membership_status, joined_date) VALUES (?, ?, ?, CURDATE())',
+                [req.params.id, req.user.userId, 'pending']
+            );
+        }
 
         res.status(201).json({
             success: true,
@@ -284,6 +294,37 @@ router.post('/:id/join', auth, roleCheck('student', 'officer'), async (req, res)
         res.status(500).json({ 
             success: false, 
             message: 'Failed to join organization',
+            error: error.message 
+        });
+    }
+});
+
+// Leave organization (Student)
+router.delete('/:id/leave', auth, roleCheck('student', 'officer'), async (req, res) => {
+    try {
+        // Delete the membership record
+        const result = await pool.query(
+            'DELETE FROM organization_members WHERE org_id = ? AND user_id = ?',
+            [req.params.id, req.user.userId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Not a member of this organization' 
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Successfully left organization'
+        });
+
+    } catch (error) {
+        console.error('Leave organization error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to leave organization',
             error: error.message 
         });
     }

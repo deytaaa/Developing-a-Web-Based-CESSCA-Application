@@ -19,6 +19,7 @@ const OrganizationDetails = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMember, setIsMember] = useState(false);
+  const [membershipStatus, setMembershipStatus] = useState(null); // 'active', 'pending', or null
   const [isOfficer, setIsOfficer] = useState(false);
   const [activeTab, setActiveTab] = useState('info');
   const [error, setError] = useState(null);
@@ -98,7 +99,13 @@ const OrganizationDetails = () => {
       // Check if current user is a member
       const membersList = membersData.members || membersData;
       const userMember = membersList.find(m => m.user_id === user?.userId);
-      setIsMember(userMember && userMember.membership_status === 'active');
+      if (userMember) {
+        setMembershipStatus(userMember.membership_status);
+        setIsMember(userMember.membership_status === 'active');
+      } else {
+        setMembershipStatus(null);
+        setIsMember(false);
+      }
 
       // Check if current user is an officer
       const officersList = officersData.officers || officersData;
@@ -188,7 +195,9 @@ const OrganizationDetails = () => {
     try {
       await organizationService.approveMember(id, memberId);
       alert('Member approved successfully');
-      loadOrganizationData();
+      // Refresh members list immediately
+      const response = await organizationService.getMembers(id);
+      setMembers(response.members || response);
     } catch (error) {
       console.error('Error approving member:', error);
       const errorMessage = error.response?.data?.message || 'Failed to approve member';
@@ -202,7 +211,9 @@ const OrganizationDetails = () => {
     try {
       await organizationService.rejectMember(id, memberId);
       alert('Membership request rejected');
-      loadOrganizationData();
+      // Refresh members list immediately
+      const response = await organizationService.getMembers(id);
+      setMembers(response.members || response);
     } catch (error) {
       console.error('Error rejecting member:', error);
       const errorMessage = error.response?.data?.message || 'Failed to reject member';
@@ -577,13 +588,21 @@ const OrganizationDetails = () => {
               
               {user && organization.status === 'active' && (user.role === 'student' || user.role === 'officer') && (
                 <div>
-                  {isMember ? (
+                  {membershipStatus === 'active' ? (
                     <button
                       onClick={handleLeave}
                       className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
                     >
                       <FiUserMinus className="mr-2" />
                       Leave Organization
+                    </button>
+                  ) : membershipStatus === 'pending' ? (
+                    <button
+                      disabled
+                      className="flex items-center px-4 py-2 bg-yellow-500 text-white rounded-lg cursor-not-allowed opacity-75"
+                    >
+                      <FiClock className="mr-2" />
+                      Waiting for Approval
                     </button>
                   ) : (
                     <button
@@ -697,14 +716,20 @@ const OrganizationDetails = () => {
                         src={`http://localhost:5000${officer.profile_picture}`}
                         alt={`${officer.first_name} ${officer.last_name}`}
                         className="w-12 h-12 rounded-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextElementSibling.style.display = 'flex';
+                        }}
                       />
-                    ) : (
-                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                        <span className="text-green-600 font-bold text-lg">
-                          {officer.first_name?.[0]}{officer.last_name?.[0]}
-                        </span>
-                      </div>
-                    )}
+                    ) : null}
+                    <div 
+                      className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center"
+                      style={{display: officer.profile_picture ? 'none' : 'flex'}}
+                    >
+                      <span className="text-green-600 font-bold text-lg">
+                        {officer.first_name?.[0]}{officer.last_name?.[0]}
+                      </span>
+                    </div>
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900">
                         {officer.first_name} {officer.last_name}
@@ -754,7 +779,7 @@ const OrganizationDetails = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {members.map((member) => (
+                    {members.filter(m => m.membership_status === 'active').map((member) => (
                       <tr key={member.member_id}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
@@ -763,14 +788,20 @@ const OrganizationDetails = () => {
                                 src={`http://localhost:5000${member.profile_picture}`}
                                 alt={`${member.first_name} ${member.last_name}`}
                                 className="w-8 h-8 rounded-full object-cover mr-3"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextElementSibling.style.display = 'flex';
+                                }}
                               />
-                            ) : (
-                              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                                <span className="text-green-600 font-semibold text-sm">
-                                  {member.first_name?.[0]}{member.last_name?.[0]}
-                                </span>
-                              </div>
-                            )}
+                            ) : null}
+                            <div 
+                              className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3"
+                              style={{display: member.profile_picture ? 'none' : 'flex'}}
+                            >
+                              <span className="text-green-600 font-semibold text-sm">
+                                {member.first_name?.[0]}{member.last_name?.[0]}
+                              </span>
+                            </div>
                             <div className="text-sm font-medium text-gray-900">
                               {member.first_name} {member.last_name}
                             </div>

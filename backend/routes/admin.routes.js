@@ -562,12 +562,18 @@ router.put('/members/:memberId/approve', auth, roleCheck('admin', 'cessca_staff'
 // Reject organization membership (Admin/CESSCA)
 router.put('/members/:memberId/reject', auth, roleCheck('admin', 'cessca_staff'), async (req, res) => {
     try {
-        await pool.query(
-            `UPDATE organization_members 
-             SET membership_status = 'rejected', approved_by = ?, approved_at = NOW()
-             WHERE member_id = ?`,
-            [req.user.userId, req.params.memberId]
+        // Delete the membership request completely
+        const result = await pool.query(
+            `DELETE FROM organization_members WHERE member_id = ?`,
+            [req.params.memberId]
         );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Member not found' 
+            });
+        }
 
         await pool.query(
             `INSERT INTO activity_logs (user_id, action, entity_type, entity_id, description)
