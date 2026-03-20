@@ -8,6 +8,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Modal from '../components/Modal';
 import Table from '../components/Table';
 import { adminService } from '../services/adminService';
+import activityLogService from '../services/activityLogService';
 import { organizationService } from '../services/organizationService';
 import { useAuth } from '../contexts/AuthContext';
 import { FiCheck, FiX, FiTrash2, FiEdit, FiPlus, FiEye, FiSearch } from 'react-icons/fi';
@@ -17,6 +18,13 @@ const Admin = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
+  // Activity logs state
+  const [activityLogs, setActivityLogs] = useState([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [logsPage, setLogsPage] = useState(1);
+  const [logsLimit, setLogsLimit] = useState(25);
+  const [logsTotal, setLogsTotal] = useState(0);
+
   // Define tabs based on user role
   const allTabs = [
     { id: 'users', label: 'User Management', roles: ['admin'] },
@@ -96,8 +104,25 @@ const Admin = () => {
       loadOrganizations();
     } else if (activeTab === 'announcements') {
       loadAnnouncements();
+    } else if (activeTab === 'logs') {
+      loadActivityLogs(logsPage, logsLimit);
     }
-  }, [activeTab]);
+    // eslint-disable-next-line
+  }, [activeTab, logsPage, logsLimit]);
+
+  const loadActivityLogs = async (page = 1, limit = 25) => {
+    setLogsLoading(true);
+    try {
+      const res = await activityLogService.getAll(page, limit);
+      setActivityLogs(res.logs || []);
+      setLogsTotal(res.total || 0);
+    } catch (error) {
+      setActivityLogs([]);
+      setLogsTotal(0);
+    } finally {
+      setLogsLoading(false);
+    }
+  };
 
   const loadUsers = async () => {
     setLoading(true);
@@ -782,7 +807,73 @@ const Admin = () => {
             {activeTab === 'logs' && (
               <Card>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Activity Logs</h2>
-                <p className="text-gray-600">Activity logs viewer - implementation in progress</p>
+                {logsLoading ? (
+                  <LoadingSpinner centered size="lg" />
+                ) : activityLogs.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">No activity logs found.</p>
+                ) : (
+                  <>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Entity</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">IP</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {activityLogs.map((log) => (
+                            <tr key={log.log_id}>
+                              <td className="px-4 py-2 whitespace-nowrap text-xs text-gray-500">{new Date(log.created_at).toLocaleString()}</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-xs">{log.email || 'System'}</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-xs">{log.role || '-'}</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-xs">{log.action}</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-xs">{log.entity_type}{log.entity_id ? ` #${log.entity_id}` : ''}</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-xs max-w-xs truncate" title={log.description}>{log.description}</td>
+                              <td className="px-4 py-2 whitespace-nowrap text-xs">{log.ip_address}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    {/* Pagination Controls */}
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="text-xs text-gray-500">
+                        Page {logsPage} of {Math.ceil(logsTotal / logsLimit) || 1} | {logsTotal} logs
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          className="px-2 py-1 text-xs border rounded disabled:opacity-50"
+                          onClick={() => setLogsPage((p) => Math.max(1, p - 1))}
+                          disabled={logsPage === 1}
+                        >
+                          Prev
+                        </button>
+                        <button
+                          className="px-2 py-1 text-xs border rounded disabled:opacity-50"
+                          onClick={() => setLogsPage((p) => p + 1)}
+                          disabled={logsPage >= Math.ceil(logsTotal / logsLimit)}
+                        >
+                          Next
+                        </button>
+                        <select
+                          className="ml-2 px-2 py-1 text-xs border rounded"
+                          value={logsLimit}
+                          onChange={e => { setLogsLimit(Number(e.target.value)); setLogsPage(1); }}
+                        >
+                          {[10, 25, 50, 100].map((n) => (
+                            <option key={n} value={n}>{n} / page</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </>
+                )}
               </Card>
             )}
           </>
