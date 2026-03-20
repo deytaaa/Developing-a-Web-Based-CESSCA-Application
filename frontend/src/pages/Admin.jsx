@@ -61,6 +61,9 @@ const Admin = () => {
   const [loading, setLoading] = useState(false);
   const [pendingUsers, setPendingUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  const [usersPage, setUsersPage] = useState(1);
+  const [usersLimit, setUsersLimit] = useState(25);
+  const [usersTotal, setUsersTotal] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [organizations, setOrganizations] = useState([]);
   const [pendingMembers, setPendingMembers] = useState([]);
@@ -99,7 +102,7 @@ const Admin = () => {
 
   useEffect(() => {
     if (activeTab === 'users') {
-      loadUsers();
+      loadUsers(usersPage, usersLimit);
     } else if (activeTab === 'organizations') {
       loadOrganizations();
     } else if (activeTab === 'announcements') {
@@ -108,7 +111,7 @@ const Admin = () => {
       loadActivityLogs(logsPage, logsLimit);
     }
     // eslint-disable-next-line
-  }, [activeTab, logsPage, logsLimit]);
+  }, [activeTab, logsPage, logsLimit, usersPage, usersLimit]);
 
   const loadActivityLogs = async (page = 1, limit = 25) => {
     setLogsLoading(true);
@@ -124,21 +127,25 @@ const Admin = () => {
     }
   };
 
-  const loadUsers = async () => {
+  const loadUsers = async (page = 1, limit = 25) => {
     setLoading(true);
     try {
       const [pendingResponse, allResponse] = await Promise.all([
         adminService.getPendingUsers(),
-        adminService.getUsers(),
+        adminService.getUsers({ page, limit })
       ]);
       setPendingUsers(pendingResponse.users || []);
       setAllUsers(allResponse.users || []);
+      setUsersTotal(allResponse.total || 0);
     } catch (error) {
-      console.error('Failed to load users:', error);
+      setPendingUsers([]);
+      setAllUsers([]);
+      setUsersTotal(0);
     } finally {
       setLoading(false);
     }
   };
+
 
   const loadAnnouncements = async () => {
     setLoading(true);
@@ -509,15 +516,8 @@ const Admin = () => {
                   <Card>
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-lg font-semibold text-gray-900">
-                        All Users Management ({allUsers.filter((user) => {
-                          const search = searchTerm.toLowerCase();
-                          return (
-                            user.first_name?.toLowerCase().includes(search) ||
-                            user.last_name?.toLowerCase().includes(search) ||
-                            user.email?.toLowerCase().includes(search) ||
-                            user.student_id?.toLowerCase().includes(search)
-                          );
-                        }).length})
+                        All Users Management
+                        <span className="ml-2 text-xs text-gray-500">Page {usersPage} of {Math.ceil(usersTotal / usersLimit) || 1} | {usersTotal} users</span>
                       </h2>
                       <Button
                         variant="primary"
@@ -526,73 +526,90 @@ const Admin = () => {
                         <FiPlus className="mr-2" /> Create User
                       </Button>
                     </div>
-                    {allUsers.filter((user) => {
-                      const search = searchTerm.toLowerCase();
-                      return (
-                        user.first_name?.toLowerCase().includes(search) ||
-                        user.last_name?.toLowerCase().includes(search) ||
-                        user.email?.toLowerCase().includes(search) ||
-                        user.student_id?.toLowerCase().includes(search)
-                      );
-                    }).length === 0 ? (
+                    {allUsers.length === 0 ? (
                       <p className="text-gray-500 text-center py-8">
                         {searchTerm ? `No users found matching "${searchTerm}"` : 'No users found'}
                       </p>
                     ) : (
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Login</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {allUsers.filter((user) => {
-                            const search = searchTerm.toLowerCase();
-                            return (
-                              user.first_name?.toLowerCase().includes(search) ||
-                              user.last_name?.toLowerCase().includes(search) ||
-                              user.email?.toLowerCase().includes(search) ||
-                              user.student_id?.toLowerCase().includes(search)
-                            );
-                          }).map((user) => (
-                            <tr key={user.user_id}>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-medium text-gray-900">
-                                  {user.first_name} {user.last_name}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {user.email}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <Badge variant={getRoleBadge(user.role)}>{user.role}</Badge>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <Badge variant={getStatusBadge(user.status)}>{user.status}</Badge>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                <Button
-                                  variant="danger"
-                                  size="sm"
-                                  onClick={() => handleDeleteUser(user.user_id)}
-                                >
-                                  <FiTrash2 />
-                                </Button>
-                              </td>
+                      <>
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Login</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {allUsers.map((user) => (
+                              <tr key={user.user_id}>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {user.first_name} {user.last_name}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {user.email}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <Badge variant={getRoleBadge(user.role)}>{user.role}</Badge>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <Badge variant={getStatusBadge(user.status)}>{user.status}</Badge>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                  <Button
+                                    variant="danger"
+                                    size="sm"
+                                    onClick={() => handleDeleteUser(user.user_id)}
+                                  >
+                                    <FiTrash2 />
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      {/* Pagination Controls */}
+                      <div className="flex items-center justify-between mt-4">
+                        <div className="text-xs text-gray-500">
+                          Page {usersPage} of {Math.ceil(usersTotal / usersLimit) || 1} | {usersTotal} users
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            className="px-2 py-1 text-xs border rounded disabled:opacity-50"
+                            onClick={() => setUsersPage((p) => Math.max(1, p - 1))}
+                            disabled={usersPage === 1}
+                          >
+                            Prev
+                          </button>
+                          <button
+                            className="px-2 py-1 text-xs border rounded disabled:opacity-50"
+                            onClick={() => setUsersPage((p) => p + 1)}
+                            disabled={usersPage >= Math.ceil(usersTotal / usersLimit)}
+                          >
+                            Next
+                          </button>
+                          <select
+                            className="ml-2 px-2 py-1 text-xs border rounded"
+                            value={usersLimit}
+                            onChange={e => { setUsersLimit(Number(e.target.value)); setUsersPage(1); }}
+                          >
+                            {[10, 25, 50, 100].map((n) => (
+                              <option key={n} value={n}>{n} / page</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      </>
                     )}
                   </Card>
                 )}

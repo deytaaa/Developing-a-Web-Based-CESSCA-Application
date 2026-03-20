@@ -10,11 +10,11 @@ const bcrypt = require('bcryptjs');
 router.get('/users', auth, roleCheck('admin', 'cessca_staff'), async (req, res) => {
     try {
         const { role, status } = req.query;
-        
-        let query = `
-            SELECT u.user_id, u.email, u.role, u.status, u.created_at, u.last_login,
-                   up.first_name, up.middle_name, up.last_name, up.student_id, 
-                   up.course, up.contact_number, up.profile_picture
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 25;
+        const offset = (page - 1) * limit;
+
+        let baseQuery = `
             FROM users u
             LEFT JOIN user_profiles up ON u.user_id = up.user_id
             WHERE 1=1
@@ -22,21 +22,34 @@ router.get('/users', auth, roleCheck('admin', 'cessca_staff'), async (req, res) 
         const params = [];
 
         if (role) {
-            query += ' AND u.role = ?';
+            baseQuery += ' AND u.role = ?';
             params.push(role);
         }
         if (status) {
-            query += ' AND u.status = ?';
+            baseQuery += ' AND u.status = ?';
             params.push(status);
         }
 
-        query += ' ORDER BY u.created_at DESC';
+        // Get total count
+        const [[{ count }]] = await pool.query(`SELECT COUNT(*) as count ${baseQuery}`, params);
 
-        const [users] = await pool.query(query, params);
+        // Get paginated users
+        const [users] = await pool.query(
+            `SELECT u.user_id, u.email, u.role, u.status, u.created_at, u.last_login,
+                    up.first_name, up.middle_name, up.last_name, up.student_id, 
+                    up.course, up.contact_number, up.profile_picture
+             ${baseQuery}
+             ORDER BY u.created_at DESC
+             LIMIT ? OFFSET ?`,
+            [...params, limit, offset]
+        );
 
         res.json({
             success: true,
             count: users.length,
+            total: count,
+            page,
+            limit,
             users
         });
 
