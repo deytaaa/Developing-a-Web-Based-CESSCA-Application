@@ -187,11 +187,11 @@ const BOARD_OF_TRUSTEES = [
 const CERTIFICATES = [];
 
 const FACTS = [
-  { value: '1999',    label: 'Year Established' },
-  { value: '5,000+', label: 'Enrolled Students' },
-  { value: '200+',   label: 'Faculty & Staff' },
+  { value: '1993',    label: 'Year Established' },
+  { value: '3,000+', label: 'Enrolled Students' },
+  { value: '100+',   label: 'Faculty & Staff' },
   { value: '15+',    label: 'Degree Programs' },
-  { value: '20+',    label: 'Student Organizations' },
+  { value: '10-20',    label: 'Student Organizations' },
   { value: '100+',   label: 'School Achievements' },
 ];
 
