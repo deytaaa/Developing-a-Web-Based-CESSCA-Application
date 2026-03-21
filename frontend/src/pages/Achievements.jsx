@@ -1,4 +1,40 @@
-import { useState, useEffect, useCallback } from 'react';
+// ImageModal for lightbox view
+const ImageModal = ({ src, alt, open, onClose }) => {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70" onClick={onClose}>
+      <div className="relative max-w-3xl w-full" onClick={e => e.stopPropagation()}>
+        <img src={src} alt={alt} className="w-full h-auto max-h-[80vh] rounded-lg shadow-lg bg-white" />
+        <button onClick={onClose} className="absolute top-2 right-2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-1.5 shadow">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+    </div>
+  );
+};
+import React, { useState, useEffect, useCallback } from 'react';
+// ─── Achievement Description with Read More ─────────────
+const AchievementDescription = ({ description }) => {
+  const [expanded, setExpanded] = useState(false);
+  if (!description) return null;
+  const limit = 120;
+  const isLong = description.length > limit;
+  return (
+    <p className="text-xs text-gray-500 mb-2">
+      {expanded || !isLong ? description : description.slice(0, limit) + '...'}
+      {isLong && !expanded && (
+        <button className="text-blue-600 ml-1 text-xs underline" onClick={() => setExpanded(true)}>
+          Read more
+        </button>
+      )}
+      {isLong && expanded && (
+        <button className="text-blue-600 ml-1 text-xs underline" onClick={() => setExpanded(false)}>
+          Read less
+        </button>
+      )}
+    </p>
+  );
+};
 import Layout from '../components/Layout';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
@@ -60,7 +96,7 @@ const EMPTY_FORM = {
 
 const Achievements = () => {
   const { user } = useAuth();
-  const isAdmin = ['admin', 'cessca_staff'].includes(user?.role);
+  const isAdmin = user?.role === 'admin';
 
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading]           = useState(true);
@@ -194,7 +230,7 @@ const Achievements = () => {
                 Celebrating the excellence and milestones of Pateros Technological College.
               </p>
 
-              {isAdmin && (
+              {(user?.role === 'admin' || user?.role === 'cessca_staff') && (
                 <button
                   onClick={openCreate}
                   className="mt-5 inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-green-950 px-4 py-2 rounded-lg font-semibold text-sm shadow-sm transition-colors"
@@ -284,7 +320,7 @@ const Achievements = () => {
                   <FiStar className="text-yellow-500" /> Featured Achievements
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {featured.map((a) => <AchievementCard key={a.achievement_id} achievement={a} isAdmin={isAdmin} onEdit={openEdit} onDelete={setDeleteConfirm} featured />)}
+                  {featured.map((a) => <AchievementCard key={a.achievement_id} achievement={a} user={user} onEdit={openEdit} onDelete={setDeleteConfirm} featured />)}
                 </div>
               </div>
             )}
@@ -296,7 +332,7 @@ const Achievements = () => {
                   <h2 className="text-lg font-bold text-gray-800 mb-3">All Achievements</h2>
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {rest.map((a) => <AchievementCard key={a.achievement_id} achievement={a} isAdmin={isAdmin} onEdit={openEdit} onDelete={setDeleteConfirm} />)}
+                  {rest.map((a) => <AchievementCard key={a.achievement_id} achievement={a} user={user} onEdit={openEdit} onDelete={setDeleteConfirm} />)}
                 </div>
               </div>
             )}
@@ -439,66 +475,72 @@ const Achievements = () => {
 };
 
 // ─── Achievement Card Component ───────────────────────────────────────────────
-const AchievementCard = ({ achievement: a, isAdmin, onEdit, onDelete, featured }) => {
+const AchievementCard = ({ achievement: a, user, onEdit, onDelete, featured }) => {
   const dateStr = a.achievement_date
     ? new Date(a.achievement_date).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })
     : '';
+  const [imgModalOpen, setImgModalOpen] = useState(false);
 
   return (
-    <Card className={`flex flex-col overflow-hidden !p-0 ${featured ? 'ring-2 ring-yellow-400 shadow-md shadow-yellow-100' : ''}`}>
-      {/* Image or fallback */}
-      <div className="relative h-36 bg-gradient-to-br from-green-800 to-green-600 flex items-center justify-center overflow-hidden">
+    <div className={`bg-white rounded-xl shadow-md flex flex-col overflow-hidden border border-gray-100 relative ${featured ? 'ring-2 ring-yellow-400 shadow-yellow-100' : ''}`}> 
+      {/* Image at top */}
+      <div className="relative w-full bg-white flex items-center justify-center cursor-pointer group" style={{ aspectRatio: '4/5', minHeight: 260, maxHeight: 340 }} onClick={() => a.image_url && setImgModalOpen(true)}>
         {a.image_url ? (
           <img
             src={`http://localhost:5000${a.image_url}`}
             alt={a.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain group-hover:opacity-80 transition"
+            style={{ maxHeight: 320, maxWidth: '100%' }}
           />
         ) : (
-          <span className="text-5xl">{CATEGORY_ICONS[a.category]}</span>
+          <span className="absolute inset-0 flex items-center justify-center text-5xl text-gray-300">{CATEGORY_ICONS[a.category]}</span>
         )}
         {featured && (
-          <div className="absolute top-2 left-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+          <div className="absolute top-2 left-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow">
             <FiStar size={10} /> Featured
           </div>
         )}
-        {isAdmin && (
-          <div className="absolute top-2 right-2 flex gap-1">
+        {(user?.role === 'admin' || user?.role === 'cessca_staff') && (
+          <div className="absolute top-2 right-2 flex gap-1 z-10">
             <button
-              onClick={() => onEdit(a)}
+              onClick={e => { e.stopPropagation(); onEdit(a); }}
               className="p-1.5 bg-white bg-opacity-90 hover:bg-opacity-100 text-green-700 rounded-md shadow-sm transition-all"
               title="Edit"
             >
               <FiEdit2 size={13} />
             </button>
-            <button
-              onClick={() => onDelete(a)}
-              className="p-1.5 bg-white bg-opacity-90 hover:bg-opacity-100 text-red-600 rounded-md shadow-sm transition-all"
-              title="Delete"
-            >
-              <FiTrash2 size={13} />
-            </button>
+            {user?.role === 'admin' && (
+              <button
+                onClick={e => { e.stopPropagation(); onDelete(a); }}
+                className="p-1.5 bg-white bg-opacity-90 hover:bg-opacity-100 text-red-600 rounded-md shadow-sm transition-all"
+                title="Delete"
+              >
+                <FiTrash2 size={13} />
+              </button>
+            )}
           </div>
         )}
+        {/* Modal for full image */}
+        <ImageModal src={`http://localhost:5000${a.image_url}`} alt={a.title} open={imgModalOpen} onClose={() => setImgModalOpen(false)} />
       </div>
-
-      <div className="p-4 flex flex-col flex-1">
-        <div className="flex flex-wrap gap-1.5 mb-2">
+      {/* Card Content */}
+      <div className="flex flex-col flex-1 px-4 pt-3 pb-2">
+        <h3 className="font-bold text-lg text-gray-900 mb-1 line-clamp-2">{a.title}</h3>
+        <div className="flex items-center text-xs text-gray-500 mb-1">
+          <FiCalendar className="mr-1" size={13} /> {dateStr}
+        </div>
+        {a.recipient && <div className="text-xs text-green-700 font-medium mb-1">By {a.recipient}</div>}
+        <AchievementDescription description={a.description} />
+        <div className="flex flex-wrap gap-1.5 mt-auto mb-1">
           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${CATEGORY_COLORS[a.category]}`}>
             {CATEGORY_ICONS[a.category]} {a.category.charAt(0).toUpperCase() + a.category.slice(1)}
           </span>
-          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${LEVEL_COLORS[a.award_level]}`}>
+          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${LEVEL_COLORS[a.award_level]}`}> 
             {LEVEL_ICONS[a.award_level]} {a.award_level.charAt(0).toUpperCase() + a.award_level.slice(1)}
           </span>
         </div>
-        <h3 className="font-bold text-gray-900 text-sm leading-snug mb-1">{a.title}</h3>
-        {a.recipient && <p className="text-xs text-green-700 font-medium mb-1">👤 {a.recipient}</p>}
-        {a.description && <p className="text-xs text-gray-500 line-clamp-2 flex-1 mb-2">{a.description}</p>}
-        <p className="text-xs text-gray-400 flex items-center gap-1 mt-auto">
-          <FiCalendar size={11} /> {dateStr}
-        </p>
       </div>
-    </Card>
+    </div>
   );
 };
 

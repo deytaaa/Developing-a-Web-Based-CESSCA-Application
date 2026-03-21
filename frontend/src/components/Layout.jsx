@@ -24,7 +24,7 @@ const Layout = ({ children }) => {
     { name: 'Activities', href: '/activities', icon: FiCalendar, roles: ['officer', 'cessca_staff', 'admin'] },
     { name: 'Discipline', href: '/discipline', icon: FiAlertCircle, roles: ['student', 'officer', 'cessca_staff', 'admin'] },
     { name: 'Alumni', href: '/alumni', icon: FiAward, roles: ['alumni', 'cessca_staff', 'admin'] },
-    { name: 'Arts, Culture & Sports', href: '/sports', icon: FiTrendingUp, roles: ['student', 'officer', 'alumni', 'cessca_staff', 'admin'] },
+    { name: 'Arts, Culture & Sports', href: '/sports', icon: FiTrendingUp, roles: ['student', 'officer', 'cessca_staff', 'admin'] },
     { name: 'Achievements', href: '/achievements', icon: FiStar, roles: ['student', 'officer', 'alumni', 'cessca_staff', 'admin'] },
     { name: 'About PTC', href: '/about', icon: FiInfo, roles: ['student', 'officer', 'alumni', 'cessca_staff', 'admin'] },
     { name: 'Administration', href: '/admin', icon: FiSettings, roles: ['cessca_staff', 'admin'] },
