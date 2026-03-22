@@ -224,25 +224,30 @@ const Dashboard = () => {
         )}
 
         {user.role === 'alumni' && (
-          <Card title="Alumni Network">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <a href="/alumni" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                <FiAward className="h-8 w-8 text-primary-600 mb-2" />
-                <h3 className="font-medium text-gray-900">Browse Alumni</h3>
-                <p className="text-sm text-gray-600">Connect with fellow PTC graduates</p>
-              </a>
-              <a href="/profile" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                <FiUsers className="h-8 w-8 text-primary-600 mb-2" />
-                <h3 className="font-medium text-gray-900">Update Profile</h3>
-                <p className="text-sm text-gray-600">Keep your records up to date</p>
-              </a>
-              <a href="/sports" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                <FiTrendingUp className="h-8 w-8 text-primary-600 mb-2" />
-                <h3 className="font-medium text-gray-900">Events</h3>
-                <p className="text-sm text-gray-600">Participate in campus activities</p>
-              </a>
-            </div>
-          </Card>
+            <Card title="Alumni Network">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <a href="/alumni" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                  <FiUsers className="h-8 w-8 text-primary-600 mb-2" />
+                  <h3 className="font-medium text-gray-900">Browse Alumni</h3>
+                  <p className="text-sm text-gray-600">Connect with fellow PTC graduates</p>
+                </a>
+                <a href="/achievements" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                  <FiAward className="h-8 w-8 text-yellow-600 mb-2" />
+                  <h3 className="font-medium text-gray-900">Achievements</h3>
+                  <p className="text-sm text-gray-600">See school and alumni achievements</p>
+                </a>
+                <a href="/about" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                  <FiUsers className="h-8 w-8 text-green-600 mb-2" />
+                  <h3 className="font-medium text-gray-900">About PTC</h3>
+                  <p className="text-sm text-gray-600">Learn more about PTC</p>
+                </a>
+                <a href="/profile" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                  <FiUsers className="h-8 w-8 text-primary-600 mb-2" />
+                  <h3 className="font-medium text-gray-900">Update Profile</h3>
+                  <p className="text-sm text-gray-600">Keep your records up to date</p>
+                </a>
+              </div>
+            </Card>
         )}
       </div>
     </Layout>

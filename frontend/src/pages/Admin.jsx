@@ -545,7 +545,17 @@ const Admin = () => {
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
-                            {allUsers.map((user) => (
+                            {allUsers
+                              .filter((user) => {
+                                const search = searchTerm.toLowerCase();
+                                return (
+                                  user.first_name?.toLowerCase().includes(search) ||
+                                  user.last_name?.toLowerCase().includes(search) ||
+                                  user.email?.toLowerCase().includes(search) ||
+                                  user.student_id?.toLowerCase().includes(search)
+                                );
+                              })
+                              .map((user) => (
                               <tr key={user.user_id}>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="text-sm font-medium text-gray-900">
