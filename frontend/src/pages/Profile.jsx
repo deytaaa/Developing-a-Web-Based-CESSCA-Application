@@ -85,12 +85,20 @@ const Profile = () => {
     try {
       // Save basic profile
       await authService.updateProfile(formData);
-      
+
       // Save alumni profile if user is alumni
       if (isAlumni) {
-        await api.post('/alumni/profile', alumniData);
+        // Format employmentStartDate as 'YYYY-MM-DD' if present
+        let alumniPayload = { ...alumniData };
+        if (alumniPayload.employmentStartDate) {
+          const date = new Date(alumniPayload.employmentStartDate);
+          if (!isNaN(date.getTime())) {
+            alumniPayload.employmentStartDate = date.toISOString().split('T')[0];
+          }
+        }
+        await api.post('/alumni/profile', alumniPayload);
       }
-      
+
       const updated = await authService.getProfile();
       updateUser(updated.user);
       setEditing(false);

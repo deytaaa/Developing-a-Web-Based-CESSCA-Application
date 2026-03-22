@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/Button';
 import ptcLogo from '../assets/images/logo-ptc.png';
+import loginBg from '../assets/images/loginbg.jpg';
 
 const Register = () => {
   const { register } = useAuth();
@@ -51,8 +52,15 @@ const Register = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-600 via-green-700 to-green-900 flex items-center justify-center py-12 px-4">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8 text-center">
+      <div className="min-h-screen flex items-center justify-center px-4 py-12 relative" style={{
+        backgroundImage: `url(${loginBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}>
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black opacity-60 z-0" />
+        <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8 text-center relative z-10">
           <div className="mb-4 text-green-600 text-5xl">✓</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Registration Successful!</h2>
           <p className="text-gray-600 mb-4">
@@ -64,8 +72,15 @@ const Register = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-600 via-green-700 to-green-900 flex items-center justify-center py-12 px-4">
-      <div className="max-w-2xl w-full bg-white rounded-lg shadow-xl p-8">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative" style={{
+      backgroundImage: `url(${loginBg})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+    }}>
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black opacity-60 z-0" />
+      <div className="max-w-2xl w-full bg-white rounded-lg shadow-xl p-8 relative z-10">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <img 
