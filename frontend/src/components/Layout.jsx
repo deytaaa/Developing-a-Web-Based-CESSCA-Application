@@ -42,6 +42,10 @@ const Layout = ({ children }) => {
     if (path === '/admin') {
       return location.pathname === '/admin' || location.pathname.startsWith('/admin/users');
     }
+    // Custom: Highlight Arts, Culture & Sports for /sports and /gallery
+    if (path === '/sports') {
+      return location.pathname.startsWith('/sports') || location.pathname.startsWith('/gallery');
+    }
     return location.pathname.startsWith(path);
   };
 
