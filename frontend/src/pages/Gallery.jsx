@@ -13,7 +13,7 @@ const Gallery = () => {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     category: '',
-    year: new Date().getFullYear(),
+    year: '', // Default to all years
     featured: false
   });
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -25,7 +25,7 @@ const Gallery = () => {
     title: '',
     description: '',
     category: '',
-    year: new Date().getFullYear(),
+    year: '', // Default to all years for upload form
     eventId: ''
   });
   const [imageFiles, setImageFiles] = useState([]);

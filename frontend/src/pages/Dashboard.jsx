@@ -5,6 +5,8 @@ import Card from '../components/Card';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Badge from '../components/Badge';
 import { analyticsService } from '../services/analyticsService';
+import { achievementService } from '../services/achievementService';
+import { organizationService } from '../services/organizationService';
 import { useAuth } from '../contexts/AuthContext';
 import {
   FiUsers,
@@ -15,6 +17,77 @@ import {
   FiImage,
   FiCalendar,
 } from 'react-icons/fi';
+
+// Officer: Summary Cards
+const OfficerSummaryCards = () => {
+  const [orgs, setOrgs] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [discipline, setDiscipline] = useState([]);
+  const [achievements, setAchievements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    (async () => {
+      try {
+        const orgRes = await organizationService.getMyOfficerOrganizations();
+        setOrgs(orgRes.organizations || []);
+        let allActs = [];
+        for (const org of orgRes.organizations || []) {
+          const acts = await organizationService.getActivities(org.org_id, { upcoming: true });
+          if (Array.isArray(acts.activities)) allActs = allActs.concat(acts.activities);
+        }
+        setActivities(allActs);
+        setDiscipline([]); // Placeholder
+        const achRes = await achievementService.getAll({ recent: true, limit: 3 });
+        setAchievements(achRes.achievements || []);
+      } catch (e) {
+        setOrgs([]); setActivities([]); setDiscipline([]); setAchievements([]);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+  if (loading) return <LoadingSpinner size="sm" />;
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <Card className="!p-6">
+        <div className="flex items-center">
+          <div className="flex-shrink-0 bg-green-100 rounded-lg p-3"><FiUsers className="h-6 w-6 text-green-600" /></div>
+          <div className="ml-4">
+            <p className="text-sm font-medium text-gray-600">Total Organizations</p>
+            <p className="text-2xl font-bold text-gray-900">{orgs.length}</p>
+          </div>
+        </div>
+      </Card>
+      <Card className="!p-6">
+        <div className="flex items-center">
+          <div className="flex-shrink-0 bg-indigo-100 rounded-lg p-3"><FiCalendar className="h-6 w-6 text-indigo-600" /></div>
+          <div className="ml-4">
+            <p className="text-sm font-medium text-gray-600">Upcoming Activities</p>
+            <p className="text-2xl font-bold text-gray-900">{activities.length}</p>
+          </div>
+        </div>
+      </Card>
+      <Card className="!p-6">
+        <div className="flex items-center">
+          <div className="flex-shrink-0 bg-yellow-100 rounded-lg p-3"><FiAlertCircle className="h-6 w-6 text-yellow-600" /></div>
+          <div className="ml-4">
+            <p className="text-sm font-medium text-gray-600">Active Discipline Cases</p>
+            <p className="text-2xl font-bold text-gray-900">{discipline.length}</p>
+          </div>
+        </div>
+      </Card>
+      <Card className="!p-6">
+        <div className="flex items-center">
+          <div className="flex-shrink-0 bg-blue-100 rounded-lg p-3"><FiAward className="h-6 w-6 text-blue-600" /></div>
+          <div className="ml-4">
+            <p className="text-sm font-medium text-gray-600">Recent Achievements</p>
+            <p className="text-2xl font-bold text-gray-900">{achievements.length}</p>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+};
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -78,7 +151,6 @@ const Dashboard = () => {
                   </div>
                 </div>
               </Card>
-
               <Card className="!p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0 bg-green-100 rounded-lg p-3">
@@ -93,7 +165,6 @@ const Dashboard = () => {
                   </div>
                 </div>
               </Card>
-
               <Card className="!p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0 bg-indigo-100 rounded-lg p-3">
@@ -108,7 +179,6 @@ const Dashboard = () => {
                   </div>
                 </div>
               </Card>
-
               <Card className="!p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0 bg-blue-100 rounded-lg p-3">
@@ -126,7 +196,6 @@ const Dashboard = () => {
                 </div>
               </Card>
             </div>
-
             <Card title="Quick Access">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Link to="/analytics" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
@@ -144,6 +213,29 @@ const Dashboard = () => {
                 <Link to="/activities" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
                   <FiCalendar className="h-6 w-6 text-blue-600 mx-auto mb-2" />
                   <p className="text-sm font-medium text-gray-900">Activities</p>
+                </Link>
+              </div>
+            </Card>
+          </>
+        )}
+
+        {/* Officer dashboard summary cards */}
+        {user.role === 'officer' && (
+          <>
+            <OfficerSummaryCards />
+            <Card title="Quick Access">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <Link to="/organizations" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
+                  <FiUsers className="h-6 w-6 text-green-600 mx-auto mb-2" />
+                  <p className="text-sm font-medium text-gray-900">My Organizations</p>
+                </Link>
+                <Link to="/activities" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
+                  <FiCalendar className="h-6 w-6 text-indigo-600 mx-auto mb-2" />
+                  <p className="text-sm font-medium text-gray-900">Manage Activities</p>
+                </Link>
+                <Link to="/achievements" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
+                  <FiAward className="h-6 w-6 text-blue-600 mx-auto mb-2" />
+                  <p className="text-sm font-medium text-gray-900">Achievements</p>
                 </Link>
               </div>
             </Card>
