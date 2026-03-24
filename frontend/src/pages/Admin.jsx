@@ -666,7 +666,12 @@ const Admin = () => {
                                 <div className="flex items-center">
                                   <div className="h-10 w-10 flex-shrink-0">
                                     {member.profile_picture ? (
-                                      <img className="h-10 w-10 rounded-full" src={member.profile_picture} alt="" />
+                                      <img
+                                        className="h-10 w-10 rounded-full"
+                                        src={member.profile_picture.startsWith('http') ? member.profile_picture : `http://localhost:5000${member.profile_picture}`}
+                                        alt="Profile"
+                                        onError={e => { e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'flex'; }}
+                                      />
                                     ) : (
                                       <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
                                         <span className="text-primary-600 font-medium text-sm">
