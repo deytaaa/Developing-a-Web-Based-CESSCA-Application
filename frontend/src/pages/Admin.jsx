@@ -575,13 +575,24 @@ const Admin = () => {
                                   {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                  <Button
-                                    variant="danger"
-                                    size="sm"
-                                    onClick={() => handleDeleteUser(user.user_id)}
-                                  >
-                                    <FiTrash2 />
-                                  </Button>
+                                  {user.user_id === currentUser.user_id ? (
+                                    <span
+                                      title="You cannot delete your own account"
+                                      className="inline-block"
+                                    >
+                                      <FiTrash2 style={{ color: '#ff0000', opacity: 0.6, cursor: 'not-allowed' }} />
+                                    </span>
+                                  ) : (
+                                    <span title="Delete user">
+                                      <Button
+                                        variant="danger"
+                                        size="sm"
+                                        onClick={() => handleDeleteUser(user.user_id)}
+                                      >
+                                        <FiTrash2 />
+                                      </Button>
+                                    </span>
+                                  )}
                                 </td>
                               </tr>
                             ))}
@@ -1213,13 +1224,22 @@ const Admin = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Course
               </label>
-              <input
-                type="text"
+              <select
                 className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 value={createUserForm.course}
                 onChange={(e) => setCreateUserForm({ ...createUserForm, course: e.target.value })}
-                placeholder="Course (optional)"
-              />
+              >
+                <option value="">Select course (optional)</option>
+                <option value="Bachelor of Science in Information Technology (BSIT)">Bachelor of Science in Information Technology (BSIT)</option>
+                <option value="Bachelor of Science in Office Administration (BSOA)">Bachelor of Science in Office Administration (BSOA)</option>
+                <option value="Bachelor of Science in Accounting Information System (BSAIS)">Bachelor of Science in Accounting Information System (BSAIS)</option>
+                <option value="Certificate in Computer Sciences (CCS)">Certificate in Computer Sciences (CCS)</option>
+                <option value="Certificate in Office Administration (COA)">Certificate in Office Administration (COA)</option>
+                <option value="Certificate in Hotel and Restaurant Management (CHRM)">Certificate in Hotel and Restaurant Management (CHRM)</option>
+                <option value="Associate in Hotel and Restaurant Technology (AHRT)">Associate in Hotel and Restaurant Technology (AHRT)</option>
+                <option value="Associate in Human Resource Development (AHRD)">Associate in Human Resource Development (AHRD)</option>
+                <option value="Associate in Accounting Information System (AAIS)">Associate in Accounting Information System (AAIS)</option>
+              </select>
             </div>
 
             <div className="md:col-span-2">

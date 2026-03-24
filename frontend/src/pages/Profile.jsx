@@ -532,7 +532,7 @@ const Profile = () => {
             </div>
             <div>
               <p className="text-sm text-gray-600">Status</p>
-              <p className="text-base font-medium text-gray-900 capitalize">{user?.status}</p>
+              <p className="text-base font-medium text-gray-900 capitalize">{user?.status ? user.status : 'N/A'}</p>
             </div>
           </div>
         </Card>

@@ -247,20 +247,39 @@ router.put('/users/:id/role', auth, roleCheck('admin'), [
 // Delete user (Admin only)
 router.delete('/users/:id', auth, roleCheck('admin'), async (req, res) => {
     try {
+        const targetUserId = parseInt(req.params.id);
         // Prevent self-deletion
-        if (parseInt(req.params.id) === req.user.userId) {
+        if (targetUserId === req.user.userId) {
             return res.status(400).json({ 
                 success: false, 
                 message: 'Cannot delete your own account' 
             });
         }
 
-        await pool.query('DELETE FROM users WHERE user_id = ?', [req.params.id]);
+        // Check if target user is admin
+        const [targetRows] = await pool.query('SELECT role FROM users WHERE user_id = ?', [targetUserId]);
+        if (targetRows.length === 0) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        const targetRole = targetRows[0].role;
+
+        if (targetRole === 'admin') {
+            // Count number of admins
+            const [[{ count: adminCount }]] = await pool.query("SELECT COUNT(*) as count FROM users WHERE role = 'admin'");
+            if (adminCount <= 1) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Cannot delete the last remaining admin account'
+                });
+            }
+        }
+
+        await pool.query('DELETE FROM users WHERE user_id = ?', [targetUserId]);
 
         await pool.query(
             `INSERT INTO activity_logs (user_id, action, entity_type, entity_id, description)
              VALUES (?, 'delete_user', 'user', ?, 'User deleted')`,
-            [req.user.userId, req.params.id]
+            [req.user.userId, targetUserId]
         );
 
         res.json({
