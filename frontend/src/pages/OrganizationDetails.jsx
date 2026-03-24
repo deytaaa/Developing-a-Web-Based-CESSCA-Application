@@ -758,7 +758,7 @@ const OrganizationDetails = () => {
 
         {activeTab === 'members' && (
           <Card>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Members ({members.filter(m => m.membership_status === 'active').length})</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Members ({members.length})</h3>
             {members.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <FiUsers className="text-5xl mx-auto mb-3 text-gray-400" />
@@ -779,7 +779,7 @@ const OrganizationDetails = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {members.filter(m => m.membership_status === 'active').map((member) => (
+                    {members.map((member) => (
                       <tr key={member.member_id}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
@@ -809,7 +809,7 @@ const OrganizationDetails = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.email}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <Badge variant={member.membership_status === 'active' ? 'success' : 'warning'}>
+                          <Badge variant={member.membership_status === 'active' ? 'success' : member.membership_status === 'pending' ? 'warning' : 'secondary'}>
                             {member.membership_status}
                           </Badge>
                         </td>
