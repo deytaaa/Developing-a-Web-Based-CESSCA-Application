@@ -22,51 +22,67 @@ async function createAdminUser() {
 
     console.log('✅ Generated password hashes');
 
-    // Delete existing users (to avoid duplicates)
-    await connection.execute('DELETE FROM users WHERE email IN (?, ?, ?)', 
-      ['admin@ptc.edu.ph', 'cessca@ptc.edu.ph', 'student@ptc.edu.ph']
-    );
 
-    // Insert admin user
-    const [adminResult] = await connection.execute(
-      'INSERT INTO users (email, password, role, status) VALUES (?, ?, ?, ?)',
-      ['admin@ptc.edu.ph', adminPassword, 'admin', 'active']
-    );
-    const adminId = adminResult.insertId;
+    // Remove all users except cessca staff and admin
+    await connection.execute('DELETE FROM users WHERE email NOT IN (?, ?)', ['admin@ptc.edu.ph', 'cessca@ptc.edu.ph']);
 
-    // Insert cessca staff user
-    const [cesscaResult] = await connection.execute(
-      'INSERT INTO users (email, password, role, status) VALUES (?, ?, ?, ?)',
-      ['cessca@ptc.edu.ph', cesscaPassword, 'cessca_staff', 'active']
-    );
-    const cesscaId = cesscaResult.insertId;
+    // Upsert admin user
+    let adminId, cesscaId, studentId;
+    // Admin
+    const [adminRows] = await connection.execute('SELECT user_id FROM users WHERE email = ?', ['admin@ptc.edu.ph']);
+    if (adminRows.length > 0) {
+      adminId = adminRows[0].user_id;
+      await connection.execute('UPDATE users SET password = ?, role = ?, status = ? WHERE user_id = ?', [adminPassword, 'admin', 'active', adminId]);
+    } else {
+      const [adminResult] = await connection.execute('INSERT INTO users (email, password, role, status) VALUES (?, ?, ?, ?)', ['admin@ptc.edu.ph', adminPassword, 'admin', 'active']);
+      adminId = adminResult.insertId;
+    }
+    // CESSCA Staff
+    const [cesscaRows] = await connection.execute('SELECT user_id FROM users WHERE email = ?', ['cessca@ptc.edu.ph']);
+    if (cesscaRows.length > 0) {
+      cesscaId = cesscaRows[0].user_id;
+      await connection.execute('UPDATE users SET password = ?, role = ?, status = ? WHERE user_id = ?', [cesscaPassword, 'cessca_staff', 'active', cesscaId]);
+    } else {
+      const [cesscaResult] = await connection.execute('INSERT INTO users (email, password, role, status) VALUES (?, ?, ?, ?)', ['cessca@ptc.edu.ph', cesscaPassword, 'cessca_staff', 'active']);
+      cesscaId = cesscaResult.insertId;
+    }
+    // Student
+    const [studentRows] = await connection.execute('SELECT user_id FROM users WHERE email = ?', ['student@ptc.edu.ph']);
+    if (studentRows.length > 0) {
+      studentId = studentRows[0].user_id;
+      await connection.execute('UPDATE users SET password = ?, role = ?, status = ? WHERE user_id = ?', [studentPassword, 'student', 'active', studentId]);
+    } else {
+      const [studentResult] = await connection.execute('INSERT INTO users (email, password, role, status) VALUES (?, ?, ?, ?)', ['student@ptc.edu.ph', studentPassword, 'student', 'active']);
+      studentId = studentResult.insertId;
+    }
 
-    // Insert test student user
-    const [studentResult] = await connection.execute(
-      'INSERT INTO users (email, password, role, status) VALUES (?, ?, ?, ?)',
-      ['student@ptc.edu.ph', studentPassword, 'student', 'active']
-    );
-    const studentId = studentResult.insertId;
+    console.log('✅ Created or updated users');
 
-    console.log('✅ Created users');
 
-    // Insert user profiles
-    await connection.execute(
-      'INSERT INTO user_profiles (user_id, first_name, last_name, contact_number) VALUES (?, ?, ?, ?)',
-      [adminId, 'System', 'Administrator', '09123456789']
-    );
+    // Upsert user profiles
+    // Admin
+    const [adminProfileRows] = await connection.execute('SELECT user_id FROM user_profiles WHERE user_id = ?', [adminId]);
+    if (adminProfileRows.length > 0) {
+      await connection.execute('UPDATE user_profiles SET first_name = ?, last_name = ?, contact_number = ? WHERE user_id = ?', ['System', 'Administrator', '09123456789', adminId]);
+    } else {
+      await connection.execute('INSERT INTO user_profiles (user_id, first_name, last_name, contact_number) VALUES (?, ?, ?, ?)', [adminId, 'System', 'Administrator', '09123456789']);
+    }
+    // CESSCA Staff
+    const [cesscaProfileRows] = await connection.execute('SELECT user_id FROM user_profiles WHERE user_id = ?', [cesscaId]);
+    if (cesscaProfileRows.length > 0) {
+      await connection.execute('UPDATE user_profiles SET first_name = ?, last_name = ?, contact_number = ? WHERE user_id = ?', ['CESSCA', 'Staff', '09123456790', cesscaId]);
+    } else {
+      await connection.execute('INSERT INTO user_profiles (user_id, first_name, last_name, contact_number) VALUES (?, ?, ?, ?)', [cesscaId, 'CESSCA', 'Staff', '09123456790']);
+    }
+    // Student
+    const [studentProfileRows] = await connection.execute('SELECT user_id FROM user_profiles WHERE user_id = ?', [studentId]);
+    if (studentProfileRows.length > 0) {
+      await connection.execute('UPDATE user_profiles SET first_name = ?, middle_name = ?, last_name = ?, student_id = ?, course = ?, contact_number = ? WHERE user_id = ?', ['Juan', 'Santos', 'Dela Cruz', '2024-001', 'BS Information Technology', '09123456791', studentId]);
+    } else {
+      await connection.execute('INSERT INTO user_profiles (user_id, first_name, middle_name, last_name, student_id, course, contact_number) VALUES (?, ?, ?, ?, ?, ?, ?)', [studentId, 'Juan', 'Santos', 'Dela Cruz', '2024-001', 'BS Information Technology', '09123456791']);
+    }
 
-    await connection.execute(
-      'INSERT INTO user_profiles (user_id, first_name, last_name, contact_number) VALUES (?, ?, ?, ?)',
-      [cesscaId, 'CESSCA', 'Staff', '09123456790']
-    );
-
-    await connection.execute(
-      'INSERT INTO user_profiles (user_id, first_name, middle_name, last_name, student_id, course, contact_number) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [studentId, 'Juan', 'Santos', 'Dela Cruz', '2024-001', 'BS Information Technology', '09123456791']
-    );
-
-    console.log('✅ Created user profiles');
+    console.log('✅ Created or updated user profiles');
 
     console.log('\n🎉 Success! You can now login with:');
     console.log('\n📝 Admin Account:');
