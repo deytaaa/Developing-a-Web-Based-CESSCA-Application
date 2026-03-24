@@ -358,14 +358,24 @@ const Profile = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Degree Program <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
+                  <select
                     disabled={!editing}
                     required
                     className="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 disabled:bg-gray-100 disabled:text-gray-700"
                     value={alumniData.degreeProgram}
                     onChange={(e) => setAlumniData({ ...alumniData, degreeProgram: e.target.value })}
-                  />
+                  >
+                    <option value="">Select a degree program</option>
+                    <option value="Bachelor of Science in Information Technology (BSIT)">Bachelor of Science in Information Technology (BSIT)</option>
+                    <option value="Bachelor of Science in Office Administration (BSOA)">Bachelor of Science in Office Administration (BSOA)</option>
+                    <option value="Bachelor of Science in Accounting Information System (BSAIS)">Bachelor of Science in Accounting Information System (BSAIS)</option>
+                    <option value="Certificate in Computer Sciences (CCS)">Certificate in Computer Sciences (CCS)</option>
+                    <option value="Certificate in Office Administration (COA)">Certificate in Office Administration (COA)</option>
+                    <option value="Certificate in Hotel and Restaurant Management (CHRM)">Certificate in Hotel and Restaurant Management (CHRM)</option>
+                    <option value="Associate in Hotel and Restaurant Technology (AHRT)">Associate in Hotel and Restaurant Technology (AHRT)</option>
+                    <option value="Associate in Human Resource Development (AHRD)">Associate in Human Resource Development (AHRD)</option>
+                    <option value="Associate in Accounting Information System (AAIS)">Associate in Accounting Information System (AAIS)</option>
+                  </select>
                 </div>
 
                 <div>

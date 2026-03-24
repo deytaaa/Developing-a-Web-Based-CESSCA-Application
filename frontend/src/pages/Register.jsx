@@ -160,12 +160,23 @@ const Register = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Course/Program</label>
-              <input
-                type="text"
-                className="block w-full px-3 py-3 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200 placeholder-gray-400"
+              <select
+                className="block w-full px-3 py-3 bg-white text-gray-900 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
                 value={formData.course}
                 onChange={(e) => setFormData({ ...formData, course: e.target.value })}
-              />
+                required
+              >
+                <option value="">Select a course/program</option>
+                <option value="Bachelor of Science in Information Technology (BSIT)">Bachelor of Science in Information Technology (BSIT)</option>
+                <option value="Bachelor of Science in Office Administration (BSOA)">Bachelor of Science in Office Administration (BSOA)</option>
+                <option value="Bachelor of Science in Accounting Information System (BSAIS)">Bachelor of Science in Accounting Information System (BSAIS)</option>
+                <option value="Certificate in Computer Sciences (CCS)">Certificate in Computer Sciences (CCS)</option>
+                <option value="Certificate in Office Administration (COA)">Certificate in Office Administration (COA)</option>
+                <option value="Certificate in Hotel and Restaurant Management (CHRM)">Certificate in Hotel and Restaurant Management (CHRM)</option>
+                <option value="Associate in Hotel and Restaurant Technology (AHRT)">Associate in Hotel and Restaurant Technology (AHRT)</option>
+                <option value="Associate in Human Resource Development (AHRD)">Associate in Human Resource Development (AHRD)</option>
+                <option value="Associate in Accounting Information System (AAIS)">Associate in Accounting Information System (AAIS)</option>
+              </select>
             </div>
 
             <div>
