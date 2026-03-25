@@ -35,8 +35,8 @@ const Layout = ({ children }) => {
   );
 
   const isActive = (path) => {
-    if (path === '/') {
-      return location.pathname === path;
+    if (path === '/' || path === '/dashboard') {
+      return location.pathname === '/dashboard';
     }
     // For exact matching on specific admin routes
     if (path === '/admin') {

@@ -6,24 +6,29 @@ import ptcLogo from '../assets/images/logo-ptc.png';
 import loginBg from '../assets/images/loginbg.jpg';
 
 const Login = () => {
-  const { login } = useAuth();
   const navigate = useNavigate();
+  const { login, user, loading } = useAuth();
+  // If already logged in, redirect to dashboard
+  if (!loading && user) {
+    navigate('/dashboard', { replace: true });
+    return null;
+  }
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+    setFormLoading(true);
     try {
       await login(formData.email, formData.password);
-      navigate('/');
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {
-      setLoading(false);
+      setFormLoading(false);
     }
   };
 
@@ -112,10 +117,10 @@ const Login = () => {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={formLoading}
               className="w-full py-3 px-4 rounded-xl font-bold text-white text-sm tracking-wide bg-gradient-to-r from-green-700 to-green-600 hover:from-green-800 hover:to-green-700 disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
             >
-              {loading ? (
+              {formLoading ? (
                 <>
                   <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
