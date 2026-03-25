@@ -796,14 +796,14 @@ const About = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-gray-600">
             <div>
               <p className="font-semibold text-gray-800 mb-1">Address</p>
-              <p>Pateros Technological College</p>
-              <p>P. Bernardo St., Pateros</p>
-              <p>Metro Manila, Philippines 1620</p>
+              <p>205 College Street,</p>
+              <p>Sto. Rosario-Kanluran,</p>
+              <p>Pateros, Metro Manila</p>
             </div>
             <div>
               <p className="font-semibold text-gray-800 mb-1">Communication</p>
               <p className="flex items-center gap-2"><FiPhone size={13} /> (02) 8xxxxx</p>
-              <p className="flex items-center gap-2 mt-1"><FiMail size={13} /> info@ptc.edu.ph</p>
+              <p className="flex items-center gap-2 mt-1"><FiMail size={13} /> ptc@paterostechnologicalcollege.edu.ph</p>
             </div>
             <div>
               <p className="font-semibold text-gray-800 mb-1">Office Hours</p>

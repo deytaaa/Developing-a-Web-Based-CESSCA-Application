@@ -30,7 +30,6 @@ const Admin = () => {
     { id: 'users', label: 'User Management', roles: ['admin'] },
     { id: 'organizations', label: 'Organizations', roles: ['cessca_staff', 'admin'] },
     { id: 'announcements', label: 'Announcements', roles: ['cessca_staff', 'admin'] },
-    { id: 'settings', label: 'System Settings', roles: ['admin'] },
     { id: 'logs', label: 'Activity Logs', roles: ['admin'] },
   ];
 
@@ -836,14 +835,6 @@ const Admin = () => {
                   </div>
                 </Card>
               </div>
-            )}
-
-            {/* Settings Tab */}
-            {activeTab === 'settings' && (
-              <Card>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">System Settings</h2>
-                <p className="text-gray-600">System configuration - implementation in progress</p>
-              </Card>
             )}
 
             {/* Logs Tab */}
