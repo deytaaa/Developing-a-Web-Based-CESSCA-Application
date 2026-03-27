@@ -10,11 +10,13 @@ const upload = require('../middleware/upload');
 router.get('/', auth, async (req, res) => {
     try {
         const { category, award_level, year, featured } = req.query;
+        let page = parseInt(req.query.page, 10) || 1;
+        let limit = parseInt(req.query.limit, 10) || 10;
+        if (page < 1) page = 1;
+        if (limit < 1) limit = 10;
+        const offset = (page - 1) * limit;
 
-        let query = `
-            SELECT sa.*, u.email as created_by_email,
-                   up.first_name as created_by_first_name,
-                   up.last_name  as created_by_last_name
+        let baseQuery = `
             FROM school_achievements sa
             JOIN users u  ON sa.created_by = u.user_id
             JOIN user_profiles up ON u.user_id = up.user_id
@@ -23,26 +25,43 @@ router.get('/', auth, async (req, res) => {
         const params = [];
 
         if (category) {
-            query += ' AND sa.category = ?';
+            baseQuery += ' AND sa.category = ?';
             params.push(category);
         }
         if (award_level) {
-            query += ' AND sa.award_level = ?';
+            baseQuery += ' AND sa.award_level = ?';
             params.push(award_level);
         }
         if (year) {
-            query += ' AND YEAR(sa.achievement_date) = ?';
+            baseQuery += ' AND YEAR(sa.achievement_date) = ?';
             params.push(year);
         }
         if (featured === 'true') {
-            query += ' AND sa.is_featured = TRUE';
+            baseQuery += ' AND sa.is_featured = TRUE';
         }
 
-        query += ' ORDER BY sa.achievement_date DESC';
+        // Get total count
+        const [[{ count }]] = await pool.query(`SELECT COUNT(*) as count ${baseQuery}`, params);
 
-        const [achievements] = await pool.query(query, params);
+        // Get paginated achievements
+        const [achievements] = await pool.query(
+            `SELECT sa.*, u.email as created_by_email,
+                    up.first_name as created_by_first_name,
+                    up.last_name  as created_by_last_name
+             ${baseQuery}
+             ORDER BY sa.achievement_date DESC
+             LIMIT ? OFFSET ?`,
+            [...params, limit, offset]
+        );
 
-        res.json({ success: true, count: achievements.length, achievements });
+        res.json({
+            success: true,
+            count: achievements.length,
+            total: count,
+            page,
+            limit,
+            achievements
+        });
     } catch (error) {
         console.error('Get achievements error:', error);
         res.status(500).json({ success: false, message: 'Failed to fetch achievements', error: error.message });

@@ -107,24 +107,33 @@ const Achievements = () => {
   const [submitting, setSubmitting]     = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [previewUrl, setPreviewUrl]     = useState(null);
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const params = {};
+      const params = { page, limit };
       if (filters.category)   params.category   = filters.category;
       if (filters.award_level) params.award_level = filters.award_level;
       if (filters.year)        params.year        = filters.year;
       const res = await achievementService.getAll(params);
       setAchievements(res.achievements || []);
+      setTotal(res.total || 0);
     } catch {
       setAchievements([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
-  }, [filters.category, filters.award_level, filters.year]);
+  }, [filters.category, filters.award_level, filters.year, page, limit]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => { setPage(1); }, [filters.category, filters.award_level, filters.year, filters.search]);
 
   const openCreate = () => {
     setEditTarget(null);
@@ -336,6 +345,36 @@ const Achievements = () => {
                 </div>
               </div>
             )}
+
+            {/* Pagination Controls */}
+            <div className="flex items-center justify-between mt-6">
+              <div className="text-xs text-gray-500">
+                Page {page} of {Math.ceil(total / limit) || 1} | {total} achievements
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  className="px-2 py-1 text-xs border rounded disabled:opacity-50"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  Prev
+                </button>
+                <button
+                  className="px-2 py-1 text-xs border rounded disabled:opacity-50"
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={page >= Math.ceil(total / limit)}
+                >
+                  Next
+                </button>
+                <select
+                  className="ml-2 px-2 py-1 text-xs border rounded"
+                  value={limit}
+                  onChange={e => setLimit(Number(e.target.value))}
+                >
+                  {[5, 10, 20, 50].map(l => <option key={l} value={l}>{l} / page</option>)}
+                </select>
+              </div>
+            </div>
           </>
         )}
       </div>
