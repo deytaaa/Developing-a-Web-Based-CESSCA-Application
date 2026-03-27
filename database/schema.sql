@@ -6,8 +6,8 @@
 -- DROP DATABASE IF EXISTS cessca_db;
 
 -- Create database
-CREATE DATABASE IF NOT EXISTS cessca_db;
-USE cessca_db;
+-- CREATE DATABASE IF NOT EXISTS cessca_db;
+-- USE cessca_db;
 
 -- ============================================
 -- USERS & AUTHENTICATION
