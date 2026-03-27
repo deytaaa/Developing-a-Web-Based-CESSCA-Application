@@ -349,7 +349,8 @@ const Gallery = () => {
               <div key={album.album_id} className="group relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
                 <div className="aspect-square overflow-hidden bg-gray-100 relative">
                   <img
-                    src={`http://localhost:5000${album.cover_image}`}
+                    src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${album.cover_image}`}
+                    onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
                     alt={album.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
                     onClick={() => openAlbumModal(album)}
@@ -712,7 +713,8 @@ const Gallery = () => {
 
               {/* Image */}
               <img
-                src={`http://localhost:5000${getCurrentPhoto().image_url}`}
+                src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${getCurrentPhoto().image_url}`}
+                onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
                 alt={selectedAlbum.title}
                 className="max-h-full max-w-full object-contain"
                 style={{ maxHeight: 'calc(100vh - 220px)' }}
@@ -746,7 +748,8 @@ const Gallery = () => {
                       title={photo.title}
                     >
                       <img
-                        src={`http://localhost:5000${photo.image_url}`}
+                        src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${photo.image_url}`}
+                        onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
                         alt={photo.title}
                         className="w-20 h-20 object-cover rounded"
                       />
