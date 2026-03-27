@@ -818,40 +818,34 @@ const OrganizationDetails = () => {
                                   <>
                                     <button
                                       onClick={() => handleApproveMember(member.member_id)}
+                                      className="text-green-600 hover:text-green-900 transition"
+                                      title="Approve Member"
+                                    >
+                                      <FiCheck className="text-lg" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleRejectMember(member.member_id)}
+                                      className="text-red-600 hover:text-red-900 transition"
+                                      title="Reject Member"
+                                    >
+                                      <FiX className="text-lg" />
+                                    </button>
                                   </>
+                                )}
+                                {member.membership_status === 'active' && (
+                                  <button
+                                    onClick={() => handleRemoveMember(member.member_id)}
+                                    className="text-red-600 hover:text-red-900 transition"
+                                    title="Remove Member"
+                                  >
+                                    <FiTrash2 className="text-lg" />
+                                  </button>
                                 )}
                               </div>
                             </td>
                           )}
                         </tr>
                       ) : null
-                                    className="text-green-600 hover:text-green-900 transition"
-                                    title="Approve Member"
-                                  >
-                                    <FiCheck className="text-lg" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleRejectMember(member.member_id)}
-                                    className="text-red-600 hover:text-red-900 transition"
-                                    title="Reject Member"
-                                  >
-                                    <FiX className="text-lg" />
-                                  </button>
-                                </>
-                              )}
-                              {member.membership_status === 'active' && (
-                                <button
-                                  onClick={() => handleRemoveMember(member.member_id)}
-                                  className="text-red-600 hover:text-red-900 transition"
-                                  title="Remove Member"
-                                >
-                                  <FiTrash2 className="text-lg" />
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        )}
-                      </tr>
                     ))}
                   </tbody>
                 </table>
