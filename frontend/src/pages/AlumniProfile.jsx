@@ -208,7 +208,12 @@ const AlumniProfile = () => {
             <div className="flex flex-col items-center">
               {alumni.profile_picture ? (
                 <img 
-                  src={`http://localhost:5000${alumni.profile_picture}`} 
+                  src={alumni.profile_picture
+                    ? (alumni.profile_picture.startsWith('http')
+                        ? alumni.profile_picture
+                        : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${alumni.profile_picture}`)
+                    : '/default-avatar.png'}
+                  onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
                   alt={`${alumni.first_name} ${alumni.last_name}`}
                   className="w-32 h-32 rounded-full object-cover mb-4"
                 />

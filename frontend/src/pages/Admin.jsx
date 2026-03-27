@@ -667,7 +667,12 @@ const Admin = () => {
                                     {member.profile_picture ? (
                                       <img
                                         className="h-10 w-10 rounded-full"
-                                        src={member.profile_picture.startsWith('http') ? member.profile_picture : `http://localhost:5000${member.profile_picture}`}
+                                        src={member.profile_picture
+                                          ? (member.profile_picture.startsWith('http')
+                                              ? member.profile_picture
+                                              : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${member.profile_picture}`)
+                                          : '/default-avatar.png'}
+                                        onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
                                         alt="Profile"
                                         onError={e => { e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'flex'; }}
                                       />
