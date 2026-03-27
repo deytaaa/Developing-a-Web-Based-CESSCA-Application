@@ -798,9 +798,9 @@ const OrganizationDetails = () => {
                                   {(member.first_name?.[0] || '')}{(member.last_name?.[0] || '')}
                                 </span>
                               )}
-                            </div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {(member.first_name || '') + ' ' + (member.last_name || '')}
+                              <span className="text-sm font-medium text-gray-900">
+                                {(member.first_name || '') + ' ' + (member.last_name || '')}
+                              </span>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.email || 'N/A'}</td>
