@@ -784,19 +784,20 @@ const OrganizationDetails = () => {
                         <tr key={member.member_id || member.id || Math.random()}>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
-                              <img
-                                src={member.profile_picture
-                                  ? (member.profile_picture.startsWith('http')
-                                      ? member.profile_picture
-                                      : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${member.profile_picture}`)
-                                  : '/default-avatar.png'}
-                                alt={`${member.first_name || ''} ${member.last_name || ''}`}
-                                className="w-8 h-8 rounded-full object-cover mr-3"
-                                onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
-                              />
-                              <span className="text-green-600 font-semibold text-sm">
-                                {(member.first_name?.[0] || '')}{(member.last_name?.[0] || '')}
-                              </span>
+                              {member.profile_picture ? (
+                                <img
+                                  src={member.profile_picture.startsWith('http')
+                                    ? member.profile_picture
+                                    : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${member.profile_picture}`}
+                                  alt={`${member.first_name || ''} ${member.last_name || ''}`}
+                                  className="w-8 h-8 rounded-full object-cover mr-3"
+                                  onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
+                                />
+                              ) : (
+                                <span className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3 text-green-600 font-semibold text-sm">
+                                  {(member.first_name?.[0] || '')}{(member.last_name?.[0] || '')}
+                                </span>
+                              )}
                             </div>
                             <div className="text-sm font-medium text-gray-900">
                               {(member.first_name || '') + ' ' + (member.last_name || '')}
