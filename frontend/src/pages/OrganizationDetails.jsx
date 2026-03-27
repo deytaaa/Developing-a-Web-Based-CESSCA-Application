@@ -780,44 +780,51 @@ const OrganizationDetails = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {members.map((member) => (
-                      <tr key={member.member_id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <img
-                              src={member.profile_picture
-                                ? (member.profile_picture.startsWith('http')
-                                    ? member.profile_picture
-                                    : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${member.profile_picture}`)
-                                : '/default-avatar.png'}
-                              alt={`${member.first_name} ${member.last_name}`}
-                              className="w-8 h-8 rounded-full object-cover mr-3"
-                              onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
-                            />
+                      member ? (
+                        <tr key={member.member_id || member.id || Math.random()}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <img
+                                src={member.profile_picture
+                                  ? (member.profile_picture.startsWith('http')
+                                      ? member.profile_picture
+                                      : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${member.profile_picture}`)
+                                  : '/default-avatar.png'}
+                                alt={`${member.first_name || ''} ${member.last_name || ''}`}
+                                className="w-8 h-8 rounded-full object-cover mr-3"
+                                onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
+                              />
                               <span className="text-green-600 font-semibold text-sm">
-                                {member.first_name?.[0]}{member.last_name?.[0]}
+                                {(member.first_name?.[0] || '')}{(member.last_name?.[0] || '')}
                               </span>
                             </div>
                             <div className="text-sm font-medium text-gray-900">
-                              {member.first_name} {member.last_name}
+                              {(member.first_name || '') + ' ' + (member.last_name || '')}
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.email}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <Badge variant={member.membership_status === 'active' ? 'success' : member.membership_status === 'pending' ? 'warning' : 'secondary'}>
-                            {member.membership_status}
-                          </Badge>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {member.joined_date ? new Date(member.joined_date).toLocaleDateString() : 'Pending'}
-                        </td>
-                        {canManageMembers && (
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div className="flex space-x-2">
-                              {member.membership_status === 'pending' && (
-                                <>
-                                  <button
-                                    onClick={() => handleApproveMember(member.member_id)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.email || 'N/A'}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <Badge variant={member.membership_status === 'active' ? 'success' : member.membership_status === 'pending' ? 'warning' : 'secondary'}>
+                              {member.membership_status || 'N/A'}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {member.joined_date ? new Date(member.joined_date).toLocaleDateString() : 'Pending'}
+                          </td>
+                          {canManageMembers && (
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <div className="flex space-x-2">
+                                {member.membership_status === 'pending' && (
+                                  <>
+                                    <button
+                                      onClick={() => handleApproveMember(member.member_id)}
+                                  </>
+                                )}
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                      ) : null
                                     className="text-green-600 hover:text-green-900 transition"
                                     title="Approve Member"
                                   >
