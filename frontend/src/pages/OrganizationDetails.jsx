@@ -783,21 +783,16 @@ const OrganizationDetails = () => {
                       <tr key={member.member_id}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            {member.profile_picture ? (
-                              <img 
-                                src={`http://localhost:5000${member.profile_picture}`}
-                                alt={`${member.first_name} ${member.last_name}`}
-                                className="w-8 h-8 rounded-full object-cover mr-3"
-                                onError={(e) => {
-                                  e.target.style.display = 'none';
-                                  e.target.nextElementSibling.style.display = 'flex';
-                                }}
-                              />
-                            ) : null}
-                            <div 
-                              className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3"
-                              style={{display: member.profile_picture ? 'none' : 'flex'}}
-                            >
+                            <img
+                              src={member.profile_picture
+                                ? (member.profile_picture.startsWith('http')
+                                    ? member.profile_picture
+                                    : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${member.profile_picture}`)
+                                : '/default-avatar.png'}
+                              alt={`${member.first_name} ${member.last_name}`}
+                              className="w-8 h-8 rounded-full object-cover mr-3"
+                              onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
+                            />
                               <span className="text-green-600 font-semibold text-sm">
                                 {member.first_name?.[0]}{member.last_name?.[0]}
                               </span>
