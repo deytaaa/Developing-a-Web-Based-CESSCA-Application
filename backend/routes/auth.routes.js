@@ -22,6 +22,7 @@ router.post('/login', [
 
         const { email, password } = req.body;
 
+
         // Find user
         const [users] = await pool.query(
             'SELECT * FROM users WHERE email = ?',
@@ -29,6 +30,7 @@ router.post('/login', [
         );
 
         if (users.length === 0) {
+            console.log('Login attempt failed: user not found', email);
             return res.status(401).json({ 
                 success: false, 
                 message: 'Invalid email or password' 
@@ -36,9 +38,12 @@ router.post('/login', [
         }
 
         const user = users[0];
+        console.log('Login attempt:', { email, password });
+        console.log('User from DB:', user);
 
         // Check if user is active
         if (user.status !== 'active') {
+            console.log('User not active:', user.status);
             return res.status(403).json({ 
                 success: false, 
                 message: 'Account is not active. Please contact administrator.' 
@@ -47,7 +52,9 @@ router.post('/login', [
 
         // Verify password
         const isMatch = await bcrypt.compare(password, user.password);
+        console.log('Password match:', isMatch);
         if (!isMatch) {
+            console.log('Password mismatch for user:', email);
             return res.status(401).json({ 
                 success: false, 
                 message: 'Invalid email or password' 
