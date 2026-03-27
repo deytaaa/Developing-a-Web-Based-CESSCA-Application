@@ -1,3 +1,10 @@
+// Helper to get the correct logo URL
+const getLogoUrl = (logoPath) => {
+  if (!logoPath) return '/default-org.png';
+  if (logoPath.startsWith('http')) return logoPath;
+  // Always use the backend's public URL, never localhost
+  return `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${logoPath}`;
+};
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
@@ -557,9 +564,10 @@ const OrganizationDetails = () => {
               <div className="w-24 h-24 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
                 {organization.logo_url ? (
                   <img 
-                    src={`http://localhost:5000${organization.logo_url}`} 
-                    alt={organization.org_name} 
-                    className="w-full h-full object-cover rounded-lg" 
+                    src={getLogoUrl(organization.logo_url)}
+                    alt={organization.org_name}
+                    className="w-full h-full object-cover rounded-lg"
+                    onError={e => { e.target.onerror = null; e.target.src = '/default-org.png'; }}
                   />
                 ) : (
                   <FiUsers className="text-4xl text-green-600" />
