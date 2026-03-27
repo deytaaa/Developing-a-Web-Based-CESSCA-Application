@@ -19,14 +19,15 @@ const Profile = () => {
     contactNumber: '',
     address: '',
   });
-            <img
-              src={user.profile_picture?.startsWith('http')
-                ? user.profile_picture
-                : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${user.profile_picture}`}
-              alt="Profile"
-              className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
-              onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
-            />
+
+  // Alumni-specific state
+  const [alumniData, setAlumniData] = useState({
+    graduationYear: '',
+    degreeProgram: '',
+    currentEmploymentStatus: '',
+    companyName: '',
+    jobPosition: '',
+    industry: '',
     employmentStartDate: '',
     currentAddress: '',
     permanentAddress: '',
@@ -201,6 +202,7 @@ const Profile = () => {
                   src={getProfilePictureUrl()}
                   alt="Profile"
                   className="w-32 h-32 rounded-full object-cover border-4 border-green-600"
+                  onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
                 />
               ) : (
                 <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center border-4 border-green-600">
