@@ -19,14 +19,14 @@ const Profile = () => {
     contactNumber: '',
     address: '',
   });
-  
-  const [alumniData, setAlumniData] = useState({
-    graduationYear: '',
-    degreeProgram: '',
-    currentEmploymentStatus: '',
-    companyName: '',
-    jobPosition: '',
-    industry: '',
+            <img
+              src={user.profile_picture?.startsWith('http')
+                ? user.profile_picture
+                : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${user.profile_picture}`}
+              alt="Profile"
+              className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+              onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
+            />
     employmentStartDate: '',
     currentAddress: '',
     permanentAddress: '',

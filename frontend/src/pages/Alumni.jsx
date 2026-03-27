@@ -226,7 +226,7 @@ const Alumni = () => {
                 const hasProfile = alum.alumni_id != null;
                 const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || '';
                 const profilePictureUrl = alum.profile_picture 
-                  ? (alum.profile_picture.startsWith('http')
+                    ? (alum.profile_picture?.startsWith('http')
                       ? alum.profile_picture
                       : `${backendUrl}${alum.profile_picture}`)
                   : null;

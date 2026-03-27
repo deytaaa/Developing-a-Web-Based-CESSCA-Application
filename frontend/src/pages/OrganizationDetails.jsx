@@ -977,7 +977,8 @@ const OrganizationDetails = () => {
                                 >
                                   <div className="aspect-square overflow-hidden bg-gray-100 relative">
                                     <img
-                                      src={`http://localhost:5000${coverPhoto.image_url}`}
+                                      src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${coverPhoto.image_url}`}
+                                      onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
                                       alt={albumName}
                                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                     />
@@ -1047,7 +1048,8 @@ const OrganizationDetails = () => {
                               >
                                 <div className="relative">
                                   <img
-                                    src={`http://localhost:5000${photo.image_url}`}
+                                    src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${photo.image_url}`}
+                                    onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
                                     alt={photo.title}
                                     className="w-full h-64 object-cover"
                                   />
@@ -1183,7 +1185,8 @@ const OrganizationDetails = () => {
 
               {/* Image */}
               <img
-                src={`http://localhost:5000${getCurrentPhoto().image_url}`}
+                src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${getCurrentPhoto().image_url}`}
+                onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
                 alt={getCurrentPhoto().title}
                 className="max-h-full max-w-full object-contain"
                 style={{ maxHeight: 'calc(100vh - 220px)' }}
@@ -1217,7 +1220,8 @@ const OrganizationDetails = () => {
                       title={photo.title}
                     >
                       <img
-                        src={`http://localhost:5000${photo.image_url}`}
+                        src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${photo.image_url}`}
+                        onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
                         alt={photo.title}
                         className="w-20 h-20 object-cover rounded"
                       />

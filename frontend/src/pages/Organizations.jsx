@@ -87,20 +87,16 @@ const Organizations = () => {
                 {/* Organization Logo */}
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-24 h-24 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
-                    {org.logo_url ? (
-                      <img 
-                        src={org.logo_url
-                          ? (org.logo_url.startsWith('http')
-                              ? org.logo_url
-                              : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${org.logo_url}`)
-                          : '/default-org.png'}
-                        onError={e => { e.target.onerror = null; e.target.src = '/default-org.png'; }}
-                        alt={org.org_name} 
-                        className="w-full h-full object-cover" 
-                      />
-                    ) : (
-                      <FiUsers className="text-4xl text-green-600" />
-                    )}
+                    <img
+                      src={org.logo_url
+                        ? (org.logo_url.startsWith('http')
+                            ? org.logo_url
+                            : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${org.logo_url}`)
+                        : '/default-org.png'}
+                      onError={e => { e.target.onerror = null; e.target.src = '/default-org.png'; }}
+                      alt={org.org_name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
 

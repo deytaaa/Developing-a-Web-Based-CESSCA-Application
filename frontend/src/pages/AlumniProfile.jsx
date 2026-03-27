@@ -210,6 +210,7 @@ const AlumniProfile = () => {
                 <img 
                   src={alumni.profile_picture
                     ? (alumni.profile_picture.startsWith('http')
+                        ? (alumni.profile_picture?.startsWith('http')
                         ? alumni.profile_picture
                         : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${alumni.profile_picture}`)
                     : '/default-avatar.png'}
