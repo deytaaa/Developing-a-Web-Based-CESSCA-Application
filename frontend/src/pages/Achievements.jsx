@@ -526,7 +526,8 @@ const AchievementCard = ({ achievement: a, user, onEdit, onDelete, featured }) =
       <div className="relative w-full bg-white flex items-center justify-center cursor-pointer group" style={{ aspectRatio: '4/5', minHeight: 260, maxHeight: 340 }} onClick={() => a.image_url && setImgModalOpen(true)}>
         {a.image_url ? (
           <img
-            src={`http://localhost:5000${a.image_url}`}
+            src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${a.image_url}`}
+            onError={e => { e.target.onerror = null; e.target.src = '/default-achievement.png'; }}
             alt={a.title}
             className="w-full h-full object-contain group-hover:opacity-80 transition"
             style={{ maxHeight: 320, maxWidth: '100%' }}
@@ -560,7 +561,7 @@ const AchievementCard = ({ achievement: a, user, onEdit, onDelete, featured }) =
           </div>
         )}
         {/* Modal for full image */}
-        <ImageModal src={`http://localhost:5000${a.image_url}`} alt={a.title} open={imgModalOpen} onClose={() => setImgModalOpen(false)} />
+        <ImageModal src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${a.image_url}`} alt={a.title} open={imgModalOpen} onClose={() => setImgModalOpen(false)} />
       </div>
       {/* Card Content */}
       <div className="flex flex-col flex-1 px-4 pt-3 pb-2">
