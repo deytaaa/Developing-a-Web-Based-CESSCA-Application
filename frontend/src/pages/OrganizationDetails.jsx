@@ -712,24 +712,23 @@ const OrganizationDetails = () => {
                 {officers.filter(o => o.status === 'active').map((officer) => (
                   <div key={officer.officer_id} className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg">
                     {officer.profile_picture ? (
-                      <img 
-                        src={`http://localhost:5000${officer.profile_picture}`}
+                      <img
+                        src={officer.profile_picture.startsWith('http')
+                          ? officer.profile_picture
+                          : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${officer.profile_picture}`}
                         alt={`${officer.first_name} ${officer.last_name}`}
                         className="w-12 h-12 rounded-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.nextElementSibling.style.display = 'flex';
-                        }}
+                        onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
                       />
-                    ) : null}
-                    <div 
-                      className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center"
-                      style={{display: officer.profile_picture ? 'none' : 'flex'}}
-                    >
-                      <span className="text-green-600 font-bold text-lg">
-                        {officer.first_name?.[0]}{officer.last_name?.[0]}
-                      </span>
-                    </div>
+                    ) : (
+                      <div
+                        className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center"
+                      >
+                        <span className="text-green-600 font-bold text-lg">
+                          {officer.first_name?.[0]}{officer.last_name?.[0]}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900">
                         {officer.first_name} {officer.last_name}
