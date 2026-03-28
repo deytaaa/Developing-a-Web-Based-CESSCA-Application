@@ -1,3 +1,9 @@
+// Helper to get absolute image URL
+const getImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  return `${API_BASE}${url}`;
+};
 import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import ptcLogo from '../assets/images/logo-ptc.png';
@@ -268,34 +274,33 @@ const About = () => {
   const certificates = aboutContent.certificates || [];
 
   useEffect(() => {
-    const stored = localStorage.getItem(ABOUT_STORAGE_KEY);
-    setAboutContent(buildAboutContentFromStorage(stored));
+      const stored = localStorage.getItem(ABOUT_STORAGE_KEY) || null;
+      setAboutContent(buildAboutContentFromStorage(stored));
   }, []);
 
   const handleSave = () => {
-    localStorage.setItem(ABOUT_STORAGE_KEY, JSON.stringify(aboutContent));
+    localStorage.setItem(ABOUT_STORAGE_KEY, JSON.stringify(aboutContent || {}));
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    const stored = localStorage.getItem(ABOUT_STORAGE_KEY);
+    const stored = localStorage.getItem(ABOUT_STORAGE_KEY) || null;
     setAboutContent(buildAboutContentFromStorage(stored));
     setIsEditing(false);
   };
 
   const handleAdminFieldChange = (index, field, value) => {
-    setAboutContent((prev) => ({
-      ...prev,
-      administration: prev.administration.map((admin, i) =>
+    setAboutContent((prev) => {
+      const updatedAdmin = prev.administration.map((admin, i) =>
         i === index ? { ...admin, [field]: value } : admin
-      ),
-    }));
+      );
+      return { ...prev, administration: updatedAdmin };
+    });
   };
 
   const handleFormerAdminFieldChange = (index, field, value) => {
-    setAboutContent((prev) => ({
-      ...prev,
-      formerAdministration: prev.formerAdministration.map((admin, i) =>
+    setAboutContent((prev) => {
+      const updatedFormerAdmin = prev.formerAdministration.map((admin, i) =>
         i === index
           ? {
               ...admin,
@@ -303,8 +308,9 @@ const About = () => {
               ...(field === 'name' ? { initials: buildInitials(value) } : {}),
             }
           : admin
-      ),
-    }));
+      );
+      return { ...prev, formerAdministration: updatedFormerAdmin };
+    });
   };
 
   const handleAddFormerAdministrators = (count = 1) => {
@@ -325,14 +331,14 @@ const About = () => {
   };
 
   const handleBoardMemberFieldChange = (index, field, value) => {
-    setAboutContent((prev) => ({
-      ...prev,
-      boardOfTrustees: prev.boardOfTrustees.map((m, i) =>
+    setAboutContent((prev) => {
+      const updatedBoardMembers = prev.boardOfTrustees.map((m, i) =>
         i === index
           ? { ...m, [field]: value, ...(field === 'name' ? { initials: buildInitials(value) } : {}) }
           : m
-      ),
-    }));
+      );
+      return { ...prev, boardOfTrustees: updatedBoardMembers };
+    });
   };
 
   const handleAddBoardMember = () => {
@@ -568,7 +574,7 @@ const About = () => {
                   <div className="bg-white/10 border border-white/40 rounded-lg p-4 backdrop-blur-sm max-w-sm">
                     {president.image_url ? (
                       <img
-                        src={president.image_url}
+                        src={getImageUrl(president.image_url)}
                         alt={president.name}
                         className="w-full h-auto max-h-[32rem] object-contain rounded-md border border-white/40"
                       />
@@ -600,12 +606,27 @@ const About = () => {
                           onChange={(e) => handleAdminFieldChange(0, 'term', e.target.value)}
                           className="w-full text-sm text-gray-700 border border-gray-300 rounded-md px-2 py-1"
                         />
+                        {/* President photo upload */}
                         <input
-                          type="text"
-                          value={president.image_url || ''}
-                          onChange={(e) => handleAdminFieldChange(0, 'image_url', e.target.value)}
-                          placeholder="President photo URL"
+                          type="file"
+                          accept="image/*"
                           className="w-full text-sm text-gray-700 border border-gray-300 rounded-md px-2 py-1"
+                          onChange={async (e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              const MAX_SIZE_MB = 10;
+                              if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+                                alert('File is too large. Maximum size is 10MB.');
+                                return;
+                              }
+                              try {
+                                const url = await uploadAboutImage(file);
+                                handleAdminFieldChange(0, 'image_url', url);
+                              } catch (err) {
+                                alert('Image upload failed: ' + err.message);
+                              }
+                            }
+                          }}
                         />
                         <textarea
                           rows={3}
@@ -908,11 +929,38 @@ const AdminCard = ({ admin, isEditing, onFieldChange, getSetting }) => (
   </div>
 );
 
+
+// Helper for uploading images
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+async function uploadAboutImage(file) {
+  const formData = new FormData();
+  formData.append('image', file);
+  // Get JWT token from localStorage (or wherever you store it)
+  const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('Not authenticated: No token found. Please log in again.');
+  }
+  try {
+    const res = await fetch(`${API_BASE}/api/about/upload`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'Upload failed');
+    return data.imageUrl;
+  } catch (err) {
+    throw err;
+  }
+}
+
 const FormerAdminCard = ({ admin, isEditing, onFieldChange, onRemove }) => (
   <div className="bg-slate-800/70 border border-slate-600 rounded-lg overflow-hidden">
     {admin.image_url ? (
       <img
-        src={admin.image_url}
+        src={getImageUrl(admin.image_url)}
         alt={admin.name}
         className="w-full h-auto object-contain"
       />
@@ -955,12 +1003,22 @@ const FormerAdminCard = ({ admin, isEditing, onFieldChange, onRemove }) => (
             className="w-full text-xs text-gray-700 border border-gray-300 rounded px-2 py-1"
             placeholder="Term"
           />
+          {/* Image upload */}
           <input
-            type="text"
-            value={admin.image_url || ''}
-            onChange={(e) => onFieldChange('image_url', e.target.value)}
+            type="file"
+            accept="image/*"
             className="w-full text-xs text-gray-700 border border-gray-300 rounded px-2 py-1"
-            placeholder="Profile photo URL"
+            onChange={async (e) => {
+              const file = e.target.files[0];
+              if (file) {
+                try {
+                  const url = await uploadAboutImage(file);
+                  onFieldChange('image_url', url);
+                } catch (err) {
+                  alert('Image upload failed: ' + err.message);
+                }
+              }
+            }}
           />
           <textarea
             rows={2}
@@ -985,11 +1043,12 @@ const FormerAdminCard = ({ admin, isEditing, onFieldChange, onRemove }) => (
 export default About;
 
 // ─── Board of Trustees Member Card ───────────────────────────────────────────
+
 const BotMemberCard = ({ member, isEditing, onFieldChange, onRemove }) => (
   <div className="flex flex-col items-center text-center" style={{ width: '10rem' }}>
     {member.image_url ? (
       <div className="w-32 h-32 rounded-full border-4 border-white shadow-xl overflow-hidden bg-gray-300">
-        <img src={member.image_url} alt={member.name} className="w-full h-full object-cover" />
+        <img src={getImageUrl(member.image_url)} alt={member.name} className="w-full h-full object-cover" />
       </div>
     ) : (
       <div className="w-32 h-32 rounded-full border-4 border-white shadow-xl bg-gray-500 flex items-center justify-center text-white font-bold text-3xl">
@@ -1017,11 +1076,22 @@ const BotMemberCard = ({ member, isEditing, onFieldChange, onRemove }) => (
           className="w-full text-[11px] text-gray-800 border border-gray-300 rounded px-1 py-0.5 text-center"
           placeholder="Title"
         />
+        {/* Image upload */}
         <input
-          value={member.image_url || ''}
-          onChange={(e) => onFieldChange('image_url', e.target.value)}
+          type="file"
+          accept="image/*"
           className="w-full text-[11px] text-gray-800 border border-gray-300 rounded px-1 py-0.5 text-center"
-          placeholder="Photo URL"
+          onChange={async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+              try {
+                const url = await uploadAboutImage(file);
+                onFieldChange('image_url', url);
+              } catch (err) {
+                alert('Image upload failed: ' + err.message);
+              }
+            }
+          }}
         />
       </div>
     ) : (
@@ -1034,6 +1104,7 @@ const BotMemberCard = ({ member, isEditing, onFieldChange, onRemove }) => (
 );
 
 // ─── Certificate Card ─────────────────────────────────────────────────────────
+
 const CertificateCard = ({ cert, isEditing, onFieldChange, onRemove, onCertificateClick }) => (
   <div 
     className="bg-green-50 border border-green-300 rounded-xl overflow-hidden flex flex-col cursor-pointer hover:shadow-lg transition-shadow"
@@ -1041,7 +1112,7 @@ const CertificateCard = ({ cert, isEditing, onFieldChange, onRemove, onCertifica
   >
     {cert.image_url ? (
       <div className="w-full h-96 bg-green-100 flex items-center justify-center overflow-hidden">
-        <img src={cert.image_url} alt={cert.caption || 'Certificate'} className="w-full h-full object-contain p-3" />
+        <img src={getImageUrl(cert.image_url)} alt={cert.caption || 'Certificate'} className="w-full h-full object-contain p-3" />
       </div>
     ) : (
       <div className="w-full h-96 bg-gray-200 flex flex-col items-center justify-center text-gray-600 gap-2 rounded-xl">
@@ -1060,11 +1131,22 @@ const CertificateCard = ({ cert, isEditing, onFieldChange, onRemove, onCertifica
             <FiTrash2 size={11} /> Remove
           </button>
         </div>
+        {/* Image upload */}
         <input
-          value={cert.image_url || ''}
-          onChange={(e) => onFieldChange('image_url', e.target.value)}
+          type="file"
+          accept="image/*"
           className="w-full text-xs text-gray-800 border border-gray-300 rounded px-2 py-1"
-          placeholder="Certificate image URL"
+          onChange={async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+              try {
+                const url = await uploadAboutImage(file);
+                onFieldChange('image_url', url);
+              } catch (err) {
+                alert('Image upload failed: ' + err.message);
+              }
+            }
+          }}
         />
         <input
           value={cert.caption || ''}
