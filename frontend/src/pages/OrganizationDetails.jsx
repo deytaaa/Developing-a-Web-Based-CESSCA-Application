@@ -793,13 +793,15 @@ const OrganizationDetails = () => {
                             <div className="flex items-center">
                               {member.profile_picture ? (
                                 <img
-                                  src={member.profile_picture.startsWith('http')
-                                    ? member.profile_picture
-                                    : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${member.profile_picture}`}
+                                  src={`http://localhost:5000${member.profile_picture}`}
                                   alt={`${member.first_name || ''} ${member.last_name || ''}`}
                                   className="w-8 h-8 rounded-full object-cover mr-3"
-                                  onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
+                                 onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextElementSibling.style.display = 'flex';
+                                }}
                                 />
+                              
                               ) : (
                                 <span className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3 text-green-600 font-semibold text-sm">
                                   {(member.first_name?.[0] || '')}{(member.last_name?.[0] || '')}

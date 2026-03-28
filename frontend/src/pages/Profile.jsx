@@ -175,8 +175,7 @@ const Profile = () => {
     if (user?.profile?.profile_picture) {
       // Add timestamp to force refresh after upload
       const timestamp = new Date().getTime();
-      const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || '';
-      return `${backendUrl}${user.profile.profile_picture}?t=${timestamp}`;
+      return `http://localhost:5000${user.profile.profile_picture}?t=${timestamp}`;
     }
     return null;
   };

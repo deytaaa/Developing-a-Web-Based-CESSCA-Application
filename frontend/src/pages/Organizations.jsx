@@ -95,8 +95,7 @@ const Organizations = () => {
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-24 h-24 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img
-                      src={getLogoUrl(org.logo_url)}
-                      onError={e => { e.target.onerror = null; e.target.src = '/default-org.png'; }}
+                      src={`http://localhost:5000${org.logo_url}`} 
                       alt={org.org_name}
                       className="w-full h-full object-cover"
                     />
