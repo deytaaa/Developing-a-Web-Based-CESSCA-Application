@@ -3,6 +3,8 @@ import Layout from '../components/Layout';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 import { sportsService } from '../services/sportsService';
+import sportsHeroBg from '../assets/images/loginbg.jpg';
+
 import { useAuth } from '../contexts/AuthContext';
 import heroBg from '../assets/images/artsbanner.png';
 import { FiImage, FiUpload, FiX, FiStar, FiCalendar, FiTag, FiUser, FiMaximize2, FiTrash2, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
@@ -245,33 +247,42 @@ const Gallery = () => {
     <Layout>
       <div className="space-y-6">
         {/* Hero Banner */}
-        <div className="relative rounded-2xl overflow-hidden shadow-lg min-h-[260px] flex items-center justify-center bg-gradient-to-r from-green-700 to-green-900">
-          <img
-            src={heroBg}
-            alt="Arts, Culture, and Sports Office Banner"
-            className="absolute inset-0 w-full h-full object-cover opacity-60"
-            draggable={false}
-            style={{ pointerEvents: 'none' }}
-          />
-          <div className="relative z-10 p-8 md:p-16 flex flex-col items-start">
-            <h1 className="text-4xl md:text-6xl font-extrabold leading-tight text-yellow-300 drop-shadow-lg">
-              Arts, Culture,
-              <span className="block text-white">and Sports Office</span>
-            </h1>
-            <p className="text-green-100 mt-4 text-sm md:text-base max-w-xl">
-              Gallery of campus events, performances, competitions, and student achievements.
-            </p>
-            {canUpload && (
-              <Button
-                variant="primary"
-                onClick={() => setShowUploadModal(true)}
-                className="mt-5 !bg-yellow-400 hover:!bg-yellow-300 !text-green-950 border-0"
-              >
-                <FiUpload className="mr-2" />
-                Upload Photos
-              </Button>
-            )}
+        <div
+          className="relative rounded-2xl overflow-hidden h-[20rem] md:h-[23rem] border border-green-900"
+          style={{
+            backgroundImage: `linear-gradient(115deg, rgba(5, 74, 26, 0.88) 0%, rgba(0, 108, 27, 0.8) 52%, rgba(7, 64, 21, 0.88) 100%), url(${sportsHeroBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_40%,rgba(250,204,21,0.2),transparent_38%),radial-gradient(circle_at_78%_60%,rgba(34,197,94,0.22),transparent_40%)]" />
+
+          <div className="relative z-10 h-full flex items-center px-6 md:px-10">
+            <div className="max-w-2xl">
+              <p className="text-yellow-300 font-semibold tracking-wider uppercase text-xs md:text-sm mb-3">
+                PTC CESSCA
+              </p>
+              <h1 className="text-4xl md:text-6xl font-extrabold leading-tight text-yellow-300 drop-shadow-lg">
+                Arts, Culture,
+                <span className="block text-white">and Sports Office</span>
+              </h1>
+              <p className="text-green-100 mt-4 text-sm md:text-base max-w-xl">
+                Gallery of campus events, performances, competitions, and student achievements.
+              </p>
+
+              {canUpload && (
+                <Button
+                  variant="primary"
+                  onClick={() => setShowUploadModal(true)}
+                  className="mt-5 !bg-yellow-400 hover:!bg-yellow-300 !text-green-950 border-0"
+                >
+                  <FiUpload className="mr-2" />
+                  Upload Photos
+                </Button>
+              )}
+            </div>
           </div>
+
           <div className="absolute right-6 top-7 hidden md:flex gap-3 opacity-80">
             <span className="w-7 h-11 border-2 border-yellow-400 -skew-x-[30deg]" />
             <span className="w-7 h-11 border-2 border-yellow-400 -skew-x-[30deg]" />
@@ -337,7 +348,8 @@ const Gallery = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {gallery.map((album) => (
+            {gallery.map((album) => {
+              return (
               <div key={album.album_id} className="group relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
                 <div className="aspect-square overflow-hidden bg-gray-100 relative">
                   <img
@@ -352,6 +364,30 @@ const Gallery = () => {
                     <FiImage />
                     {album.photo_count}
                   </div>
+                  {/* Delete icon for authorized users */}
+                  {canUpload && (
+                    <button
+                      onClick={async e => {
+                        e.stopPropagation();
+                        // Fetch album photos and find the cover photo by image path
+                        try {
+                          const data = await sportsService.getAlbumPhotos(album.album_id);
+                          const coverPhoto = data.photos.find(photo => photo.image_url === album.cover_image);
+                          if (coverPhoto && coverPhoto.gallery_id) {
+                            handleDeletePhoto(coverPhoto.gallery_id);
+                          } else {
+                            alert('Could not find cover photo to delete.');
+                          }
+                        } catch (err) {
+                          alert('Failed to fetch album photos for deletion.');
+                        }
+                      }}
+                      className="absolute bottom-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 shadow z-10"
+                      title="Delete Album Cover Photo"
+                    >
+                      <FiTrash2 />
+                    </button>
+                  )}
                 </div>
                 <div className="p-3">
                   <div className="flex items-start justify-between mb-2">
@@ -399,7 +435,9 @@ const Gallery = () => {
                   </div>
                 </div>
               </div>
-            ))}
+              
+            
+            )})}
           </div>
         )}
 

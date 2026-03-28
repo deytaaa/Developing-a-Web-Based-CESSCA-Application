@@ -523,14 +523,13 @@ const AchievementCard = ({ achievement: a, user, onEdit, onDelete, featured }) =
   return (
     <div className={`bg-white rounded-xl shadow-md flex flex-col overflow-hidden border border-gray-100 relative ${featured ? 'ring-2 ring-yellow-400 shadow-yellow-100' : ''}`}> 
       {/* Image at top */}
-      <div className="relative w-full bg-white flex items-center justify-center cursor-pointer group" style={{ aspectRatio: '4/5', minHeight: 260, maxHeight: 340 }} onClick={() => a.image_url && setImgModalOpen(true)}>
+      <div className="relative w-full bg-gray-100 flex items-center justify-center cursor-pointer group aspect-square overflow-hidden" onClick={() => a.image_url && setImgModalOpen(true)}>
         {a.image_url ? (
           <img
             src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${a.image_url}`}
             onError={e => { e.target.onerror = null; e.target.src = '/default-achievement.png'; }}
             alt={a.title}
-            className="w-full h-full object-contain group-hover:opacity-80 transition"
-            style={{ maxHeight: 320, maxWidth: '100%' }}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 group-hover:opacity-80"
           />
         ) : (
           <span className="absolute inset-0 flex items-center justify-center text-5xl text-gray-300">{CATEGORY_ICONS[a.category]}</span>

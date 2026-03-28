@@ -224,6 +224,7 @@ router.delete('/:id', auth, roleCheck('admin'), async (req, res) => {
     }
 });
 
+
 // Get organization members
 router.get('/:id/members', auth, async (req, res) => {
     try {

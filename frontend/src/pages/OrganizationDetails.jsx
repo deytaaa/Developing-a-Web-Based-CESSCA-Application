@@ -1,11 +1,4 @@
-// Helper to get the correct logo URL
-const getLogoUrl = (logoPath) => {
-  if (!logoPath) return '/default-org.png';
-  if (logoPath.startsWith('http')) return logoPath;
-  // Always use the backend's public URL, never localhost
-  return `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${logoPath}`;
-};
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Card from '../components/Card';
@@ -15,6 +8,14 @@ import Modal from '../components/Modal';
 import { organizationService } from '../services/organizationService';
 import { useAuth } from '../contexts/AuthContext';
 import { FiUsers, FiCalendar, FiMapPin, FiClock, FiAward, FiUserPlus, FiUserMinus, FiArrowLeft, FiTarget, FiHeart, FiPlus, FiX, FiTrash2, FiCheck, FiEdit, FiUpload, FiImage, FiCamera, FiMaximize2, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+
+// Helper to get the correct logo URL
+const getLogoUrl = (logoPath) => {
+  if (!logoPath) return '/default-org.png';
+  if (logoPath.startsWith('http')) return logoPath;
+  // Always use the backend's public URL, never localhost
+  return `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${logoPath}`;
+};
 
 const OrganizationDetails = () => {
   const { id } = useParams();
@@ -30,6 +31,8 @@ const OrganizationDetails = () => {
   const [isOfficer, setIsOfficer] = useState(false);
   const [activeTab, setActiveTab] = useState('info');
   const [error, setError] = useState(null);
+
+  // ...existing code...
   
   // Officer management state
   const [showOfficerModal, setShowOfficerModal] = useState(false);
@@ -1003,6 +1006,18 @@ const OrganizationDetails = () => {
                                         <FiMaximize2 className="text-sm" />
                                       </div>
                                     </div>
+                                    {/* Delete icon for authorized users */}
+                                    {(isOfficer || user?.role === 'cessca_staff' || user?.role === 'admin') && (
+                                      <div className="absolute bottom-2 right-2 flex gap-2 z-10">
+                                        <button
+                                          onClick={e => { e.stopPropagation(); handleDeleteGalleryPhoto(coverPhoto.gallery_id); }}
+                                          className="p-2 bg-red-600 text-white rounded-full hover:bg-red-700 shadow"
+                                          title="Delete Album Cover Photo"
+                                        >
+                                          <FiTrash2 />
+                                        </button>
+                                      </div>
+                                    )}
                                   </div>
                                   <div className="p-4">
                                     <h4 className="font-semibold text-gray-900 mb-2 line-clamp-1">{albumName}</h4>
@@ -1038,7 +1053,7 @@ const OrganizationDetails = () => {
                                   </div>
                                 </div>
                               );
-                            })}
+                          })}
                           </div>
                         </div>
                       )}
@@ -1063,7 +1078,7 @@ const OrganizationDetails = () => {
                                     alt={photo.title}
                                     className="w-full h-64 object-cover"
                                   />
-                                  <div className="absolute top-2 right-2">
+                                  <div className="absolute top-2 right-2 flex gap-2 z-10">
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
@@ -1074,6 +1089,15 @@ const OrganizationDetails = () => {
                                     >
                                       <FiMaximize2 />
                                     </button>
+                                    {(isOfficer || user?.role === 'cessca_staff' || user?.role === 'admin') && (
+                                      <button
+                                        onClick={e => { e.stopPropagation(); handleDeleteGalleryPhoto(photo.gallery_id); }}
+                                        className="p-2 bg-red-600 text-white rounded-full hover:bg-red-700 shadow"
+                                        title="Delete Photo"
+                                      >
+                                        <FiTrash2 />
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
                                 <div className="p-4">

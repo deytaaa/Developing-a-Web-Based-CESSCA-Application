@@ -248,10 +248,15 @@ router.get('/:id/achievements', auth, async (req, res) => {
 });
 
 // Add achievement
-router.post('/:id/achievements', auth, roleCheck('alumni'), [
+router.post(
+    '/:id/achievements',
+    auth,
+    roleCheck('alumni', 'admin', 'cessca_staff'),
+    [
     body('achievementType').isIn(['academic', 'professional', 'award', 'publication', 'certification', 'other']),
     body('title').notEmpty().trim()
-], async (req, res) => {
+    ],
+    async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -298,11 +303,16 @@ router.post('/:id/achievements', auth, roleCheck('alumni'), [
 });
 
 // Add additional education
-router.post('/:id/education', auth, roleCheck('alumni'), [
+router.post(
+    '/:id/education',
+    auth,
+    roleCheck('alumni', 'admin', 'cessca_staff'),
+    [
     body('degreeLevel').isIn(['masteral', 'doctoral', 'certificate', 'diploma']),
     body('degreeProgram').notEmpty().trim(),
     body('institution').notEmpty().trim()
-], async (req, res) => {
+    ],
+    async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -322,7 +332,7 @@ router.post('/:id/education', auth, roleCheck('alumni'), [
             });
         }
 
-        // Verify ownership or admin
+        // Verify ownership or admin/staff
         if (req.user.role !== 'admin' && req.user.role !== 'cessca_staff') {
             if (alumniCheck[0].user_id !== req.user.userId) {
                 return res.status(403).json({ 
