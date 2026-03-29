@@ -54,8 +54,7 @@ router.post('/cases', auth, roleCheck('student', 'officer'), [
 // Get cases (filtered by role)
 router.get('/cases', auth, roleCheck('student', 'officer', 'cessca_staff', 'admin'), async (req, res) => {
     try {
-        const { status, caseType, priority } = req.query;
-        
+        const { status, caseType, priority, date, page = 1, limit = 10 } = req.query;
         let query = `
             SELECT dc.*, 
                    c.email as complainant_email, cup.first_name as complainant_first_name, 
@@ -97,9 +96,47 @@ router.get('/cases', auth, roleCheck('student', 'officer', 'cessca_staff', 'admi
             query += ' AND dc.priority = ?';
             params.push(priority);
         }
+        if (date) {
+            query += ' AND DATE(dc.created_at) = ?';
+            params.push(date);
+        }
 
         query += ' ORDER BY dc.created_at DESC';
 
+        // Pagination
+        const lim = parseInt(limit, 10) || 10;
+        const offset = ((parseInt(page, 10) || 1) - 1) * lim;
+        query += ' LIMIT ? OFFSET ?';
+        params.push(lim, offset);
+
+        // Get total count for pagination
+        let countQuery = 'SELECT COUNT(*) as total FROM discipline_cases dc WHERE 1=1';
+        let countParams = [];
+        if (req.user.role === 'student' || req.user.role === 'officer') {
+            countQuery += ' AND (dc.complainant_id = ? OR dc.respondent_id = ?)';
+            countParams.push(req.user.userId, req.user.userId);
+        } else if (req.user.role === 'cessca_staff') {
+            countQuery += ' AND (dc.assigned_to = ? OR dc.assigned_to IS NULL)';
+            countParams.push(req.user.userId);
+        }
+        if (status) {
+            countQuery += ' AND dc.status = ?';
+            countParams.push(status);
+        }
+        if (caseType) {
+            countQuery += ' AND dc.case_type = ?';
+            countParams.push(caseType);
+        }
+        if (priority) {
+            countQuery += ' AND dc.priority = ?';
+            countParams.push(priority);
+        }
+        if (date) {
+            countQuery += ' AND DATE(dc.created_at) = ?';
+            countParams.push(date);
+        }
+
+        const [[{ total }]] = await pool.query(countQuery, countParams);
         const [cases] = await pool.query(query, params);
 
         // Hide sensitive info for students
@@ -115,7 +152,7 @@ router.get('/cases', auth, roleCheck('student', 'officer', 'cessca_staff', 'admi
 
         res.json({
             success: true,
-            count: cases.length,
+            count: total,
             cases
         });
 
