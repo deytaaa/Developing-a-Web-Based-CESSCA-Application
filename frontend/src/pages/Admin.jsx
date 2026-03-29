@@ -299,7 +299,15 @@ const Admin = () => {
   const handleCreateAnnouncement = async (e) => {
     e.preventDefault();
     try {
-      await adminService.createAnnouncement(announcementForm);
+      // Map form fields to backend's expected camelCase
+      const payload = {
+        title: announcementForm.title,
+        content: announcementForm.content,
+        announcementType: announcementForm.announcement_type,
+        targetAudience: announcementForm.target_audience,
+        priority: announcementForm.priority,
+      };
+      await adminService.createAnnouncement(payload);
       alert('Announcement created successfully!');
       setShowAnnouncementModal(false);
       setAnnouncementForm({
