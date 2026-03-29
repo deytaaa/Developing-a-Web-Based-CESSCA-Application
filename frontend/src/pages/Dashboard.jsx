@@ -7,6 +7,7 @@ import Badge from '../components/Badge';
 import { analyticsService } from '../services/analyticsService';
 import { achievementService } from '../services/achievementService';
 import { organizationService } from '../services/organizationService';
+import { adminService } from '../services/adminService';
 import { useAuth } from '../contexts/AuthContext';
 import {
   FiUsers,
@@ -89,29 +90,42 @@ const OfficerSummaryCards = () => {
   );
 };
 
+
 const Dashboard = () => {
   const { user } = useAuth();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [announcements, setAnnouncements] = useState([]);
+  const [annLoading, setAnnLoading] = useState(true);
 
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-        if (['cessca_staff', 'admin', 'officer'].includes(user.role)) {
+        if (["cessca_staff", "admin", "officer"].includes(user.role)) {
           const response = await analyticsService.getDashboard();
           setDashboard(response.dashboard);
-        } else if (user.role === 'student') {
+        } else if (user.role === "student") {
           const response = await analyticsService.getStudentDashboard();
           setDashboard(response.dashboard);
         }
       } catch (error) {
-        console.error('Failed to load dashboard:', error);
+        console.error("Failed to load dashboard:", error);
       } finally {
         setLoading(false);
       }
     };
-
     loadDashboard();
+  }, [user.role]);
+
+  useEffect(() => {
+    // Only fetch announcements for student/officer
+    if (["student", "officer"].includes(user.role)) {
+      setAnnLoading(true);
+      adminService.getAnnouncements({ limit: 5, sort: "desc" })
+        .then((res) => setAnnouncements(res.announcements || []))
+        .catch(() => setAnnouncements([]))
+        .finally(() => setAnnLoading(false));
+    }
   }, [user.role]);
 
   if (loading) {
@@ -123,6 +137,17 @@ const Dashboard = () => {
   }
 
   const upcomingTotal = (dashboard?.upcomingActivities?.length || 0) + (dashboard?.upcomingSports?.length || 0);
+
+  // Announcement Section (for student/officer)
+  const showAnnouncementSection = ["student", "officer"].includes(user.role);
+  let urgentAnnouncement = null;
+  let regularAnnouncements = [];
+  if (showAnnouncementSection && announcements.length > 0) {
+    urgentAnnouncement = announcements.find(a => a.announcement_type === "urgent" || a.announcementType === "urgent");
+    regularAnnouncements = announcements
+      .filter(a => (a.announcement_type || a.announcementType) !== "urgent")
+      .slice(0, 3);
+  }
 
   return (
     <Layout>
@@ -223,6 +248,42 @@ const Dashboard = () => {
         {user.role === 'officer' && (
           <>
             <OfficerSummaryCards />
+            {showAnnouncementSection && (
+              <div className="space-y-4">
+                {/* Urgent Banner */}
+                {annLoading ? (
+                  <LoadingSpinner size="sm" />
+                ) : urgentAnnouncement ? (
+                  <div className="w-full rounded-lg bg-red-50 border border-red-200 px-6 py-3 flex items-center mb-2">
+                    <FiAlertCircle className="text-red-500 mr-3 text-xl" />
+                    <span className="font-semibold text-red-700 text-sm">{urgentAnnouncement.title}</span>
+                    <span className="ml-2 text-xs text-red-500">{urgentAnnouncement.content}</span>
+                    {urgentAnnouncement.expires_at && (
+                      <span className="ml-4 text-xs text-gray-500">Expires: {new Date(urgentAnnouncement.expires_at).toLocaleString()}</span>
+                    )}
+                  </div>
+                ) : null}
+                {/* Announcement Cards */}
+                {regularAnnouncements.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {regularAnnouncements.map((a) => (
+                      <Card key={a.announcement_id} className="!p-4">
+                        <div className="flex items-center mb-2">
+                          <FiAlertCircle className="text-primary-500 mr-2" />
+                          <span className="font-semibold text-gray-900">{a.title}</span>
+                        </div>
+                        <div className="text-sm text-gray-700 mb-1">{a.content}</div>
+                        <div className="flex items-center text-xs text-gray-500">
+                          {a.created_at && (
+                            <span>{new Date(a.created_at).toLocaleDateString()}</span>
+                          )}
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <Card title="Quick Access">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <Link to="/organizations" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
@@ -273,6 +334,44 @@ const Dashboard = () => {
                 </div>
               </Card>
             </div>
+
+            {/* Announcements Section */}
+            {showAnnouncementSection && (
+              <div className="space-y-4">
+                {/* Urgent Banner */}
+                {annLoading ? (
+                  <LoadingSpinner size="sm" />
+                ) : urgentAnnouncement ? (
+                  <div className="w-full rounded-lg bg-red-50 border border-red-200 px-6 py-3 flex items-center mb-2">
+                    <FiAlertCircle className="text-red-500 mr-3 text-xl" />
+                    <span className="font-semibold text-red-700 text-sm">{urgentAnnouncement.title}</span>
+                    <span className="ml-2 text-xs text-red-500">{urgentAnnouncement.content}</span>
+                    {urgentAnnouncement.expires_at && (
+                      <span className="ml-4 text-xs text-gray-500">Expires: {new Date(urgentAnnouncement.expires_at).toLocaleString()}</span>
+                    )}
+                  </div>
+                ) : null}
+                {/* Announcement Cards */}
+                {regularAnnouncements.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {regularAnnouncements.map((a) => (
+                      <Card key={a.announcement_id} className="!p-4">
+                        <div className="flex items-center mb-2">
+                          <FiAlertCircle className="text-primary-500 mr-2" />
+                          <span className="font-semibold text-gray-900">{a.title}</span>
+                        </div>
+                        <div className="text-sm text-gray-700 mb-1">{a.content}</div>
+                        <div className="flex items-center text-xs text-gray-500">
+                          {a.created_at && (
+                            <span>{new Date(a.created_at).toLocaleDateString()}</span>
+                          )}
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {dashboard.disciplineCases?.length > 0 && (
               <Card title="Recent Discipline & Consultation Cases">
