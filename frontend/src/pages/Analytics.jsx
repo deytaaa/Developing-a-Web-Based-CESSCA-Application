@@ -55,9 +55,6 @@ const Analytics = () => {
               <option value="month">This Month</option>
               <option value="week">This Week</option>
             </select>
-            <Button variant="outline">
-              <FiDownload className="mr-2" /> Export Report
-            </Button>
           </div>
         </div>
 
