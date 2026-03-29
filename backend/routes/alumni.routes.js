@@ -54,11 +54,11 @@ router.get('/', auth, roleCheck('alumni', 'cessca_staff', 'admin'), async (req, 
 });
 
 // Get current user's alumni profile (MUST come before /:id route)
-router.get('/profile', auth, roleCheck('alumni'), async (req, res) => {
+router.get('/profile', auth, roleCheck('alumni' , 'cessca_staff', 'alumni'), async (req, res) => {
     try {
         const [alumni] = await pool.query(
-            `SELECT ap.*, u.email, up.first_name, up.middle_name, up.last_name, 
-                    up.contact_number, up.profile_picture, up.date_of_birth, up.gender, up.address
+            `SELECT ap.*, ap.contact_number AS alumni_contact_number, u.email, up.first_name, up.middle_name, up.last_name, 
+                    up.profile_picture, up.date_of_birth, up.gender, up.address
              FROM users u
              JOIN user_profiles up ON u.user_id = up.user_id
              LEFT JOIN alumni_profiles ap ON u.user_id = ap.user_id
@@ -89,7 +89,7 @@ router.get('/profile', auth, roleCheck('alumni'), async (req, res) => {
 });
 
 // Create/Update alumni profile (MUST come before /:id route)
-router.post('/profile', auth, roleCheck('alumni'), [
+router.post('/profile', auth, roleCheck('alumni', 'cessca_staff', 'alumni'), [
     body('graduationYear').isInt({ min: 1990, max: 2030 }),
     body('degreeProgram').notEmpty().trim(),
     body('currentEmploymentStatus').isIn(['employed', 'self-employed', 'unemployed', 'studying'])
@@ -106,7 +106,23 @@ router.post('/profile', auth, roleCheck('alumni'), [
             contactEmail, contactNumber, linkedinProfile
         } = req.body;
 
+
         // Convert empty strings to null for optional fields
+        // Format employmentStartDate to 'YYYY-MM-DD' if provided
+        let formattedEmploymentStartDate = employmentStartDate || null;
+        if (employmentStartDate) {
+            try {
+                const d = new Date(employmentStartDate);
+                if (!isNaN(d.getTime())) {
+                    formattedEmploymentStartDate = d.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+                } else {
+                    formattedEmploymentStartDate = null;
+                }
+            } catch (e) {
+                formattedEmploymentStartDate = null;
+            }
+        }
+
         const sanitizedData = {
             graduationYear,
             degreeProgram,
@@ -114,7 +130,7 @@ router.post('/profile', auth, roleCheck('alumni'), [
             companyName: companyName || null,
             jobPosition: jobPosition || null,
             industry: industry || null,
-            employmentStartDate: employmentStartDate || null,
+            employmentStartDate: formattedEmploymentStartDate,
             currentAddress: currentAddress || null,
             permanentAddress: permanentAddress || null,
             contactEmail: contactEmail || null,
@@ -182,8 +198,8 @@ router.post('/profile', auth, roleCheck('alumni'), [
 router.get('/:id', auth, async (req, res) => {
     try {
         const [alumni] = await pool.query(
-            `SELECT ap.*, u.email, up.first_name, up.middle_name, up.last_name, 
-                    up.contact_number, up.profile_picture, up.date_of_birth, up.gender, up.address
+            `SELECT ap.*, ap.contact_number AS alumni_contact_number, u.email, up.first_name, up.middle_name, up.last_name, 
+                    up.profile_picture, up.date_of_birth, up.gender, up.address
              FROM alumni_profiles ap
              JOIN users u ON ap.user_id = u.user_id
              JOIN user_profiles up ON u.user_id = up.user_id

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
@@ -5,6 +6,8 @@ import Badge from '../components/Badge';
 import { alumniService } from '../services/alumniService';
 import { useAuth } from '../contexts/AuthContext';
 import { FiUser, FiMail, FiPhone, FiBriefcase, FiAward, FiCalendar, FiMapPin, FiArrowLeft, FiPlus, FiX, FiEdit, FiSave } from 'react-icons/fi';
+
+
 
 const AlumniProfile = () => {
   const { id } = useParams();
@@ -53,12 +56,20 @@ const AlumniProfile = () => {
     loadEducation();
   }, [id]);
 
+  // Helper to format date for input type="date"
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return '';
+    return d.toISOString().slice(0, 10);
+  };
+
   const loadAlumniProfile = async () => {
     try {
       setLoading(true);
       const data = await alumniService.getById(id);
       setAlumni(data);
-      // Populate form with current data
+      // Populate form with current data, robust mapping
       setProfileForm({
         graduationYear: data.graduation_year || '',
         degreeProgram: data.degree_program || '',
@@ -66,9 +77,9 @@ const AlumniProfile = () => {
         companyName: data.company_name || '',
         jobPosition: data.job_position || '',
         industry: data.industry || '',
-        employmentStartDate: data.employment_start_date || '',
-        contactEmail: data.contact_email || '',
-        contactNumber: data.contact_number || '',
+        employmentStartDate: formatDate(data.employment_start_date) || '',
+        contactEmail: data.contact_email || data.contactEmail || '',
+        contactNumber: data.contact_number || data.contactNumber || data['contact number'] || '',
         linkedinProfile: data.linkedin_profile || '',
         currentAddress: data.current_address || '',
         permanentAddress: data.permanent_address || ''
@@ -154,7 +165,8 @@ const AlumniProfile = () => {
   const isOwnProfile = currentUser && alumni && (
     currentUser.userId === alumni.user_id || 
     currentUser.role === 'admin' || 
-    currentUser.role === 'cessca_staff'
+    currentUser.role === 'cessca_staff' ||
+    currentUser.role === 'alumni'
   );
 
   const getEmploymentBadgeVariant = (status) => {
@@ -362,7 +374,7 @@ const AlumniProfile = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Employment Start Date</label>
                     <input
                       type="date"
-                      value={profileForm.employmentStartDate}
+                      value={formatDate(profileForm.employmentStartDate)}
                       onChange={(e) => setProfileForm({ ...profileForm, employmentStartDate: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-gray-900"
                     />
