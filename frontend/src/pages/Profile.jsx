@@ -1,3 +1,10 @@
+// Helper to format date for input type="date"
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return '';
+  return d.toISOString().slice(0, 10);
+};
 import { useState, useEffect, useRef } from 'react';
 import Layout from '../components/Layout';
 import Card from '../components/Card';
@@ -438,7 +445,7 @@ const Profile = () => {
                     type="date"
                     disabled={!editing}
                     className="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 disabled:bg-gray-100 disabled:text-gray-700"
-                    value={alumniData.employmentStartDate}
+                    value={formatDate(alumniData.employmentStartDate)}
                     onChange={(e) => setAlumniData({ ...alumniData, employmentStartDate: e.target.value })}
                   />
                 </div>

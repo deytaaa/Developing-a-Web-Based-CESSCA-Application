@@ -51,7 +51,7 @@ function App() {
             {/* Sports & Arts */}
             <Route path="/sports" element={<ProtectedRoute roles={['student', 'officer', 'cessca_staff', 'admin']}><Sports /></ProtectedRoute>} />
             <Route path="/sports/events/:id" element={<ProtectedRoute roles={['student', 'officer', 'cessca_staff', 'admin']}><EventDetails /></ProtectedRoute>} />
-            <Route path="/gallery" element={<ProtectedRoute roles={['student', 'officer', 'alumni', 'cessca_staff', 'admin']}><Gallery /></ProtectedRoute>} />
+            <Route path="/gallery" element={<ProtectedRoute roles={['student', 'officer', 'cessca_staff', 'admin']}><Gallery /></ProtectedRoute>} />
             
             {/* Analytics */}
             <Route path="/analytics" element={<ProtectedRoute roles={['cessca_staff', 'admin']}><Analytics /></ProtectedRoute>} />
