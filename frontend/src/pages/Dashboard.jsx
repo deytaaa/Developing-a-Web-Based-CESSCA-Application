@@ -4,6 +4,7 @@ import Layout from '../components/Layout';
 import Card from '../components/Card';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Badge from '../components/Badge';
+import artsBanner from '../assets/images/banner.jpg';
 import { analyticsService } from '../services/analyticsService';
 import { achievementService } from '../services/achievementService';
 import { organizationService } from '../services/organizationService';
@@ -149,13 +150,34 @@ const Dashboard = () => {
       .slice(0, 3);
   }
 
+  // Banner for student, officer, alumni
+  const showBanner = ["student", "officer", "alumni"].includes(user.role);
+  const bannerTitle = user.role === "student"
+    ? "Student Dashboard"
+    : user.role === "officer"
+    ? "Officer Dashboard"
+    : user.role === "alumni"
+    ? "Alumni Dashboard"
+    : "Dashboard";
+
   return (
     <Layout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="mt-1 text-gray-600">Welcome back, {user?.profile?.first_name}!</p>
-        </div>
+        {showBanner && (
+          <div
+            className="relative rounded-2xl overflow-hidden mb-2"
+            style={{ minHeight: 140, background: `url(${artsBanner}) center/cover, #166534` }}
+          >
+            <div className="absolute inset-0 bg-green-900 bg-opacity-70" />
+            <div className="relative z-10 px-8 py-8 flex flex-col justify-center h-full">
+              <div className="text-xs text-yellow-200 font-semibold mb-1">PTC CESSCA</div>
+              <h1 className="text-3xl md:text-4xl font-bold text-yellow-400 drop-shadow mb-1">
+                Welcome back, <span className="text-white">{user?.profile?.first_name}!</span>
+              </h1>
+              <div className="text-lg md:text-2xl font-semibold text-white drop-shadow mb-1">{bannerTitle}</div>
+            </div>
+          </div>
+        )}
 
         {dashboard && ['cessca_staff', 'admin'].includes(user.role) && (
           <>

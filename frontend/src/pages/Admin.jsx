@@ -991,7 +991,6 @@ const Admin = () => {
               <option value="all">All Users</option>
               <option value="students">Students Only</option>
               <option value="officers">Officers Only</option>
-              <option value="alumni">Alumni Only</option>
             </select>
           </div>
 
