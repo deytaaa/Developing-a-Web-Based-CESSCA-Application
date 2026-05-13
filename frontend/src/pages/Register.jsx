@@ -91,7 +91,6 @@ const Register = () => {
           </div>
           <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
           <p className="mt-2 text-sm font-semibold text-green-600">Join the CESSCA Portal - Pateros Technological College</p>
-          <div className="mt-1 h-1 w-24 bg-gradient-to-r from-green-500 via-gold-400 to-green-500 mx-auto rounded-full"></div>
         </div>
 
         {error && (
