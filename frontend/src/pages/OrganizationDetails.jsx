@@ -13,8 +13,14 @@ import { FiUsers, FiCalendar, FiMapPin, FiClock, FiAward, FiUserPlus, FiUserMinu
 const getLogoUrl = (logoPath) => {
   if (!logoPath) return '/default-org.png';
   if (logoPath.startsWith('http')) return logoPath;
-  // Always use the backend's public URL, never localhost
-  return `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${logoPath}`;
+  return `${import.meta.env.VITE_API_BASE || 'http://localhost:5000'}${logoPath}`;
+};
+
+// Helper to get the correct image URL
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+  if (imagePath.startsWith('http')) return imagePath;
+  return `${import.meta.env.VITE_API_BASE || 'http://localhost:5000'}${imagePath}`;
 };
 
 const OrganizationDetails = () => {
@@ -724,9 +730,7 @@ const OrganizationDetails = () => {
                   <div key={officer.officer_id} className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg">
                     {officer.profile_picture ? (
                       <img
-                        src={officer.profile_picture.startsWith('http')
-                          ? officer.profile_picture
-                          : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${officer.profile_picture}`}
+                        src={getImageUrl(officer.profile_picture)}
                         alt={`${officer.first_name} ${officer.last_name}`}
                         className="w-12 h-12 rounded-full object-cover"
                         onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
