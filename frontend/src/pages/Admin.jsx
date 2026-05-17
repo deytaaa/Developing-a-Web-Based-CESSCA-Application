@@ -70,7 +70,9 @@ const Admin = () => {
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
   const [showOrgModal, setShowOrgModal] = useState(false);
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [showEditUserModal, setShowEditUserModal] = useState(false);
   const [editingOrg, setEditingOrg] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
   const [announcementForm, setAnnouncementForm] = useState({
     title: '',
     content: '',
@@ -97,6 +99,11 @@ const Admin = () => {
     student_id: '',
     course: '',
     contact_number: '',
+  });
+  const [editUserForm, setEditUserForm] = useState({
+    role: 'student',
+    status: 'active',
+    password: '',
   });
 
   useEffect(() => {
@@ -270,6 +277,48 @@ const Admin = () => {
       loadUsers();
     } catch (error) {
       alert('Failed to delete user');
+    }
+  };
+
+  const handleEditUser = (user) => {
+    setEditingUser(user);
+    setEditUserForm({
+      role: user.role || 'student',
+      status: user.status || 'active',
+      password: '',
+    });
+    setShowEditUserModal(true);
+  };
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+
+    if (!editingUser) return;
+
+    try {
+      const roleChanged = editUserForm.role !== editingUser.role;
+      const statusChanged = editUserForm.status !== editingUser.status;
+      const passwordChanged = editUserForm.password.trim().length > 0;
+
+      if (roleChanged) {
+        await adminService.updateUserRole(editingUser.user_id, editUserForm.role);
+      }
+
+      if (statusChanged) {
+        await adminService.approveUser(editingUser.user_id, editUserForm.status);
+      }
+
+      if (passwordChanged) {
+        await adminService.updateUserPassword(editingUser.user_id, editUserForm.password);
+      }
+
+      alert('User updated successfully!');
+      setShowEditUserModal(false);
+      setEditingUser(null);
+      setEditUserForm({ role: 'student', status: 'active', password: '' });
+      loadUsers(usersPage, usersLimit);
+    } catch (error) {
+      alert(error.response?.data?.message || 'Failed to update user');
     }
   };
 
@@ -582,24 +631,36 @@ const Admin = () => {
                                   {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                  {user.user_id === currentUser.user_id ? (
-                                    <span
-                                      title="You cannot delete your own account"
-                                      className="inline-block"
-                                    >
-                                      <FiTrash2 style={{ color: '#ff0000', opacity: 0.6, cursor: 'not-allowed' }} />
-                                    </span>
-                                  ) : (
-                                    <span title="Delete user">
+                                  <div className="flex items-center gap-2">
+                                    <span title={user.user_id === currentUser.user_id ? 'You cannot edit your own account' : 'Edit user'}>
                                       <Button
-                                        variant="danger"
+                                        variant="outline"
                                         size="sm"
-                                        onClick={() => handleDeleteUser(user.user_id)}
+                                        onClick={() => handleEditUser(user)}
+                                        disabled={user.user_id === currentUser.user_id}
                                       >
-                                        <FiTrash2 />
+                                        <FiEdit />
                                       </Button>
                                     </span>
-                                  )}
+                                    {user.user_id === currentUser.user_id ? (
+                                      <span
+                                        title="You cannot delete your own account"
+                                        className="inline-block"
+                                      >
+                                        <FiTrash2 style={{ color: '#ff0000', opacity: 0.6, cursor: 'not-allowed' }} />
+                                      </span>
+                                    ) : (
+                                      <span title="Delete user">
+                                        <Button
+                                          variant="danger"
+                                          size="sm"
+                                          onClick={() => handleDeleteUser(user.user_id)}
+                                        >
+                                          <FiTrash2 />
+                                        </Button>
+                                      </span>
+                                    )}
+                                  </div>
                                 </td>
                               </tr>
                             ))}
@@ -1265,6 +1326,79 @@ const Admin = () => {
             </Button>
             <Button type="submit" variant="primary">
               Create User
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Edit User Modal */}
+      <Modal
+        isOpen={showEditUserModal}
+        onClose={() => setShowEditUserModal(false)}
+        title="Edit User"
+      >
+        <form onSubmit={handleUpdateUser} className="space-y-4">
+          <div className="rounded-lg bg-gray-50 border border-gray-200 p-4">
+            <p className="text-sm font-medium text-gray-900">
+              {editingUser?.first_name} {editingUser?.last_name}
+            </p>
+            <p className="text-xs text-gray-500">{editingUser?.email}</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Role <span className="text-red-500">*</span>
+            </label>
+            <select
+              required
+              className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              value={editUserForm.role}
+              onChange={(e) => setEditUserForm({ ...editUserForm, role: e.target.value })}
+            >
+              <option value="student">Student</option>
+              <option value="officer">Officer</option>
+              <option value="alumni">Alumni</option>
+              <option value="cessca_staff">CESSCA Staff</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Status <span className="text-red-500">*</span>
+            </label>
+            <select
+              required
+              className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              value={editUserForm.status}
+              onChange={(e) => setEditUserForm({ ...editUserForm, status: e.target.value })}
+            >
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              New Password
+            </label>
+            <input
+              type="password"
+              minLength={6}
+              className="block w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              value={editUserForm.password}
+              onChange={(e) => setEditUserForm({ ...editUserForm, password: e.target.value })}
+              placeholder="Leave blank to keep current password"
+            />
+            <p className="text-xs text-gray-500 mt-1">Leave blank if you do not want to change the password.</p>
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => setShowEditUserModal(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary">
+              Save Changes
             </Button>
           </div>
         </form>

@@ -244,6 +244,51 @@ router.put('/users/:id/role', auth, roleCheck('admin'), [
     }
 });
 
+// Update user password (Admin only)
+router.put('/users/:id/password', auth, roleCheck('admin'), [
+    body('password').isLength({ min: 6 })
+], async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ success: false, errors: errors.array() });
+        }
+
+        const { password } = req.body;
+        const targetUserId = parseInt(req.params.id, 10);
+
+        const [targetRows] = await pool.query('SELECT user_id FROM users WHERE user_id = ?', [targetUserId]);
+        if (targetRows.length === 0) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await pool.query(
+            'UPDATE users SET password = ? WHERE user_id = ?',
+            [hashedPassword, targetUserId]
+        );
+
+        await pool.query(
+            `INSERT INTO activity_logs (user_id, action, entity_type, entity_id, description)
+             VALUES (?, 'update_password', 'user', ?, ?)`,
+            [req.user.userId, targetUserId, 'User password updated']
+        );
+
+        res.json({
+            success: true,
+            message: 'User password updated successfully'
+        });
+    } catch (error) {
+        console.error('Update password error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update user password',
+            error: error.message
+        });
+    }
+});
+
 // Delete user (Admin only)
 router.delete('/users/:id', auth, roleCheck('admin'), async (req, res) => {
     try {
