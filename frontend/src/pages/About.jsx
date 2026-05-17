@@ -1,9 +1,3 @@
-// Helper to get absolute image URL
-const getImageUrl = (url) => {
-  if (!url) return '';
-  if (url.startsWith('http')) return url;
-  return `${API_BASE}${url}`;
-};
 import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import ptcLogo from '../assets/images/logo-ptc.png';
@@ -11,6 +5,16 @@ import adminBg from '../assets/images/loginbg.jpg';
 import { FiBookOpen, FiEye, FiHeart, FiStar, FiMail, FiPhone, FiEdit2, FiSave, FiX, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
+import api from '../services/api';
+
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+
+// Helper to get absolute image URL
+const getImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  return `${API_BASE}${url}`;
+};
 
 // ─── Static school data ───────────────────────────────────────────────────────
 const MISSION_INTRO = 'Pateros Technological College commits itself to:';
@@ -110,7 +114,7 @@ const FORMER_ADMINISTRATION = [
     title: 'Former PTC Administrator',
     term: '',
     initials: 'AP',
-    image_url: '',
+    image_url: '/uploads/image-1774713247335-605789906.jpg',
     bio: '',
     color: 'from-slate-700 to-slate-500',
   },
@@ -119,7 +123,7 @@ const FORMER_ADMINISTRATION = [
     title: 'Former PTC Administrator',
     term: '',
     initials: 'DV',
-    image_url: '',
+    image_url: '/uploads/image-1774713331792-186462778.jpg',
     bio: '',
     color: 'from-slate-700 to-slate-500',
   },
@@ -128,7 +132,7 @@ const FORMER_ADMINISTRATION = [
     title: 'Former PTC Administrator',
     term: '',
     initials: 'EC',
-    image_url: '',
+    image_url: '/uploads/image-1774713445244-52727424.png',
     bio: '',
     color: 'from-slate-700 to-slate-500',
   },
@@ -201,8 +205,6 @@ const FACTS = [
   { value: '100+',   label: 'School Achievements' },
 ];
 
-const ABOUT_STORAGE_KEY = 'cessca_about_content_v1';
-
 const DEFAULT_ABOUT_CONTENT = {
   missionIntro: MISSION_INTRO,
   missionPoints: MISSION_POINTS,
@@ -231,11 +233,11 @@ const createFormerAdminTemplate = () => ({
   color: 'from-slate-700 to-slate-500',
 });
 
-const buildAboutContentFromStorage = (storedRaw) => {
-  if (!storedRaw) return DEFAULT_ABOUT_CONTENT;
+const normalizeAboutContent = (rawContent) => {
+  if (!rawContent) return DEFAULT_ABOUT_CONTENT;
 
   try {
-    const parsed = JSON.parse(storedRaw);
+    const parsed = typeof rawContent === 'string' ? JSON.parse(rawContent) : rawContent;
     return {
       missionIntro: parsed.missionIntro || MISSION_INTRO,
       missionPoints: Array.isArray(parsed.missionPoints) && parsed.missionPoints.length
@@ -274,18 +276,34 @@ const About = () => {
   const certificates = aboutContent.certificates || [];
 
   useEffect(() => {
-      const stored = localStorage.getItem(ABOUT_STORAGE_KEY) || null;
-      setAboutContent(buildAboutContentFromStorage(stored));
+    const loadAboutContent = async () => {
+      try {
+        const response = await api.get('/about');
+        setAboutContent(normalizeAboutContent(response.data?.content));
+      } catch (error) {
+        setAboutContent(DEFAULT_ABOUT_CONTENT);
+      }
+    };
+
+    loadAboutContent();
   }, []);
 
-  const handleSave = () => {
-    localStorage.setItem(ABOUT_STORAGE_KEY, JSON.stringify(aboutContent || {}));
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      await api.put('/about', { content: aboutContent });
+      setIsEditing(false);
+    } catch (error) {
+      alert(error.response?.data?.message || 'Failed to save About content');
+    }
   };
 
-  const handleCancel = () => {
-    const stored = localStorage.getItem(ABOUT_STORAGE_KEY) || null;
-    setAboutContent(buildAboutContentFromStorage(stored));
+  const handleCancel = async () => {
+    try {
+      const response = await api.get('/about');
+      setAboutContent(normalizeAboutContent(response.data?.content));
+    } catch {
+      setAboutContent(DEFAULT_ABOUT_CONTENT);
+    }
     setIsEditing(false);
   };
 
@@ -928,27 +946,17 @@ const AdminCard = ({ admin, isEditing, onFieldChange, getSetting }) => (
     </div>
   </div>
 );
-
-
 // Helper for uploading images
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
 async function uploadAboutImage(file) {
   const formData = new FormData();
   formData.append('image', file);
-  // Get JWT token from localStorage (or wherever you store it)
-  const token = localStorage.getItem('token');
-  if (!token) {
-    throw new Error('Not authenticated: No token found. Please log in again.');
-  }
   try {
-    const res = await fetch(`${API_BASE}/api/about/upload`, {
-      method: 'POST',
-      body: formData,
+    const response = await api.post('/about/upload', formData, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
       },
     });
-    const data = await res.json();
+    const data = response.data;
     if (!data.success) throw new Error(data.message || 'Upload failed');
     return data.imageUrl;
   } catch (err) {
