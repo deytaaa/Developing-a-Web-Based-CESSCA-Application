@@ -1,13 +1,25 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
+const isProduction = process.env.NODE_ENV === 'production';
+
+const requiredEnv = (name, fallback = '') => {
+    const value = process.env[name] || fallback;
+
+    if (isProduction && !process.env[name]) {
+        throw new Error(`Missing required environment variable: ${name}. Render must use an external MySQL database; localhost will not work.`);
+    }
+
+    return value;
+};
+
 // Create connection pool
 const pool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'cessca_db',
-    port: process.env.DB_PORT || 3306,
+    host: requiredEnv('DB_HOST', 'localhost'),
+    user: requiredEnv('DB_USER', 'root'),
+    password: requiredEnv('DB_PASSWORD', ''),
+    database: requiredEnv('DB_NAME', 'cessca_db'),
+    port: parseInt(process.env.DB_PORT || '3306', 10),
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
@@ -22,7 +34,7 @@ const testConnection = async () => {
         console.log('✅ Database connected successfully');
         connection.release();
     } catch (error) {
-        console.error('❌ Database connection failed:', error);
+        console.error('❌ Database connection failed:', error.message);
         process.exit(1);
     }
 };

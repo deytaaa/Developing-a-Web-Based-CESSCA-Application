@@ -70,3 +70,4 @@ location /uploads {
 - Keep `frontend/dist` on the server if you want the backend to serve the app directly.
 - Use `VITE_API_URL=/api` for a same-domain deployment.
 - Keep `frontend/vite.config.js` proxy settings for local development only.
+- For Render, use an external MySQL database and set `DB_HOST` to that server, not `localhost`.
