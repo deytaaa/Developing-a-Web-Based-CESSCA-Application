@@ -1,10 +1,3 @@
-// Helper to get the correct logo URL
-const getLogoUrl = (logoPath) => {
-  if (!logoPath) return '/default-org.png';
-  if (logoPath.startsWith('http')) return logoPath;
-  // Always use the backend's public URL, never localhost
-  return `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${logoPath}`;
-};
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
@@ -15,6 +8,14 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { organizationService } from '../services/organizationService';
 import { useAuth } from '../contexts/AuthContext';
 import { FiSettings, FiUsers } from 'react-icons/fi';
+
+// Helper to get the correct logo URL
+const getLogoUrl = (logoPath) => {
+  if (!logoPath) return '/default-org.png';
+  if (logoPath.startsWith('http')) return logoPath;
+  const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '');
+  return `${baseUrl}${logoPath}`;
+};
 
 const Organizations = () => {
   const { user } = useAuth();
@@ -95,7 +96,7 @@ const Organizations = () => {
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-24 h-24 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
                     <img
-                      src={`http://localhost:5000${org.logo_url}`} 
+                      src={getLogoUrl(org.logo_url)} 
                       alt={org.org_name}
                       className="w-full h-full object-cover"
                     />
