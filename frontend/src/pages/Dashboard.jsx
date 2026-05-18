@@ -62,7 +62,7 @@ const OfficerSummaryCards = () => {
       </Card>
       <Card className="!p-6">
         <div className="flex items-center">
-          <div className="flex-shrink-0 bg-indigo-100 rounded-lg p-3"><FiCalendar className="h-6 w-6 text-indigo-600" /></div>
+          <div className="flex-shrink-0 bg-indigo-100 rounded-lg p-3"><FiCalendar className="h-6 w-6 h-6 w-6 text-green-600" /></div>
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-600">Upcoming Activities</p>
             <p className="text-2xl font-bold text-gray-900">{activities.length}</p>
@@ -80,7 +80,7 @@ const OfficerSummaryCards = () => {
       </Card>
       <Card className="!p-6">
         <div className="flex items-center">
-          <div className="flex-shrink-0 bg-blue-100 rounded-lg p-3"><FiAward className="h-6 w-6 text-blue-600" /></div>
+          <div className="flex-shrink-0 bg-blue-100 rounded-lg p-3"><FiAward className="h-6 w-6 text-green-600" /></div>
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-600">Recent Achievements</p>
             <p className="text-2xl font-bold text-gray-900">{achievements.length}</p>
@@ -184,15 +184,15 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card className="!p-6">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-yellow-100 rounded-lg p-3">
-                    <FiAlertCircle className="h-6 w-6 text-yellow-600" />
+                  <div className="flex-shrink-0 bg-green-100 rounded-lg p-3">
+                    <FiAlertCircle className="h-6 w-6 h-6 w-6 text-green-600" />
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Pending Cases</p>
                     <p className="text-2xl font-bold text-gray-900">
                       {dashboard.disciplineStats?.find((s) => s.status === 'pending')?.count || 0}
                     </p>
-                    <Link to="/discipline" className="text-xs text-yellow-600 hover:underline">
+                    <Link to="/discipline" className="text-xs text-green-600 hover:underline">
                       View all →
                     </Link>
                   </div>
@@ -215,12 +215,12 @@ const Dashboard = () => {
               <Card className="!p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0 bg-indigo-100 rounded-lg p-3">
-                    <FiCalendar className="h-6 w-6 text-indigo-600" />
+                    <FiCalendar className="h-6 w-6 text-green-600" />
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Upcoming Events</p>
                     <p className="text-2xl font-bold text-gray-900">{dashboard.upcomingEvents?.length || 0}</p>
-                    <Link to="/sports" className="text-xs text-indigo-600 hover:underline">
+                    <Link to="/sports" className="text-xs h-6 w-6 text-green-600 hover:underline">
                       View all →
                     </Link>
                   </div>
@@ -228,15 +228,15 @@ const Dashboard = () => {
               </Card>
               <Card className="!p-6">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-blue-100 rounded-lg p-3">
-                    <FiAward className="h-6 w-6 text-blue-600" />
+                  <div className="flex-shrink-0 bg-green-100 rounded-lg p-3">
+                    <FiAward className="h-6 w-6 text-green-600" />
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Alumni Records</p>
                     <p className="text-2xl font-bold text-gray-900">
                       {dashboard.alumniStats?.reduce((acc, s) => acc + s.count, 0) || 0}
                     </p>
-                    <Link to="/alumni" className="text-xs text-blue-600 hover:underline">
+                    <Link to="/alumni" className="text-xs h-6 w-6 text-green-600 hover:underline">
                       View all →
                     </Link>
                   </div>
@@ -246,19 +246,19 @@ const Dashboard = () => {
             <Card title="Quick Access">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Link to="/analytics" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
-                  <FiBarChart2 className="h-6 w-6 text-indigo-600 mx-auto mb-2" />
+                  <FiBarChart2 className="h-6 w-6 text-green-600 mx-auto mb-2" />
                   <p className="text-sm font-medium text-gray-900">Analytics</p>
                 </Link>
                 <Link to="/gallery" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
-                  <FiImage className="h-6 w-6 text-pink-600 mx-auto mb-2" />
+                  <FiImage className="h-6 w-6 text-green-600 mx-auto mb-2" />
                   <p className="text-sm font-medium text-gray-900">Gallery</p>
                 </Link>
                 <Link to="/sports" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
-                  <FiTrendingUp className="h-6 w-6 text-gold-600 mx-auto mb-2" />
+                  <FiTrendingUp className="h-6 w-6 text-green-600 mx-auto mb-2" />
                   <p className="text-sm font-medium text-gray-900">Sports & Arts</p>
                 </Link>
                 <Link to="/activities" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
-                  <FiCalendar className="h-6 w-6 text-blue-600 mx-auto mb-2" />
+                  <FiCalendar className="h-6 w-6 text-green-600 mx-auto mb-2" />
                   <p className="text-sm font-medium text-gray-900">Activities</p>
                 </Link>
               </div>
@@ -313,11 +313,11 @@ const Dashboard = () => {
                   <p className="text-sm font-medium text-gray-900">My Organizations</p>
                 </Link>
                 <Link to="/activities" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
-                  <FiCalendar className="h-6 w-6 text-indigo-600 mx-auto mb-2" />
+                  <FiCalendar className="h-6 w-6 h-6 w-6 text-green-600 mx-auto mb-2" />
                   <p className="text-sm font-medium text-gray-900">Manage Activities</p>
                 </Link>
                 <Link to="/achievements" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
-                  <FiAward className="h-6 w-6 text-blue-600 mx-auto mb-2" />
+                  <FiAward className="h-6 w-6 text-green-600 mx-auto mb-2" />
                   <p className="text-sm font-medium text-gray-900">Achievements</p>
                 </Link>
               </div>
@@ -330,7 +330,7 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card className="!p-6">
                 <div className="flex items-center">
-                  <FiUsers className="h-6 w-6 text-blue-600" />
+                  <FiUsers className="h-6 w-6 text-green-600" />
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Organizations</p>
                     <p className="text-2xl font-bold text-gray-900">{dashboard.organizations?.length || 0}</p>
