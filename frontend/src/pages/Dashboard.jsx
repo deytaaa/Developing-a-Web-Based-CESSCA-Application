@@ -214,7 +214,7 @@ const Dashboard = () => {
               </Card>
               <Card className="!p-6">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-indigo-100 rounded-lg p-3">
+                  <div className="flex-shrink-0 bg-green-100 rounded-lg p-3">
                     <FiCalendar className="h-6 w-6 text-green-600" />
                   </div>
                   <div className="ml-4">
