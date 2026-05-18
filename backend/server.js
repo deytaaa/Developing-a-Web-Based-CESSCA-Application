@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const { testConnection } = require('./config/database');
@@ -21,6 +23,8 @@ const aboutUploadRoutes = require('./routes/aboutUpload.routes');
 const activityLogRoutes = require('./routes/activitylog.routes');
 
 const app = express();
+const frontendDistPath = path.join(__dirname, '..', 'frontend', 'dist');
+const hasFrontendBuild = fs.existsSync(frontendDistPath);
 
 
 // Dynamic CORS configuration to allow only one origin at a time
@@ -82,6 +86,18 @@ app.use('/api/about', aboutRoutes);
 app.use('/api/about', aboutUploadRoutes);
 
 app.use('/api/activity-logs', activityLogRoutes);
+
+if (hasFrontendBuild) {
+    app.use(express.static(frontendDistPath));
+
+    app.get(/^\/(?!api\/|uploads\/).*/, (req, res, next) => {
+        if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/')) {
+            return next();
+        }
+
+        res.sendFile(path.join(frontendDistPath, 'index.html'));
+    });
+}
 
 // 404 handler
 app.use((req, res) => {

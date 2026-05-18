@@ -7,20 +7,21 @@ import Button from '../components/Button';
 import Modal from '../components/Modal';
 import { organizationService } from '../services/organizationService';
 import { useAuth } from '../contexts/AuthContext';
+import { getAssetUrl } from '../utils/assetUrl';
 import { FiUsers, FiCalendar, FiMapPin, FiClock, FiAward, FiUserPlus, FiUserMinus, FiArrowLeft, FiTarget, FiHeart, FiPlus, FiX, FiTrash2, FiCheck, FiEdit, FiUpload, FiImage, FiCamera, FiMaximize2, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 // Helper to get the correct logo URL
 const getLogoUrl = (logoPath) => {
   if (!logoPath) return '/default-org.png';
   if (logoPath.startsWith('http')) return logoPath;
-  return `${import.meta.env.VITE_API_BASE || 'http://localhost:5000'}${logoPath}`;
+  return getAssetUrl(logoPath);
 };
 
 // Helper to get the correct image URL
 const getImageUrl = (imagePath) => {
   if (!imagePath) return null;
   if (imagePath.startsWith('http')) return imagePath;
-  return `${import.meta.env.VITE_API_BASE || 'http://localhost:5000'}${imagePath}`;
+  return getAssetUrl(imagePath);
 };
 
 const OrganizationDetails = () => {
@@ -262,7 +263,7 @@ const OrganizationDetails = () => {
       status: organization.status || '',
       founded_date: organization.founded_date ? organization.founded_date.split('T')[0] : ''
     });
-    setLogoPreview(organization.logo_url ? `http://localhost:5000${organization.logo_url}` : null);
+    setLogoPreview(organization.logo_url ? getAssetUrl(organization.logo_url) : null);
     setShowEditModal(true);
   };
 
@@ -800,7 +801,7 @@ const OrganizationDetails = () => {
                             <div className="flex items-center">
                               {member.profile_picture ? (
                                 <img
-                                  src={`http://localhost:5000${member.profile_picture}`}
+                                  src={getAssetUrl(member.profile_picture)}
                                   alt={`${member.first_name || ''} ${member.last_name || ''}`}
                                   className="w-8 h-8 rounded-full object-cover mr-3"
                                  onError={(e) => {

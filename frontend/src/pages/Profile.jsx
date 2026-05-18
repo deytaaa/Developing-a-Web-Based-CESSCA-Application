@@ -12,6 +12,7 @@ import Button from '../components/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { authService } from '../services/authService';
 import api from '../services/api';
+import { getAssetUrl } from '../utils/assetUrl';
 import { FiCamera, FiTrash2, FiUser } from 'react-icons/fi';
 
 const Profile = () => {
@@ -182,7 +183,7 @@ const Profile = () => {
     if (user?.profile?.profile_picture) {
       // Add timestamp to force refresh after upload
       const timestamp = new Date().getTime();
-      return `http://localhost:5000${user.profile.profile_picture}?t=${timestamp}`;
+      return `${getAssetUrl(user.profile.profile_picture)}?t=${timestamp}`;
     }
     return null;
   };

@@ -161,6 +161,14 @@ VITE_API_URL=https://yourdomain.com/api
 npm run build
 ```
 
+If you want a single Node.js service to host both the API and the frontend, keep the built frontend at `frontend/dist`. The backend will serve that build automatically when it exists, so routes like `/login` and `/dashboard` open directly from the same domain.
+
+For that setup, use a relative frontend API URL:
+
+```env
+VITE_API_URL=/api
+```
+
 ## Step 4: Nginx Configuration
 
 ### Create Nginx Config

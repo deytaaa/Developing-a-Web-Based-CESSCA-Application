@@ -7,6 +7,7 @@ import Button from '../components/Button';
 import LoadingSpinner from '../components/LoadingSpinner';
 import heroBg from '../assets/images/loginbg.jpg';
 import { alumniService } from '../services/alumniService';
+import { getAssetUrl } from '../utils/assetUrl';
 import { FiSearch, FiEye, FiAward, FiBriefcase, FiUser } from 'react-icons/fi';
 
 const Alumni = () => {
@@ -224,10 +225,7 @@ const Alumni = () => {
             ) : (
               filteredAlumni.map((alum) => {
                 const hasProfile = alum.alumni_id != null;
-                const profilePictureUrl = alum.profile_picture 
-                    ? `http://localhost:5000${alum.profile_picture}`
-          
-                  : null;
+                const profilePictureUrl = alum.profile_picture ? getAssetUrl(alum.profile_picture) : null;
                 
                 return (
                 <Card key={alum.user_id || alum.alumni_id} className="hover:shadow-lg transition">

@@ -5,6 +5,7 @@ import Layout from '../components/Layout';
 import Badge from '../components/Badge';
 import { alumniService } from '../services/alumniService';
 import { useAuth } from '../contexts/AuthContext';
+import { getAssetUrl } from '../utils/assetUrl';
 import { FiUser, FiMail, FiPhone, FiBriefcase, FiAward, FiCalendar, FiMapPin, FiArrowLeft, FiPlus, FiX, FiEdit, FiSave } from 'react-icons/fi';
 
 
@@ -220,7 +221,7 @@ const AlumniProfile = () => {
             <div className="flex flex-col items-center">
               {alumni.profile_picture ? (
                 <img
-                    src={`http://localhost:5000${alumni.profile_picture}`} 
+                    src={getAssetUrl(alumni.profile_picture)} 
                   alt={`${alumni.first_name} ${alumni.last_name}`}
                   className="w-32 h-32 rounded-full object-cover mb-4"
                 />

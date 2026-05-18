@@ -11,6 +11,7 @@ import { adminService } from '../services/adminService';
 import activityLogService from '../services/activityLogService';
 import { organizationService } from '../services/organizationService';
 import { useAuth } from '../contexts/AuthContext';
+import { getAssetUrl } from '../utils/assetUrl';
 import { FiCheck, FiX, FiTrash2, FiEdit, FiPlus, FiEye, FiSearch } from 'react-icons/fi';
 
 const Admin = () => {
@@ -736,7 +737,7 @@ const Admin = () => {
                                     {member.profile_picture ? (
                                       <img
                                         className="h-10 w-10 rounded-full"
-                                        src={member.profile_picture.startsWith('http') ? member.profile_picture : `http://localhost:5000${member.profile_picture}`}
+                                        src={getAssetUrl(member.profile_picture)}
                                         alt="Profile"
                                         onError={e => { e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'flex'; }}
                                       />

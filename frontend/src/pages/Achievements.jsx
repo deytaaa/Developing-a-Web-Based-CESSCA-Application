@@ -154,7 +154,7 @@ const Achievements = () => {
       is_featured: Boolean(a.is_featured),
       image: null,
     });
-    setPreviewUrl(a.image_url ? `http://localhost:5000${a.image_url}` : null);
+    setPreviewUrl(a.image_url ? getAssetUrl(a.image_url) : null);
     setModalOpen(true);
   };
 

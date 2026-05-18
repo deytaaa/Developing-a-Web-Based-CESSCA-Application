@@ -6,14 +6,13 @@ import { FiBookOpen, FiEye, FiHeart, FiStar, FiMail, FiPhone, FiEdit2, FiSave, F
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 import api from '../services/api';
-
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+import { getAssetUrl } from '../utils/assetUrl';
 
 // Helper to get absolute image URL
 const getImageUrl = (url) => {
   if (!url) return '';
   if (url.startsWith('http')) return url;
-  return `${API_BASE}${url}`;
+  return getAssetUrl(url);
 };
 
 // ─── Static school data ───────────────────────────────────────────────────────

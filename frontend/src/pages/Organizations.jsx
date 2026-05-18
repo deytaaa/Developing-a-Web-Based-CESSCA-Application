@@ -7,14 +7,14 @@ import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { organizationService } from '../services/organizationService';
 import { useAuth } from '../contexts/AuthContext';
+import { getAssetUrl } from '../utils/assetUrl';
 import { FiSettings, FiUsers } from 'react-icons/fi';
 
 // Helper to get the correct logo URL
 const getLogoUrl = (logoPath) => {
   if (!logoPath) return '/default-org.png';
   if (logoPath.startsWith('http')) return logoPath;
-  const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '');
-  return `${baseUrl}${logoPath}`;
+  return getAssetUrl(logoPath);
 };
 
 const Organizations = () => {
