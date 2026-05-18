@@ -25,6 +25,7 @@ const activityLogRoutes = require('./routes/activitylog.routes');
 const app = express();
 const frontendDistPath = path.join(__dirname, '..', 'frontend', 'dist');
 const hasFrontendBuild = fs.existsSync(frontendDistPath);
+let databaseReady = false;
 
 
 // Dynamic CORS configuration to allow only one origin at a time
@@ -66,8 +67,9 @@ app.use('/uploads', express.static('uploads'));
 // Health check endpoint
 app.get('/health', (req, res) => {
     res.json({ 
-        status: 'OK', 
+        status: databaseReady ? 'OK' : 'DEGRADED', 
         message: 'CESSCA API is running',
+        database: databaseReady ? 'connected' : 'not_connected',
         timestamp: new Date().toISOString() 
     });
 });
@@ -122,12 +124,16 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
     try {
-        await testConnection();
         app.listen(PORT, () => {
             console.log(`🚀 Server running on port ${PORT}`);
             console.log(`📍 API URL: http://localhost:${PORT}/api`);
             console.log(`🏥 Health check: http://localhost:${PORT}/health`);
         });
+
+        databaseReady = await testConnection();
+        if (!databaseReady) {
+            console.warn('⚠️ Starting without a database connection. Check Render environment variables and MySQL host.');
+        }
     } catch (error) {
         console.error('Failed to start server:', error);
         process.exit(1);
