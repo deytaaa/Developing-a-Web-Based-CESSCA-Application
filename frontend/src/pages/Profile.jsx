@@ -17,6 +17,7 @@ import { FiCamera, FiTrash2, FiUser } from 'react-icons/fi';
 
 const Profile = () => {
   const { user, updateUser } = useAuth();
+  const isAlumni = user?.role === 'alumni';
   const [editing, setEditing] = useState(false);
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const fileInputRef = useRef(null);
@@ -27,19 +28,53 @@ const Profile = () => {
     contactNumber: '',
     address: '',
   });
+  const [alumniData, setAlumniData] = useState({
+    graduationYear: '',
+    degreeProgram: '',
+    currentEmploymentStatus: '',
+    companyName: '',
+    jobPosition: '',
+    industry: '',
+    employmentStartDate: '',
+    contactEmail: '',
+    contactNumber: '',
+    linkedinProfile: '',
+    currentAddress: '',
+    permanentAddress: '',
+  });
+
+  const syncProfileState = () => {
+    if (user?.profile) {
+      setFormData({
+        firstName: user.profile.first_name || '',
+        middleName: user.profile.middle_name || '',
+        lastName: user.profile.last_name || '',
+        contactNumber: user.profile.contact_number || '',
+        address: user.profile.address || '',
+      });
+    }
+
+    if (isAlumni) {
+      setAlumniData({
+        graduationYear: user?.profile?.graduation_year || '',
+        degreeProgram: user?.profile?.degree_program || '',
+        currentEmploymentStatus: user?.profile?.current_employment_status || '',
+        companyName: user?.profile?.company_name || '',
+        jobPosition: user?.profile?.job_position || '',
+        industry: user?.profile?.industry || '',
+        employmentStartDate: user?.profile?.employment_start_date || '',
+        contactEmail: user?.profile?.contact_email || '',
+        contactNumber: user?.profile?.contact_number || '',
+        linkedinProfile: user?.profile?.linkedin_profile || '',
+        currentAddress: user?.profile?.current_address || '',
+        permanentAddress: user?.profile?.permanent_address || '',
+      });
+    }
+  };
 
   useEffect(() => {
-    if (user?.profile) {
-      // Only update if we have actual profile data
-      setFormData(prev => ({
-        firstName: user.profile.first_name ?? prev.firstName,
-        middleName: user.profile.middle_name ?? prev.middleName,
-        lastName: user.profile.last_name ?? prev.lastName,
-        contactNumber: user.profile.contact_number ?? prev.contactNumber,
-        address: user.profile.address ?? prev.address,
-      }));
-    }
-  }, [user]);
+    syncProfileState();
+  }, [user, isAlumni]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -432,16 +467,7 @@ const Profile = () => {
                     variant="secondary"
                     onClick={() => {
                       setEditing(false);
-                      fetchAlumniProfile();
-                      if (user?.profile) {
-                        setFormData({
-                          firstName: user.profile.first_name || '',
-                          middleName: user.profile.middle_name || '',
-                          lastName: user.profile.last_name || '',
-                          contactNumber: user.profile.contact_number || '',
-                          address: user.profile.address || '',
-                        });
-                      }
+                      syncProfileState();
                     }}
                   >
                     Cancel
