@@ -191,16 +191,35 @@ const Profile = () => {
                 </div>
               )}
               <Button
-                variant="danger"
+                variant="primary"
                 size="sm"
                 className="mt-3"
-                onClick={handleDeleteProfilePicture}
-                disabled={uploadingPicture || !getProfilePictureUrl()}
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingPicture}
               >
-                <FiTrash2 className="inline mr-2" />
-                Remove
+                <FiCamera className="inline mr-2" />
+                {uploadingPicture ? 'Uploading...' : 'Upload'}
               </Button>
+              {getProfilePictureUrl() && (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  className="mt-2"
+                  onClick={handleDeleteProfilePicture}
+                  disabled={uploadingPicture}
+                >
+                  <FiTrash2 className="inline mr-2" />
+                  Remove
+                </Button>
+              )}
             </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleProfilePictureUpload}
+              className="hidden"
+            />
             <p className="text-sm text-gray-600">Recommended: Square image, max 5MB (JPG, PNG, GIF)</p>
           </div>
         </Card>
