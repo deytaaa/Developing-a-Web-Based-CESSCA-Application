@@ -87,6 +87,7 @@ export const organizationService = {
 
     const formatted = {
       ...officerData,
+      userId: parseInt(officerData.userId, 10),
       termStart: formatDate(officerData.termStart),
       termEnd: formatDate(officerData.termEnd),
     };
