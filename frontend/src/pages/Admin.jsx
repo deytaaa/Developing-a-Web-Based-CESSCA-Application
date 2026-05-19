@@ -30,7 +30,6 @@ const Admin = () => {
   const allTabs = [
     { id: 'users', label: 'User Management', roles: ['admin'] },
     { id: 'organizations', label: 'Organizations', roles: ['cessca_staff', 'admin'] },
-    { id: 'announcements', label: 'Announcements', roles: ['cessca_staff', 'admin'] },
     { id: 'logs', label: 'Activity Logs', roles: ['admin'] },
   ];
 
