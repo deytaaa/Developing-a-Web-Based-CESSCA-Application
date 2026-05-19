@@ -896,7 +896,7 @@ router.post('/:id/logo', auth, roleCheck('cessca_staff', 'admin'), upload.single
 
         // Check if organization exists
         const [existing] = await pool.query(
-            'SELECT logo_url FROM organizations WHERE org_id = ?',
+            'SELECT logo_url FROM organizations WHERE org_id = $1',
             [req.params.id]
         );
 
@@ -915,7 +915,7 @@ router.post('/:id/logo', auth, roleCheck('cessca_staff', 'admin'), upload.single
         // Update organization with new logo path
         const logoPath = `/uploads/${req.file.filename}`;
         await pool.query(
-            'UPDATE organizations SET logo_url = ?, updated_at = NOW() WHERE org_id = ?',
+            'UPDATE organizations SET logo_url = $1, updated_at = NOW() WHERE org_id = $2',
             [logoPath, req.params.id]
         );
 
@@ -1038,7 +1038,7 @@ router.post('/:id/gallery', auth, upload.single('image'), async (req, res) => {
         const userRole = req.user.role;
         if (!['cessca_staff', 'admin'].includes(userRole)) {
             const [isOfficer] = await pool.query(
-                "SELECT officer_id FROM organization_officers WHERE org_id = ? AND user_id = ? AND status = 'active'",
+                "SELECT officer_id FROM organization_officers WHERE org_id = $1 AND user_id = $2 AND status = 'active'",
                 [orgId, req.user.userId]
             );
 
@@ -1056,7 +1056,7 @@ router.post('/:id/gallery', auth, upload.single('image'), async (req, res) => {
         const [result] = await pool.query(
             `INSERT INTO organization_gallery 
              (org_id, activity_id, album_name, title, description, image_url, uploaded_by, photo_order) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING gallery_id`,
             [orgId, activity_id || null, album_name || null, title, description || null, imageUrl, req.user.userId, photo_order || 1]
         );
 
@@ -1065,8 +1065,8 @@ router.post('/:id/gallery', auth, upload.single('image'), async (req, res) => {
              FROM organization_gallery og
              LEFT JOIN users u ON og.uploaded_by = u.user_id
              LEFT JOIN user_profiles up ON u.user_id = up.user_id
-             WHERE og.gallery_id = ?`,
-            [result.insertId]
+             WHERE og.gallery_id = $1`,
+            [result.rows[0].gallery_id]
         );
 
         res.status(201).json({

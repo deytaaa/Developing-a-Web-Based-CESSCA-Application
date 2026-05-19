@@ -9,7 +9,7 @@ router.get('/', async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT content, updated_at FROM about_content WHERE id = 1 LIMIT 1');
         if (rows.length === 0) {
-            await pool.query('INSERT INTO about_content (id, content) VALUES (1, ?)', [JSON.stringify({})]);
+            await pool.query('INSERT INTO about_content (id, content) VALUES (1, $1)', [JSON.stringify({})]);
             const [createdRows] = await pool.query('SELECT content, updated_at FROM about_content WHERE id = 1 LIMIT 1');
             return res.json({ success: true, content: createdRows[0].content, updated_at: createdRows[0].updated_at });
         }
@@ -29,7 +29,7 @@ router.put('/', auth, roleCheck('admin', 'cessca_staff'), async (req, res) => {
         }
         await pool.query(
             `INSERT INTO about_content (id, content)
-             VALUES (1, ?)
+             VALUES (1, $1)
              ON CONFLICT (id) DO UPDATE SET content = EXCLUDED.content, updated_at = NOW()`,
             [JSON.stringify(content)]
         );

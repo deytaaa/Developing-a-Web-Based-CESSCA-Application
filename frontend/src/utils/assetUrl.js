@@ -51,6 +51,15 @@ export const getAssetUrl = (path) => {
     return path;
   }
 
+  // In development with a relative apiUrl (like '/api'), return relative paths
+  // so they work with the Vite proxy (which routes /api and /uploads to localhost:5000).
+  // In production, use the configured API origin.
+  if (!apiUrl.startsWith('http://') && !apiUrl.startsWith('https://') && !apiUrl.startsWith('//')) {
+    // apiUrl is relative (e.g., '/api')
+    // Return the path as-is so Vite proxy or production static serving handles it
+    return path.startsWith('/') ? path : `/${path}`;
+  }
+
   const baseUrl = getApiOrigin();
   return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
 };

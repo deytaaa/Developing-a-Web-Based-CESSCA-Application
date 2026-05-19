@@ -135,15 +135,15 @@ router.post(
             const [result] = await pool.query(
                 `INSERT INTO school_achievements
                     (title, description, achievement_date, category, award_level, recipient, image_url, is_featured, created_by)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING achievement_id`,
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING achievement_id`,
                 [title, description || null, achievement_date, category, award_level,
                  recipient || null, image_url, is_featured === 'true' || is_featured === true ? 1 : 0,
                  req.user.userId]
             );
 
             const [rows] = await pool.query(
-                'SELECT * FROM school_achievements WHERE achievement_id = ?',
-                [result.insertId]
+                'SELECT * FROM school_achievements WHERE achievement_id = $1',
+                [result.rows[0].achievement_id]
             );
 
             res.status(201).json({ success: true, message: 'Achievement created successfully', achievement: rows[0] });
@@ -174,7 +174,7 @@ router.put(
 
         try {
             const [existing] = await pool.query(
-                'SELECT * FROM school_achievements WHERE achievement_id = ?',
+                'SELECT * FROM school_achievements WHERE achievement_id = $1',
                 [req.params.id]
             );
             if (existing.length === 0) {
@@ -186,15 +186,15 @@ router.put(
 
             await pool.query(
                 `UPDATE school_achievements SET
-                    title            = COALESCE(?, title),
-                    description      = COALESCE(?, description),
-                    achievement_date = COALESCE(?, achievement_date),
-                    category         = COALESCE(?, category),
-                    award_level      = COALESCE(?, award_level),
-                    recipient        = COALESCE(?, recipient),
-                    image_url        = ?,
-                    is_featured      = COALESCE(?, is_featured)
-                 WHERE achievement_id = ?`,
+                    title            = COALESCE($1, title),
+                    description      = COALESCE($2, description),
+                    achievement_date = COALESCE($3, achievement_date),
+                    category         = COALESCE($4, category),
+                    award_level      = COALESCE($5, award_level),
+                    recipient        = COALESCE($6, recipient),
+                    image_url        = $7,
+                    is_featured      = COALESCE($8, is_featured)
+                 WHERE achievement_id = $9`,
                 [
                     title || null,
                     description !== undefined ? description : null,
@@ -208,7 +208,7 @@ router.put(
                 ]
             );
 
-            const [rows] = await pool.query('SELECT * FROM school_achievements WHERE achievement_id = ?', [req.params.id]);
+            const [rows] = await pool.query('SELECT * FROM school_achievements WHERE achievement_id = $1', [req.params.id]);
             res.json({ success: true, message: 'Achievement updated successfully', achievement: rows[0] });
         } catch (error) {
             console.error('Update achievement error:', error);
@@ -221,7 +221,7 @@ router.put(
 router.delete('/:id', auth, roleCheck('admin'), async (req, res) => {
     try {
         const [existing] = await pool.query(
-            'SELECT achievement_id FROM school_achievements WHERE achievement_id = ?',
+            'SELECT achievement_id FROM school_achievements WHERE achievement_id = $1',
             [req.params.id]
         );
         if (existing.length === 0) {

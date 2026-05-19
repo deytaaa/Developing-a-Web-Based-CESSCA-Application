@@ -257,7 +257,7 @@ router.post('/profile/picture', auth, upload.single('profilePicture'), async (re
 
         // Delete old profile picture if exists
         const [currentProfile] = await pool.query(
-            'SELECT profile_picture FROM user_profiles WHERE user_id = ?',
+            'SELECT profile_picture FROM user_profiles WHERE user_id = $1',
             [req.user.userId]
         );
 
@@ -271,7 +271,7 @@ router.post('/profile/picture', auth, upload.single('profilePicture'), async (re
         // Update profile with new picture path
         const picturePath = `/uploads/${req.file.filename}`;
         await pool.query(
-            'UPDATE user_profiles SET profile_picture = ? WHERE user_id = ?',
+            'UPDATE user_profiles SET profile_picture = $1 WHERE user_id = $2',
             [picturePath, req.user.userId]
         );
 
@@ -295,7 +295,7 @@ router.post('/profile/picture', auth, upload.single('profilePicture'), async (re
 router.delete('/profile/picture', auth, async (req, res) => {
     try {
         const [currentProfile] = await pool.query(
-            'SELECT profile_picture FROM user_profiles WHERE user_id = ?',
+            'SELECT profile_picture FROM user_profiles WHERE user_id = $1',
             [req.user.userId]
         );
 
@@ -307,7 +307,7 @@ router.delete('/profile/picture', auth, async (req, res) => {
         }
 
         await pool.query(
-            'UPDATE user_profiles SET profile_picture = NULL WHERE user_id = ?',
+            'UPDATE user_profiles SET profile_picture = NULL WHERE user_id = $1',
             [req.user.userId]
         );
 

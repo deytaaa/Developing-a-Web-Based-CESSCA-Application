@@ -471,14 +471,14 @@ router.post('/gallery', auth, roleCheck('cessca_staff', 'admin'),
         const [result] = await pool.query(
             `INSERT INTO sports_gallery 
              (album_id, event_id, title, description, category, image_url, year, uploaded_by, photo_order)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING gallery_id`,
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING gallery_id`,
             [albumId || null, eventId || null, title, description, category, imageUrl, year, req.user.userId, photoOrder || 1]
         );
 
         res.status(201).json({
             success: true,
             message: 'Image uploaded successfully',
-            galleryId: result.insertId,
+            galleryId: result.rows[0].gallery_id,
             album_id: albumId,
             imageUrl
         });
@@ -499,7 +499,7 @@ router.put('/gallery/:id/featured', auth, roleCheck('cessca_staff', 'admin'), as
         const { featured } = req.body;
 
         await pool.query(
-            'UPDATE sports_gallery SET featured = ? WHERE gallery_id = ?',
+            'UPDATE sports_gallery SET featured = $1 WHERE gallery_id = $2',
             [featured ? 1 : 0, req.params.id]
         );
 
@@ -523,7 +523,7 @@ router.delete('/gallery/:id', auth, roleCheck('cessca_staff', 'admin'), async (r
     try {
         // Get image info to delete file
         const [photos] = await pool.query(
-            'SELECT image_url FROM sports_gallery WHERE gallery_id = ?',
+            'SELECT image_url FROM sports_gallery WHERE gallery_id = $1',
             [req.params.id]
         );
 

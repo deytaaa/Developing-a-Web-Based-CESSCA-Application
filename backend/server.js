@@ -42,9 +42,17 @@ app.use((req, res, next) => {
     next();
 });
 
-// Security middleware - Configure helmet to not interfere with CORS
+// Security middleware - Configure helmet to allow cross-origin images and not interfere with CORS
 app.use(helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" }
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            imgSrc: ["'self'", "data:"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+        }
+    }
 }));
 
 // Rate limiting
