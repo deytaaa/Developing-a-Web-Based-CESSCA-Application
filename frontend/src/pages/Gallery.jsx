@@ -7,6 +7,7 @@ import sportsHeroBg from '../assets/images/loginbg.jpg';
 
 import { useAuth } from '../contexts/AuthContext';
 import heroBg from '../assets/images/artsbanner.png';
+import { getAssetUrl } from '../utils/assetUrl';
 import { FiImage, FiUpload, FiX, FiStar, FiCalendar, FiTag, FiUser, FiMaximize2, FiTrash2, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 const Gallery = () => {
@@ -353,7 +354,7 @@ const Gallery = () => {
               <div key={album.album_id} className="group relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
                 <div className="aspect-square overflow-hidden bg-gray-100 relative">
                   <img
-                    src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${album.cover_image}`}
+                    src={getAssetUrl(album.cover_image)}
                     onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
                     alt={album.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
@@ -743,7 +744,7 @@ const Gallery = () => {
 
               {/* Image */}
               <img
-                src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${getCurrentPhoto().image_url}`}
+                src={getAssetUrl(getCurrentPhoto().image_url)}
                 onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
                 alt={selectedAlbum.title}
                 className="max-h-full max-w-full object-contain"
@@ -778,7 +779,7 @@ const Gallery = () => {
                       title={photo.title}
                     >
                       <img
-                        src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${photo.image_url}`}
+                        src={getAssetUrl(photo.image_url)}
                         onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
                         alt={photo.title}
                         className="w-20 h-20 object-cover rounded"

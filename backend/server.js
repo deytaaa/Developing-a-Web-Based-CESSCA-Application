@@ -20,6 +20,7 @@ const activityLogRoutes = require('./routes/activitylog.routes');
 
 const app = express();
 const frontendDistPath = path.join(__dirname, '..', 'frontend', 'dist');
+const uploadsPath = path.join(__dirname, 'uploads');
 const hasFrontendBuild = fs.existsSync(frontendDistPath);
 let databaseReady = false;
 
@@ -59,7 +60,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Static files
-app.use('/uploads', express.static('uploads'));
+if (!fs.existsSync(uploadsPath)) {
+    fs.mkdirSync(uploadsPath, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsPath));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
