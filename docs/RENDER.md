@@ -1,12 +1,12 @@
 # Render Deployment Guide
 
-Render can host the Node.js backend, but the application still needs a real MySQL database that is reachable from Render.
+Render can host the Node.js backend, and Supabase can host the PostgreSQL database.
 
 ## Important
 
-- Render does not provide a local MySQL service inside the web process
-- `DB_HOST=localhost` will fail on Render
-- Use an external MySQL provider such as Railway MySQL, Aiven, DigitalOcean Managed MySQL, or another hosted MySQL server
+- Render does not provide a local PostgreSQL service inside the web process
+- `DB_HOST=localhost` will fail on Render unless you are connecting to a VM you control
+- Use the Supabase PostgreSQL connection string or another hosted PostgreSQL database
 
 ## Backend Service
 
@@ -29,11 +29,8 @@ Set these in the Render dashboard:
 ```env
 NODE_ENV=production
 PORT=10000
-DB_HOST=your-mysql-host
-DB_USER=your-mysql-user
-DB_PASSWORD=your-mysql-password
-DB_NAME=your-mysql-database
-DB_PORT=3306
+DATABASE_URL=postgresql://postgres:your_password@db.your-project-ref.supabase.co:5432/postgres
+DB_SSL=true
 JWT_SECRET=your_long_random_secret
 CORS_ORIGIN=https://your-frontend-domain.vercel.app
 ```
@@ -52,4 +49,26 @@ Make sure uploaded files are stored on a persistent disk or in object storage if
 
 ## Common Error
 
-If you see `connect ECONNREFUSED ::1:3306`, the backend is still trying to use a local database. Set `DB_HOST` to a real external MySQL host.
+If you see a connection error during startup, confirm that the Supabase `DATABASE_URL` is correct and that `DB_SSL=true` is set in Render.
+
+## Your Current `.env`
+
+The values you shared are local-development values, not Render values:
+
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=cessca123
+DB_NAME=cessca_db
+CORS_ORIGIN=https://cessca.vercel.app
+```
+
+On Render with Supabase, replace the database block with your Supabase PostgreSQL connection string:
+
+```env
+DATABASE_URL=postgresql://postgres:your_password@db.your-project-ref.supabase.co:5432/postgres
+DB_SSL=true
+```
+
+If you do not have the Supabase connection string yet, Render will keep failing even if the backend deploys successfully.

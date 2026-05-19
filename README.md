@@ -61,7 +61,7 @@ The Center for Student Service, Sports, Culture, and the Arts (CESSCA) Web Appli
 ### Backend
 - **Runtime:** Node.js
 - **Framework:** Express.js
-- **Database:** MySQL
+- **Database:** Supabase PostgreSQL
 - **Authentication:** JWT (jsonwebtoken)
 - **Validation:** express-validator
 - **File Upload:** multer
@@ -111,19 +111,13 @@ cessca-app/
 
 ### Prerequisites
 - Node.js (v16 or higher)
-- MySQL (v8.0 or higher)
+- Supabase project or PostgreSQL database
 - npm or yarn
 
 ### Database Setup
-1. Create a MySQL database:
-```sql
-CREATE DATABASE cessca_db;
-```
+1. Create a Supabase project and copy the PostgreSQL connection string.
 
-2. Import the schema:
-```bash
-mysql -u root -p cessca_db < database/schema.sql
-```
+2. Run the schema in `database/supabase_schema.sql` inside the Supabase SQL editor.
 
 ### Backend Setup
 1. Navigate to backend directory:
@@ -139,10 +133,8 @@ npm install
 3. Create `.env` file:
 ```env
 PORT=5000
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_password
-DB_NAME=cessca_db
+DATABASE_URL=postgresql://postgres:your_password@db.your-project-ref.supabase.co:5432/postgres
+DB_SSL=true
 JWT_SECRET=your_secret_key
 ```
 

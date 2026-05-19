@@ -30,7 +30,7 @@ router.put('/', auth, roleCheck('admin', 'cessca_staff'), async (req, res) => {
         await pool.query(
             `INSERT INTO about_content (id, content)
              VALUES (1, ?)
-             ON DUPLICATE KEY UPDATE content = VALUES(content), updated_at = NOW()`,
+             ON CONFLICT (id) DO UPDATE SET content = EXCLUDED.content, updated_at = NOW()`,
             [JSON.stringify(content)]
         );
         res.json({ success: true, message: 'About content updated successfully' });

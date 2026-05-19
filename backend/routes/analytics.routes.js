@@ -426,7 +426,7 @@ router.get('/sports/stats', auth, roleCheck('cessca_staff', 'admin'), async (req
             `SELECT 
                 u.user_id, up.first_name, up.last_name, up.student_id,
                 COUNT(*) as award_count,
-                GROUP_CONCAT(DISTINCT cr.award ORDER BY cr.rank_position) as awards
+                STRING_AGG(cr.award::text, ', ' ORDER BY cr.rank_position) as awards
              FROM competition_results cr
              JOIN event_participants ep ON cr.participant_id = ep.participant_id
              JOIN users u ON ep.user_id = u.user_id
