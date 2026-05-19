@@ -129,8 +129,20 @@ const startServer = async () => {
     try {
         app.listen(PORT, () => {
             console.log(`🚀 Server running on port ${PORT}`);
-            console.log(`📍 API URL: http://localhost:${PORT}/api`);
-            console.log(`🏥 Health check: http://localhost:${PORT}/health`);
+
+            // Determine an external API origin to display in logs when available.
+            // Platforms like Render set RENDER_EXTERNAL_URL. Allow an explicit EXTERNAL_URL env var too.
+            const externalOrigin = process.env.EXTERNAL_URL || process.env.RENDER_EXTERNAL_URL || null;
+
+            if (externalOrigin) {
+                const origin = externalOrigin.replace(/\/$/, '');
+                console.log(`📍 Public API URL: ${origin}/api`);
+                console.log(`🏥 Public Health check: ${origin}/health`);
+            } else {
+                console.log(`📍 API URL (local): http://localhost:${PORT}/api`);
+                console.log(`🏥 Health check (local): http://localhost:${PORT}/health`);
+                console.log('ℹ️ Set EXTERNAL_URL or rely on platform env (e.g. RENDER_EXTERNAL_URL) to show public API URLs in logs.');
+            }
         });
 
         databaseReady = await testConnection();
