@@ -259,7 +259,7 @@ router.post('/:id/join', auth, roleCheck('student'), async (req, res) => {
     try {
         // Check if already a member with active or pending status
         const [existing] = await pool.query(
-            'SELECT member_id, membership_status FROM organization_members WHERE org_id = ? AND user_id = ?',
+            "SELECT member_id, membership_status FROM organization_members WHERE org_id = ? AND user_id = ?",
             [req.params.id, req.user.userId]
         );
 
@@ -274,7 +274,7 @@ router.post('/:id/join', auth, roleCheck('student'), async (req, res) => {
         // If they have an inactive membership (rejected/left before), update it back to pending
         if (existing.length > 0 && existing[0].membership_status === 'inactive') {
             await pool.query(
-                'UPDATE organization_members SET membership_status = "pending", joined_date = CURDATE() WHERE member_id = ?',
+                "UPDATE organization_members SET membership_status = 'pending', joined_date = CURDATE() WHERE member_id = ?",
                 [existing[0].member_id]
             );
         } else {
@@ -340,7 +340,7 @@ router.put('/:id/members/:memberId/approve', auth, async (req, res) => {
         if (!isCessca) {
             // Check if user is an officer of this organization
             const [officerCheck] = await pool.query(
-                'SELECT officer_id FROM organization_officers WHERE org_id = ? AND user_id = ? AND status = "active"',
+                "SELECT officer_id FROM organization_officers WHERE org_id = ? AND user_id = ? AND status = 'active'",
                 [req.params.id, req.user.userId]
             );
 
@@ -374,7 +374,7 @@ router.put('/:id/members/:memberId/approve', auth, async (req, res) => {
 
         // Approve member
         await pool.query(
-            'UPDATE organization_members SET membership_status = "active", joined_date = CURDATE() WHERE member_id = ?',
+            "UPDATE organization_members SET membership_status = 'active', joined_date = CURDATE() WHERE member_id = ?",
             [req.params.memberId]
         );
 
@@ -402,7 +402,7 @@ router.put('/:id/members/:memberId/reject', auth, async (req, res) => {
         if (!isCessca) {
             // Check if user is an officer of this organization
             const [officerCheck] = await pool.query(
-                'SELECT officer_id FROM organization_officers WHERE org_id = ? AND user_id = ? AND status = "active"',
+                "SELECT officer_id FROM organization_officers WHERE org_id = ? AND user_id = ? AND status = 'active'",
                 [req.params.id, req.user.userId]
             );
 
@@ -457,7 +457,7 @@ router.delete('/:id/members/:memberId', auth, async (req, res) => {
         if (!isCessca) {
             // Check if user is an officer of this organization
             const [officerCheck] = await pool.query(
-                'SELECT officer_id FROM organization_officers WHERE org_id = ? AND user_id = ? AND status = "active"',
+                "SELECT officer_id FROM organization_officers WHERE org_id = ? AND user_id = ? AND status = 'active'",
                 [req.params.id, req.user.userId]
             );
 
@@ -716,17 +716,32 @@ router.delete('/activities/:activityId', auth, async (req, res) => {
 
 // Add officer to organization (CESSCA/Admin only)
 router.post('/:id/officers', auth, roleCheck('cessca_staff', 'admin'), [
-    body('userId').isInt(),
+    body('userId').notEmpty().toInt(),
     body('position').notEmpty().trim(),
-    body('termStart').isISO8601()
+    body('termStart').notEmpty().isISO8601(),
+    body('termEnd').optional().isISO8601()
 ], async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
+            console.error('Validation errors:', errors.array());
             return res.status(400).json({ success: false, errors: errors.array() });
         }
 
         const { userId, position, termStart, termEnd } = req.body;
+
+        // Check if organization exists
+        const [org] = await pool.query(
+            'SELECT org_id FROM organizations WHERE org_id = ?',
+            [req.params.id]
+        );
+
+        if (org.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Organization not found' 
+            });
+        }
 
         // Check if user exists and is a student account
         const [users] = await pool.query(
@@ -750,7 +765,7 @@ router.post('/:id/officers', auth, roleCheck('cessca_staff', 'admin'), [
 
         // Check if already an officer
         const [existing] = await pool.query(
-            'SELECT officer_id FROM organization_officers WHERE org_id = ? AND user_id = ? AND status = "active"',
+            "SELECT officer_id FROM organization_officers WHERE org_id = ? AND user_id = ? AND status = 'active'",
             [req.params.id, userId]
         );
 
@@ -788,18 +803,26 @@ router.post('/:id/officers', auth, roleCheck('cessca_staff', 'admin'), [
         const [result] = await pool.query(
             `INSERT INTO organization_officers 
              (org_id, user_id, position, term_start, term_end, status)
-             VALUES (?, ?, ?, ?, ?, 'active')`,
-            [req.params.id, userId, position, termStart, termEnd || null]
+             VALUES (?, ?, ?, ?, ?, ?)
+             RETURNING officer_id`,
+            [req.params.id, userId, position, termStart, termEnd || null, 'active']
         );
 
         res.status(201).json({
             success: true,
             message: 'Officer added successfully',
-            officerId: result.insertId
+            officerId: result.insertId || (result.rows && result.rows[0]?.officer_id)
         });
 
     } catch (error) {
         console.error('Add officer error:', error);
+        console.error('Error stack:', error.stack);
+        console.error('Error details:', {
+            message: error.message,
+            code: error.code,
+            sqlState: error.sqlState,
+            errno: error.errno
+        });
         res.status(500).json({ 
             success: false, 
             message: 'Failed to add officer',
@@ -812,7 +835,7 @@ router.post('/:id/officers', auth, roleCheck('cessca_staff', 'admin'), [
 router.delete('/:id/officers/:officerId', auth, roleCheck('cessca_staff', 'admin'), async (req, res) => {
     try {
         await pool.query(
-            'UPDATE organization_officers SET status = "ended", term_end = NOW() WHERE officer_id = ? AND org_id = ?',
+            "UPDATE organization_officers SET status = 'ended', term_end = NOW() WHERE officer_id = ? AND org_id = ?",
             [req.params.officerId, req.params.id]
         );
 
@@ -1015,7 +1038,7 @@ router.post('/:id/gallery', auth, upload.single('image'), async (req, res) => {
         const userRole = req.user.role;
         if (!['cessca_staff', 'admin'].includes(userRole)) {
             const [isOfficer] = await pool.query(
-                'SELECT officer_id FROM organization_officers WHERE org_id = ? AND user_id = ? AND status = "active"',
+                "SELECT officer_id FROM organization_officers WHERE org_id = ? AND user_id = ? AND status = 'active'",
                 [orgId, req.user.userId]
             );
 
@@ -1071,7 +1094,7 @@ router.delete('/:id/gallery/:galleryId', auth, async (req, res) => {
         const userRole = req.user.role;
         if (!['cessca_staff', 'admin'].includes(userRole)) {
             const [isOfficer] = await pool.query(
-                'SELECT officer_id FROM organization_officers WHERE org_id = ? AND user_id = ? AND status = "active"',
+                "SELECT officer_id FROM organization_officers WHERE org_id = ? AND user_id = ? AND status = 'active'",
                 [orgId, req.user.userId]
             );
 
