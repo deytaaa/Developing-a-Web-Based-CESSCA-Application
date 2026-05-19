@@ -53,7 +53,12 @@ const limiter = rateLimit({
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000, // 15 minutes
     max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || (isProduction ? 100 : 1000)
 });
-app.use('/api/', limiter);
+app.use('/api/', (req, res, next) => {
+    if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+        return next();
+    }
+    return limiter(req, res, next);
+});
 
 // Body parser middleware
 app.use(express.json());
