@@ -100,6 +100,7 @@ const Organizations = () => {
                       src={getLogoUrl(org.logo_url)} 
                       alt={org.org_name}
                       className="w-full h-full object-cover"
+                      onError={(e) => { e.target.onerror = null; e.target.src = defaultOrgImage; }}
                     />
                   </div>
                 </div>

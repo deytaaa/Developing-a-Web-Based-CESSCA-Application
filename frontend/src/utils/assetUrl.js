@@ -11,7 +11,21 @@ const getApiOrigin = () => {
 
   if (apiUrl.startsWith('http://') || apiUrl.startsWith('https://')) {
     try {
-      return new URL(apiUrl).origin;
+      const origin = new URL(apiUrl).origin;
+      // If the configured origin points to localhost but the app is running
+      // in a non-localhost host (production), avoid returning a localhost origin
+      // which would make asset URLs point to the developer machine.
+      if (
+        origin.includes('localhost') &&
+        typeof window !== 'undefined' &&
+        window.location.hostname !== 'localhost' &&
+        import.meta.env &&
+        import.meta.env.PROD
+      ) {
+        return window.location.origin;
+      }
+
+      return origin;
     } catch {
       return window.location.origin;
     }
