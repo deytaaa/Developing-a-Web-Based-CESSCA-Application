@@ -6,7 +6,7 @@ const now = () => new Date().toISOString();
 
 async function ensureUser(email, password, role, status) {
   const hashedPassword = await bcrypt.hash(password, 10);
-  const result = await pool.query(
+  const [result] = await pool.query(
     `INSERT INTO users (email, password, role, status)
      VALUES (?, ?, ?, ?)
      ON CONFLICT (email)
@@ -56,13 +56,12 @@ async function ensureOrganization(org) {
     return existing[0].org_id;
   }
 
-  const result = await pool.query(
+  const [result] = await pool.query(
     `INSERT INTO organizations (org_name, org_acronym, org_type, description, mission, vision, status, founded_date)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
      RETURNING org_id`,
     [org.org_name, org.org_acronym, org.org_type, org.description, org.mission || null, org.vision || null, org.status || 'active', org.founded_date || null]
   );
-
   return result.insertId;
 }
 

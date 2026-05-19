@@ -135,7 +135,7 @@ router.post(
             const [result] = await pool.query(
                 `INSERT INTO school_achievements
                     (title, description, achievement_date, category, award_level, recipient, image_url, is_featured, created_by)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING achievement_id`,
                 [title, description || null, achievement_date, category, award_level,
                  recipient || null, image_url, is_featured === 'true' || is_featured === true ? 1 : 0,
                  req.user.userId]

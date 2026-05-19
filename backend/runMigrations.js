@@ -1,23 +1,11 @@
-const mysql = require('mysql2/promise');
+const { pool } = require('./config/database');
 const fs = require('fs').promises;
 const path = require('path');
 require('dotenv').config();
 
 async function runMigrations() {
-    let connection;
-    
     try {
-        // Create database connection
-        connection = await mysql.createConnection({
-            host: process.env.DB_HOST || 'localhost',
-            user: process.env.DB_USER || 'root',
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME || 'cessca_db',
-            port: process.env.DB_PORT || 3306,
-            multipleStatements: true
-        });
-
-        console.log('✓ Connected to database');
+        console.log('Using Postgres pool for migrations');
 
         // Migration files
         const migrations = [];
@@ -28,7 +16,7 @@ async function runMigrations() {
 
             try {
                 const sql = await fs.readFile(migrationPath, 'utf8');
-                await connection.query(sql);
+                await pool.query(sql);
                 console.log(`✓ Successfully executed ${path.basename(migrationFile)}`);
             } catch (error) {
                 console.error(`✗ Error in ${path.basename(migrationFile)}:`, error.message);
@@ -45,11 +33,6 @@ async function runMigrations() {
     } catch (error) {
         console.error('✗ Migration failed:', error.message);
         process.exit(1);
-    } finally {
-        if (connection) {
-            await connection.end();
-            console.log('\n✓ Database connection closed');
-        }
     }
 }
 

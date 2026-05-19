@@ -1,22 +1,14 @@
-const mysql = require('mysql2/promise');
+const { pool } = require('./config/database');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 async function seedData() {
   try {
-    const connection = await mysql.createConnection({
-      host: process.env.DB_HOST || 'localhost',
-      user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_NAME || 'cessca_db',
-      port: process.env.DB_PORT || 3306
-    });
-
-    console.log('✅ Connected to database');
+    console.log('Using Postgres pool for database operations');
 
     // Get existing admin/cessca staff user
-    const [existingUsers] = await connection.execute(
-      'SELECT user_id, role FROM users WHERE role IN ("admin", "cessca_staff") LIMIT 1'
+    const [existingUsers] = await pool.query(
+      'SELECT user_id, role FROM users WHERE role IN (\'admin\', \'cessca_staff\') LIMIT 1'
     );
     
     if (existingUsers.length === 0) {
@@ -53,20 +45,20 @@ async function seedData() {
     const studentIds = [];
     for (const student of students) {
       try {
-        const [result] = await connection.execute(
-          'INSERT INTO users (email, password, role, status) VALUES (?, ?, ?, ?)',
-          [student.email, studentPassword, 'student', 'active']
-        );
-        studentIds.push(result.insertId);
-        
-        await connection.execute(
-          'INSERT INTO user_profiles (user_id, first_name, middle_name, last_name, student_id, course, year_level, contact_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-          [result.insertId, student.firstName, student.middleName, student.lastName, student.studentId, student.course, student.year, `0912345${String(Math.floor(Math.random() * 9000) + 1000)}`]
-        );
+            const [result] = await pool.query(
+              'INSERT INTO users (email, password, role, status) VALUES (?, ?, ?, ?) RETURNING user_id',
+              [student.email, studentPassword, 'student', 'active']
+            );
+            studentIds.push(result.insertId);
+
+            await pool.query(
+              'INSERT INTO user_profiles (user_id, first_name, middle_name, last_name, student_id, course, year_level, contact_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+              [result.insertId, student.firstName, student.middleName, student.lastName, student.studentId, student.course, student.year, `0912345${String(Math.floor(Math.random() * 9000) + 1000)}`]
+            );
       } catch (error) {
-        // If user exists, get their ID
-        if (error.code === 'ER_DUP_ENTRY') {
-          const [existing] = await connection.execute(
+        // If user exists, get their ID (Postgres unique_violation = 23505)
+        if (error.code === 'ER_DUP_ENTRY' || error.code === '23505') {
+          const [existing] = await pool.query(
             'SELECT user_id FROM users WHERE email = ?',
             [student.email]
           );
@@ -88,7 +80,7 @@ async function seedData() {
     const allStudents = [existingStudent, ...studentIds];
     
     // Get organization IDs
-    const [orgs] = await connection.execute('SELECT org_id FROM organizations ORDER BY org_id');
+    const [orgs] = await pool.query('SELECT org_id FROM organizations ORDER BY org_id');
     
     let memberCount = 0;
     for (const studentId of allStudents.slice(0, 10)) {
@@ -99,7 +91,7 @@ async function seedData() {
       for (let i = 0; i < numOrgs; i++) {
         const orgId = shuffled[i].org_id;
         try {
-          await connection.execute(
+          await pool.query(
             'INSERT INTO organization_members (org_id, user_id, membership_status, joined_date, approved_by, approved_at) VALUES (?, ?, ?, ?, ?, ?)',
             [orgId, studentId, 'active', '2025-09-01', adminUserId, new Date()]
           );
@@ -122,13 +114,13 @@ async function seedData() {
     
     for (const org of orgs) {
       // Get members of this org
-      const [members] = await connection.execute(
-        'SELECT user_id FROM organization_members WHERE org_id = ? AND membership_status = "active" LIMIT 5',
+      const [members] = await pool.query(
+        'SELECT user_id FROM organization_members WHERE org_id = ? AND membership_status = \'active\' LIMIT 5',
         [org.org_id]
       );
       
       for (let i = 0; i < Math.min(positions.length, members.length); i++) {
-        await connection.execute(
+        await pool.query(
           'INSERT INTO organization_officers (org_id, user_id, position, term_start, term_end, status) VALUES (?, ?, ?, ?, ?, ?)',
           [org.org_id, members[i].user_id, positions[i], '2025-09-01', '2026-05-31', 'active']
         );
@@ -152,28 +144,28 @@ async function seedData() {
     
     for (const alumni of alumniData) {
       try {
-        const [result] = await connection.execute(
-          'INSERT INTO users (email, password, role, status) VALUES (?, ?, ?, ?)',
+        const [result] = await pool.query(
+          'INSERT INTO users (email, password, role, status) VALUES (?, ?, ?, ?) RETURNING user_id',
           [alumni.email, alumniPassword, 'alumni', 'active']
         );
-        
-        await connection.execute(
+
+        await pool.query(
           'INSERT INTO user_profiles (user_id, first_name, last_name, contact_number) VALUES (?, ?, ?, ?)',
           [result.insertId, alumni.firstName, alumni.lastName, `0917${Math.floor(Math.random() * 10000000)}`]
         );
-        
-        const [alumniProfileResult] = await connection.execute(
-          'INSERT INTO alumni_profiles (user_id, graduation_year, degree_program, current_employment_status, company_name, job_position, industry, employment_start_date, contact_email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+
+        const [alumniProfileResult] = await pool.query(
+          'INSERT INTO alumni_profiles (user_id, graduation_year, degree_program, current_employment_status, company_name, job_position, industry, employment_start_date, contact_email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING alumni_id',
           [result.insertId, alumni.graduationYear, alumni.degree, 'employed', alumni.company, alumni.position, 'Information Technology', `${alumni.graduationYear}-07-01`, alumni.email]
         );
-        
+
         // Add some achievements
-        await connection.execute(
+        await pool.query(
           'INSERT INTO alumni_achievements (alumni_id, achievement_type, title, description, achievement_date) VALUES (?, ?, ?, ?, ?)',
           [alumniProfileResult.insertId, 'professional', 'Career Advancement', `Promoted to ${alumni.position}`, `${alumni.graduationYear + 1}-01-15`]
         );
       } catch (error) {
-        if (error.code !== 'ER_DUP_ENTRY') {
+        if (error.code !== 'ER_DUP_ENTRY' && error.code !== '23505') {
           console.error('Error creating alumni:', error.message);
         }
       }
@@ -196,7 +188,7 @@ async function seedData() {
     for (const caseData of cases) {
       try {
         const caseNumber = `CASE-2026-${String(caseCount + 1).padStart(4, '0')}`;
-        await connection.execute(
+        await pool.query(
           'INSERT INTO discipline_cases (case_number, complainant_id, case_type, subject, description, status, severity, assigned_to, is_anonymous) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
           [caseNumber, caseData.studentId, caseData.type, caseData.subject, caseData.description, 'pending', caseData.severity, adminUserId, false]
         );
@@ -223,8 +215,8 @@ async function seedData() {
     const eventIds = [];
     for (const event of events) {
       try {
-        const [result] = await connection.execute(
-          'INSERT INTO sports_events (event_name, event_type, description, venue, event_date, start_time, end_time, status, organizer, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        const [result] = await pool.query(
+          'INSERT INTO sports_events (event_name, event_type, description, venue, event_date, start_time, end_time, status, organizer, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING event_id',
           [event.name, event.type, event.description, event.venue, event.date, event.startTime, event.endTime, 'upcoming', 'CESSCA', adminUserId]
         );
         eventIds.push(result.insertId);
@@ -239,7 +231,7 @@ async function seedData() {
       const numParticipants = Math.floor(Math.random() * 8) + 3;
       for (let i = 0; i < numParticipants; i++) {
         try {
-          await connection.execute(
+          await pool.query(
             'INSERT INTO event_participants (event_id, user_id, participation_type, registration_date, status) VALUES (?, ?, ?, ?, ?)',
             [eventId, allStudents[i], 'individual', new Date(), 'registered']
           );
@@ -267,7 +259,7 @@ async function seedData() {
     
     for (const announcement of announcements) {
       try {
-        await connection.execute(
+        await pool.query(
           'INSERT INTO announcements (title, content, announcement_type, target_audience, priority, published_by, status, published_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
           [announcement.title, announcement.content, announcement.type, announcement.targetAudience, announcement.priority, adminUserId, 'published', new Date()]
         );
@@ -292,7 +284,7 @@ async function seedData() {
     
     for (const activity of activities) {
       try {
-        await connection.execute(
+        await pool.query(
           'INSERT INTO organization_activities (org_id, activity_title, description, activity_type, venue, start_date, end_date, target_participants, budget, status, submitted_by, reviewed_by, reviewed_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           [activity.orgId, activity.title, activity.description, activity.type, activity.venue, activity.startDate, activity.endDate, 50, activity.budget, activity.status, studentIds.length > 0 ? studentIds[0] : 3, activity.status === 'approved' ? adminUserId : null, activity.status === 'approved' ? new Date() : null]
         );
@@ -316,7 +308,7 @@ async function seedData() {
     console.log(`   - ${activities.length} organization activities`);
     console.log('\n✅ Your application now has realistic sample data for testing!\n');
 
-    await connection.end();
+    // pool shared; no explicit close
   } catch (error) {
     console.error('❌ Error:', error.message);
     process.exit(1);

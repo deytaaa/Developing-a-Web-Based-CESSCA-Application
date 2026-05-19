@@ -169,7 +169,7 @@ router.post('/users/create', auth, roleCheck('admin'), [
 
         // Create user account
         const [userResult] = await pool.query(
-            'INSERT INTO users (email, password, role, status) VALUES (?, ?, ?, ?)',
+            'INSERT INTO users (email, password, role, status) VALUES (?, ?, ?, ?) RETURNING user_id',
             [email, hashedPassword, role, 'active']
         );
 
@@ -413,7 +413,7 @@ router.post('/announcements', auth, roleCheck('admin', 'cessca_staff'), [
             `INSERT INTO announcements 
              (title, content, announcement_type, target_audience, target_org_id, 
               priority, status, published_by, published_at, expires_at)
-             VALUES (?, ?, ?, ?, ?, ?, 'published', ?, NOW(), ?)`,
+             VALUES (?, ?, ?, ?, ?, ?, 'published', ?, NOW(), ?) RETURNING announcement_id`,
             [title, content, announcementType, targetAudience, targetOrgId || null,
              priority || 'normal', req.user.userId, expiresAt || null]
         );

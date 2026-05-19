@@ -179,7 +179,7 @@ router.post('/events', auth, roleCheck('cessca_staff', 'admin'), [
             `INSERT INTO sports_events 
              (event_name, event_type, description, venue, event_date, start_time, 
               end_time, organizer, target_participants, created_by)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING event_id`,
             [eventName, eventType, description, venue, eventDate, startTime,
              endTime, organizer, targetParticipants, req.user.userId]
         );
@@ -284,7 +284,7 @@ router.post('/events/:id/register', auth, roleCheck('student'), async (req, res)
 
         const [result] = await pool.query(
             `INSERT INTO event_participants (event_id, user_id, team_name, participation_type)
-             VALUES (?, ?, ?, ?)`,
+             VALUES (?, ?, ?, ?) RETURNING participant_id`,
             [req.params.id, req.user.userId, teamName, participationType || 'individual']
         );
 
@@ -315,7 +315,7 @@ router.post('/events/:id/results', auth, roleCheck('cessca_staff', 'admin'), [
         const [result] = await pool.query(
             `INSERT INTO competition_results 
              (event_id, participant_id, rank_position, award, score, remarks, recorded_by)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+             VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING result_id`,
             [req.params.id, participantId, rankPosition, award, score, remarks, req.user.userId]
         );
 
@@ -471,7 +471,7 @@ router.post('/gallery', auth, roleCheck('cessca_staff', 'admin'),
         const [result] = await pool.query(
             `INSERT INTO sports_gallery 
              (album_id, event_id, title, description, category, image_url, year, uploaded_by, photo_order)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING gallery_id`,
             [albumId || null, eventId || null, title, description, category, imageUrl, year, req.user.userId, photoOrder || 1]
         );
 

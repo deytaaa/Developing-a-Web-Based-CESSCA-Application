@@ -141,9 +141,9 @@ router.post('/register', [
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert user
+        // Insert user (return the new user id for Postgres)
         const [userResult] = await pool.query(
-            'INSERT INTO users (email, password, role, status) VALUES (?, ?, ?, ?)',
+            'INSERT INTO users (email, password, role, status) VALUES (?, ?, ?, ?) RETURNING user_id',
             [email, hashedPassword, role, 'pending']
         );
 

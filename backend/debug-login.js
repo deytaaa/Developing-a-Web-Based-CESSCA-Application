@@ -1,17 +1,10 @@
-const mysql = require('mysql2/promise');
+const { pool } = require('./config/database');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 async function debugLogin() {
   try {
-    const connection = await mysql.createConnection({
-      host: process.env.DB_HOST || 'localhost',
-      user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_NAME || 'cessca_db',
-      port: process.env.DB_PORT || 3306
-    });
-
+    console.log('Using Postgres pool for database operations');
     const testEmail = 'john.alumni@gmail.com';
     const testPassword = 'alumni123';
 
@@ -19,7 +12,7 @@ async function debugLogin() {
     console.log('');
 
     // Get user from database
-    const [users] = await connection.execute(
+    const [users] = await pool.query(
       'SELECT user_id, email, password, role, status FROM users WHERE email = ?',
       [testEmail]
     );
@@ -43,7 +36,7 @@ async function debugLogin() {
     if (user.status !== 'active') {
       console.log('❌ Account status is:', user.status);
       console.log('   Updating to active...');
-      await connection.execute(
+      await pool.query(
         'UPDATE users SET status = ? WHERE user_id = ?',
         ['active', user.user_id]
       );
@@ -64,7 +57,7 @@ async function debugLogin() {
       const newHash = await bcrypt.hash(testPassword, 10);
       console.log('   New hash:', newHash.substring(0, 20) + '...');
       
-      await connection.execute(
+      await pool.query(
         'UPDATE users SET password = ? WHERE user_id = ?',
         [newHash, user.user_id]
       );
@@ -76,7 +69,7 @@ async function debugLogin() {
     }
 
     // Check for profile
-    const [profiles] = await connection.execute(
+    const [profiles] = await pool.query(
       'SELECT * FROM user_profiles WHERE user_id = ?',
       [user.user_id]
     );
@@ -84,7 +77,7 @@ async function debugLogin() {
     console.log('');
     if (profiles.length === 0) {
       console.log('⚠️  No user profile found - creating one...');
-      await connection.execute(
+      await pool.query(
         'INSERT INTO user_profiles (user_id, first_name, last_name) VALUES (?, ?, ?)',
         [user.user_id, 'John', 'Alumni']
       );
@@ -98,7 +91,7 @@ async function debugLogin() {
     console.log('   Email: john.alumni@gmail.com');
     console.log('   Password: alumni123');
 
-    await connection.end();
+    // pool shared; no explicit close
   } catch (error) {
     console.error('❌ Error:', error.message);
     process.exit(1);

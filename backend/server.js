@@ -135,7 +135,7 @@ const startServer = async () => {
 
         databaseReady = await testConnection();
         if (!databaseReady) {
-            console.warn('⚠️ Starting without a database connection. Check Render environment variables and MySQL host.');
+            console.warn('⚠️ Starting without a database connection. Check Render environment variables and Postgres / Supabase settings.');
         }
     } catch (error) {
         console.error('Failed to start server:', error);

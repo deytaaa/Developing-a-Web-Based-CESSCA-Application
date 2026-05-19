@@ -141,7 +141,7 @@ router.post('/', auth, roleCheck('cessca_staff', 'admin'), [
 
         const [result] = await pool.query(
             `INSERT INTO organizations (org_name, org_acronym, org_type, description, mission, vision, founded_date, status)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING org_id`,
             [org_name, org_acronym, org_type, description, mission, vision, founded_date, status || 'active']
         );
 
@@ -606,7 +606,7 @@ router.post('/:id/activities', auth, [
         const [result] = await pool.query(
             `INSERT INTO organization_activities 
              (org_id, activity_title, description, activity_type, venue, start_date, end_date, target_participants, budget, submitted_by)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING activity_id`,
             [req.params.id, activityTitle, description, activityType, venue, startDate, endDate, targetParticipants, budget, req.user.userId]
         );
 
