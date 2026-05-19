@@ -41,8 +41,8 @@ const Activities = () => {
     remarks: ''
   });
 
-  const isOfficer = user?.role === 'student';
   const isCessca = user?.role === 'cessca_staff' || user?.role === 'admin';
+  const canSubmitActivities = user?.role === 'student' && organizations.length > 0;
 
   useEffect(() => {
     loadData();
@@ -53,23 +53,13 @@ const Activities = () => {
       setLoading(true);
       
       // Load organizations based on role
-      if (isOfficer || isCessca) {
-        let orgsData;
-        
-        if (isOfficer) {
-          // Officers only see organizations they're officers of
-          orgsData = await organizationService.getMyOfficerOrganizations();
-        } else {
-          // CESSCA/Admin see all organizations
-          orgsData = await organizationService.getAll();
-        }
-        
-        setOrganizations(orgsData.organizations || orgsData || []);
-        
-        // Load all activities from relevant organizations
-        const allActivities = [];
+      if (isCessca) {
+        const orgsData = await organizationService.getAll();
         const orgList = orgsData.organizations || orgsData || [];
-        
+
+        setOrganizations(orgList);
+
+        const allActivities = [];
         for (const org of orgList) {
           try {
             const activitiesData = await organizationService.getActivities(org.org_id);
@@ -83,7 +73,29 @@ const Activities = () => {
             console.error(`Error loading activities for org ${org.org_id}:`, error);
           }
         }
-        
+
+        setActivities(allActivities);
+      } else if (user?.role === 'student') {
+        const orgsData = await organizationService.getMyOfficerOrganizations();
+        const orgList = orgsData.organizations || orgsData || [];
+
+        setOrganizations(orgList);
+
+        const allActivities = [];
+        for (const org of orgList) {
+          try {
+            const activitiesData = await organizationService.getActivities(org.org_id);
+            const orgActivities = (activitiesData.activities || activitiesData || []).map(activity => ({
+              ...activity,
+              org_name: org.org_name,
+              org_acronym: org.org_acronym
+            }));
+            allActivities.push(...orgActivities);
+          } catch (error) {
+            console.error(`Error loading activities for org ${org.org_id}:`, error);
+          }
+        }
+
         setActivities(allActivities);
       }
     } catch (error) {
@@ -229,12 +241,12 @@ const Activities = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Organization Activities</h1>
             <p className="text-gray-600 mt-1">
-              {isOfficer && 'Submit and manage organization activity proposals'}
+              {canSubmitActivities && 'Submit and manage organization activity proposals'}
               {isCessca && 'Review and approve organization activities'}
             </p>
           </div>
           
-          {isOfficer && organizations.length > 0 && (
+          {canSubmitActivities && (
             <button
               onClick={() => setShowCreateModal(true)}
               className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
@@ -246,7 +258,7 @@ const Activities = () => {
         </div>
 
         {/* No Organizations Assigned Warning for Officers */}
-        {isOfficer && organizations.length === 0 && (
+        {user?.role === 'student' && organizations.length === 0 && (
           <Card>
             <div className="text-center py-12">
               <FiAlertCircle className="text-6xl mx-auto mb-4 text-yellow-500" />
@@ -262,7 +274,7 @@ const Activities = () => {
         )}
 
         {/* Show filters and activities only if has organizations */}
-        {(isCessca || (isOfficer && organizations.length > 0)) && (
+        {(isCessca || canSubmitActivities) && (
           <>
         {/* Filters */}
         <Card>
@@ -297,7 +309,7 @@ const Activities = () => {
                 <FiCalendar className="text-6xl mx-auto mb-4 text-gray-400" />
                 <p className="text-lg">No activities found</p>
                 <p className="text-sm mt-2">
-                  {isOfficer && filterStatus === 'all' && 'Submit your first activity proposal'}
+                  {canSubmitActivities && filterStatus === 'all' && 'Submit your first activity proposal'}
                 </p>
               </div>
             </Card>
@@ -400,7 +412,7 @@ const Activities = () => {
                     )}
 
                     {/* Delete Button */}
-                    {((isOfficer && activity.submitted_by === user.userId && activity.status === 'pending') || isCessca) && (
+                    {((user?.role === 'student' && activity.submitted_by === user.userId && activity.status === 'pending') || isCessca) && (
                       <button
                         onClick={() => handleDeleteActivity(activity.activity_id)}
                         className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2"
