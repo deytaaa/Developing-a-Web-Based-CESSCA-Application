@@ -8,11 +8,12 @@ import Modal from '../components/Modal';
 import { organizationService } from '../services/organizationService';
 import { useAuth } from '../contexts/AuthContext';
 import { getAssetUrl } from '../utils/assetUrl';
+import { defaultOrgImage, defaultAvatarImage, defaultGalleryImage } from '../utils/defaultImages';
 import { FiUsers, FiCalendar, FiMapPin, FiClock, FiAward, FiUserPlus, FiUserMinus, FiArrowLeft, FiTarget, FiHeart, FiPlus, FiX, FiTrash2, FiCheck, FiEdit, FiUpload, FiImage, FiCamera, FiMaximize2, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 // Helper to get the correct logo URL
 const getLogoUrl = (logoPath) => {
-  if (!logoPath) return '/default-org.png';
+  if (!logoPath) return defaultOrgImage;
   if (logoPath.startsWith('http')) return logoPath;
   return getAssetUrl(logoPath);
 };
@@ -577,7 +578,7 @@ const OrganizationDetails = () => {
                     src={getLogoUrl(organization.logo_url)}
                     alt={organization.org_name}
                     className="w-full h-full object-cover rounded-lg"
-                    onError={e => { e.target.onerror = null; e.target.src = '/default-org.png'; }}
+                    onError={e => { e.target.onerror = null; e.target.src = defaultOrgImage; }}
                   />
                 ) : (
                   <FiUsers className="text-4xl text-green-600" />
@@ -734,7 +735,7 @@ const OrganizationDetails = () => {
                         src={getImageUrl(officer.profile_picture)}
                         alt={`${officer.first_name} ${officer.last_name}`}
                         className="w-12 h-12 rounded-full object-cover"
-                        onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
+                        onError={e => { e.target.onerror = null; e.target.src = defaultAvatarImage; }}
                       />
                     ) : (
                       <div
@@ -996,7 +997,7 @@ const OrganizationDetails = () => {
                                   <div className="aspect-square overflow-hidden bg-gray-100 relative">
                                     <img
                                       src={getImageUrl(coverPhoto.image_url)}
-                                      onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
+                                      onError={e => { e.target.onerror = null; e.target.src = defaultGalleryImage; }}
                                       alt={albumName}
                                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                     />
@@ -1079,7 +1080,7 @@ const OrganizationDetails = () => {
                                 <div className="relative">
                                   <img
                                     src={getImageUrl(photo.image_url)}
-                                    onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
+                                      onError={e => { e.target.onerror = null; e.target.src = defaultGalleryImage; }}
                                     alt={photo.title}
                                     className="w-full h-64 object-cover"
                                   />
@@ -1225,7 +1226,7 @@ const OrganizationDetails = () => {
               {/* Image */}
               <img
                 src={getImageUrl(getCurrentPhoto().image_url)}
-                onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
+                onError={e => { e.target.onerror = null; e.target.src = defaultGalleryImage; }}
                 alt={getCurrentPhoto().title}
                 className="max-h-full max-w-full object-contain"
                 style={{ maxHeight: 'calc(100vh - 220px)' }}
@@ -1260,7 +1261,7 @@ const OrganizationDetails = () => {
                     >
                       <img
                         src={getImageUrl(photo.image_url)}
-                        onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
+                        onError={e => { e.target.onerror = null; e.target.src = defaultGalleryImage; }}
                         alt={photo.title}
                         className="w-20 h-20 object-cover rounded"
                       />

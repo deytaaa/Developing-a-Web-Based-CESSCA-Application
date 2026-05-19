@@ -8,6 +8,7 @@ import sportsHeroBg from '../assets/images/loginbg.jpg';
 import { useAuth } from '../contexts/AuthContext';
 import heroBg from '../assets/images/artsbanner.png';
 import { getAssetUrl } from '../utils/assetUrl';
+import { defaultGalleryImage } from '../utils/defaultImages';
 import { FiImage, FiUpload, FiX, FiStar, FiCalendar, FiTag, FiUser, FiMaximize2, FiTrash2, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 const Gallery = () => {
@@ -355,7 +356,7 @@ const Gallery = () => {
                 <div className="aspect-square overflow-hidden bg-gray-100 relative">
                   <img
                     src={getAssetUrl(album.cover_image)}
-                    onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
+                    onError={e => { e.target.onerror = null; e.target.src = defaultGalleryImage; }}
                     alt={album.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
                     onClick={() => openAlbumModal(album)}
@@ -745,7 +746,7 @@ const Gallery = () => {
               {/* Image */}
               <img
                 src={getAssetUrl(getCurrentPhoto().image_url)}
-                onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
+                onError={e => { e.target.onerror = null; e.target.src = defaultGalleryImage; }}
                 alt={selectedAlbum.title}
                 className="max-h-full max-w-full object-contain"
                 style={{ maxHeight: 'calc(100vh - 220px)' }}
@@ -780,7 +781,7 @@ const Gallery = () => {
                     >
                       <img
                         src={getAssetUrl(photo.image_url)}
-                        onError={e => { e.target.onerror = null; e.target.src = '/default-gallery.png'; }}
+                        onError={e => { e.target.onerror = null; e.target.src = defaultGalleryImage; }}
                         alt={photo.title}
                         className="w-20 h-20 object-cover rounded"
                       />
