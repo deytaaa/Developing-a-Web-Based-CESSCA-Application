@@ -43,6 +43,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import heroBg from '../assets/images/loginbg.jpg';
 import { achievementService } from '../services/achievementService';
 import { useAuth } from '../contexts/AuthContext';
+import { getAssetUrl } from '../utils/assetUrl';
 import {
   FiAward, FiPlus, FiEdit2, FiTrash2, FiStar, FiFilter,
   FiCalendar, FiX, FiUpload, FiSearch,
@@ -526,7 +527,7 @@ const AchievementCard = ({ achievement: a, user, onEdit, onDelete, featured }) =
       <div className="relative w-full bg-gray-100 flex items-center justify-center cursor-pointer group aspect-square overflow-hidden" onClick={() => a.image_url && setImgModalOpen(true)}>
         {a.image_url ? (
           <img
-            src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${a.image_url}`}
+            src={getAssetUrl(a.image_url)}
             onError={e => {
               e.target.onerror = null;
               const svg = encodeURIComponent(`<?xml version="1.0" encoding="UTF-8"?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><rect width='100%' height='100%' fill='%23f3f4f6'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-family='Arial' font-size='24'>Image not available</text></svg>`);
@@ -564,7 +565,7 @@ const AchievementCard = ({ achievement: a, user, onEdit, onDelete, featured }) =
           </div>
         )}
         {/* Modal for full image */}
-        <ImageModal src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${a.image_url}`} alt={a.title} open={imgModalOpen} onClose={() => setImgModalOpen(false)} />
+        <ImageModal src={getAssetUrl(a.image_url)} alt={a.title} open={imgModalOpen} onClose={() => setImgModalOpen(false)} />
       </div>
       {/* Card Content */}
       <div className="flex flex-col flex-1 px-4 pt-3 pb-2">
