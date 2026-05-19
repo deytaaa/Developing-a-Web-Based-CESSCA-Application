@@ -8,9 +8,9 @@ import loginBg from '../assets/images/loginbg.jpg';
 const Login = () => {
   const navigate = useNavigate();
   const { login, user, loading } = useAuth();
-  // If already logged in, redirect to dashboard
+  // If already logged in, redirect to organizations
   if (!loading && user) {
-    navigate('/dashboard', { replace: true });
+    navigate('/organizations', { replace: true });
     return null;
   }
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -24,7 +24,7 @@ const Login = () => {
     setFormLoading(true);
     try {
       await login(formData.email, formData.password);
-      navigate('/dashboard', { replace: true });
+      navigate('/organizations', { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {

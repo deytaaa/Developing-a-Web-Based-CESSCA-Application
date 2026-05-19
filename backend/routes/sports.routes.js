@@ -265,7 +265,7 @@ router.delete('/events/:id', auth, roleCheck('cessca_staff', 'admin'), async (re
 });
 
 // Register for event
-router.post('/events/:id/register', auth, roleCheck('student', 'officer'), async (req, res) => {
+router.post('/events/:id/register', auth, roleCheck('student'), async (req, res) => {
     try {
         const { teamName, participationType } = req.body;
 

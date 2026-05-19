@@ -274,17 +274,7 @@ GET /api/sports/gallery?category=sports&year=2026
 
 ## 6. Analytics Endpoints
 
-### Get Dashboard Data
-```http
-GET /api/analytics/dashboard
-Authorization: Bearer <token>
-```
-
-### Get Organization Statistics
-```http
-GET /api/analytics/organizations/stats?year=2026
-Authorization: Bearer <token>
-```
+Analytics endpoints are no longer available in the current build. Use `/api/organizations`, `/api/sports`, `/api/admin`, and `/api/achievements` for current workflows.
 
 ### Get Alumni Reports
 ```http

@@ -41,7 +41,7 @@ const Activities = () => {
     remarks: ''
   });
 
-  const isOfficer = user?.role === 'officer';
+  const isOfficer = user?.role === 'student';
   const isCessca = user?.role === 'cessca_staff' || user?.role === 'admin';
 
   useEffect(() => {

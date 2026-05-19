@@ -129,7 +129,7 @@ router.put('/users/:id/approve', auth, roleCheck('admin', 'cessca_staff'), [
 router.post('/users/create', auth, roleCheck('admin'), [
     body('email').isEmail(),
     body('password').isLength({ min: 6 }),
-    body('role').isIn(['student', 'officer', 'alumni', 'cessca_staff', 'admin']),
+    body('role').isIn(['student', 'alumni', 'cessca_staff', 'admin']),
     body('first_name').notEmpty(),
     body('last_name').notEmpty()
 ], async (req, res) => {
@@ -213,7 +213,7 @@ router.post('/users/create', auth, roleCheck('admin'), [
 
 // Update user role (Admin only)
 router.put('/users/:id/role', auth, roleCheck('admin'), [
-    body('role').isIn(['student', 'officer', 'alumni', 'cessca_staff', 'admin'])
+    body('role').isIn(['student', 'alumni', 'cessca_staff', 'admin'])
 ], async (req, res) => {
     try {
         const { role } = req.body;

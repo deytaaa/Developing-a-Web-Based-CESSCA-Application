@@ -4,7 +4,6 @@ import { SettingsProvider } from './contexts/SettingsContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
 import Organizations from './pages/Organizations';
 import OrganizationDetails from './pages/OrganizationDetails';
 import Activities from './pages/Activities';
@@ -12,7 +11,6 @@ import Activities from './pages/Activities';
 import Sports from './pages/Sports';
 import EventDetails from './pages/EventDetails';
 import Gallery from './pages/Gallery';
-import Analytics from './pages/Analytics';
 import Admin from './pages/Admin';
 import Profile from './pages/Profile';
 import About from './pages/About';
@@ -29,33 +27,29 @@ function App() {
             <Route path="/register" element={<Register />} />
             
             {/* Protected Routes */}
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             
             {/* Organizations */}
-            <Route path="/organizations" element={<ProtectedRoute roles={['student', 'officer', 'cessca_staff', 'admin']}><Organizations /></ProtectedRoute>} />
-            <Route path="/organizations/:id" element={<ProtectedRoute roles={['student', 'officer', 'cessca_staff', 'admin']}><OrganizationDetails /></ProtectedRoute>} />
-            <Route path="/activities" element={<ProtectedRoute roles={['officer', 'cessca_staff', 'admin']}><Activities /></ProtectedRoute>} />
+            <Route path="/organizations" element={<ProtectedRoute roles={['student', 'cessca_staff', 'admin']}><Organizations /></ProtectedRoute>} />
+            <Route path="/organizations/:id" element={<ProtectedRoute roles={['student', 'cessca_staff', 'admin']}><OrganizationDetails /></ProtectedRoute>} />
+            <Route path="/activities" element={<ProtectedRoute roles={['student', 'cessca_staff', 'admin']}><Activities /></ProtectedRoute>} />
             
             {/* Alumni and Discipline modules removed */}
             
             {/* Sports & Arts */}
-            <Route path="/sports" element={<ProtectedRoute roles={['student', 'officer', 'cessca_staff', 'admin']}><Sports /></ProtectedRoute>} />
-            <Route path="/sports/events/:id" element={<ProtectedRoute roles={['student', 'officer', 'cessca_staff', 'admin']}><EventDetails /></ProtectedRoute>} />
-            <Route path="/gallery" element={<ProtectedRoute roles={['student', 'officer', 'cessca_staff', 'admin']}><Gallery /></ProtectedRoute>} />
+            <Route path="/sports" element={<ProtectedRoute roles={['student', 'cessca_staff', 'admin']}><Sports /></ProtectedRoute>} />
+            <Route path="/sports/events/:id" element={<ProtectedRoute roles={['student', 'cessca_staff', 'admin']}><EventDetails /></ProtectedRoute>} />
+            <Route path="/gallery" element={<ProtectedRoute roles={['student', 'cessca_staff', 'admin']}><Gallery /></ProtectedRoute>} />
             
-            {/* Analytics */}
-            <Route path="/analytics" element={<ProtectedRoute roles={['cessca_staff', 'admin']}><Analytics /></ProtectedRoute>} />
-
             {/* Achievements */}
             <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
             
             {/* About / Administration */}
-            <Route path="/about" element={<ProtectedRoute roles={['student', 'officer', 'alumni', 'cessca_staff', 'admin']}><About /></ProtectedRoute>} />
+            <Route path="/about" element={<ProtectedRoute roles={['student', 'alumni', 'cessca_staff', 'admin']}><About /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute roles={['admin', 'cessca_staff']}><Admin /></ProtectedRoute>} />
             
             {/* Fallback */}
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/organizations" replace />} />
           </Routes>
         </Router>
       </SettingsProvider>

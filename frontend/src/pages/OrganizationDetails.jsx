@@ -604,7 +604,7 @@ const OrganizationDetails = () => {
                 </button>
               )}
               
-              {user && organization.status === 'active' && (user.role === 'student' || user.role === 'officer') && (
+              {user && organization.status === 'active' && user.role === 'student' && (
                 <div>
                   {membershipStatus === 'active' ? (
                     <button
@@ -875,7 +875,7 @@ const OrganizationDetails = () => {
         {activeTab === 'activities' && (
           <div className="space-y-4">
             {/* Add Activity Button for Officers only */}
-            {user && user.role === 'officer' && (
+            {user && user.role === 'student' && (
               <Card>
                 <div className="flex items-center justify-between">
                   <div>

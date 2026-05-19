@@ -319,7 +319,7 @@ const Sports = () => {
                     >
                       View Details
                     </Button>
-                    {(user?.role === 'student' || user?.role === 'officer') && 
+                    {(user?.role === 'student') && 
                      event.status === 'upcoming' && (
                       <Button
                         variant="primary"

@@ -13,8 +13,6 @@ const authRoutes = require('./routes/auth.routes');
 const organizationRoutes = require('./routes/organizations.routes');
 const sportsRoutes = require('./routes/sports.routes');
 const adminRoutes = require('./routes/admin.routes');
-
-const analyticsRoutes = require('./routes/analytics.routes');
 const achievementsRoutes = require('./routes/achievements.routes');
 const aboutRoutes = require('./routes/about.routes');
 const aboutUploadRoutes = require('./routes/aboutUpload.routes');
@@ -79,8 +77,6 @@ app.use('/api/organizations', organizationRoutes);
 // Alumni and Discipline modules removed per project request
 app.use('/api/sports', sportsRoutes);
 app.use('/api/admin', adminRoutes);
-
-app.use('/api/analytics', analyticsRoutes);
 app.use('/api/achievements', achievementsRoutes);
 app.use('/api/about', aboutRoutes);
 app.use('/api/about', aboutUploadRoutes);

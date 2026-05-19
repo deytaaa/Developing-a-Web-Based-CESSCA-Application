@@ -55,7 +55,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get organizations where current user is an officer
-router.get('/my/officer-organizations', auth, roleCheck('officer'), async (req, res) => {
+router.get('/my/officer-organizations', auth, async (req, res) => {
     try {
         const [organizations] = await pool.query(
             `SELECT o.*, oo.position, oo.term_start, oo.term_end,
@@ -255,7 +255,7 @@ router.get('/:id/members', auth, async (req, res) => {
 });
 
 // Join organization (Student)
-router.post('/:id/join', auth, roleCheck('student', 'officer'), async (req, res) => {
+router.post('/:id/join', auth, roleCheck('student'), async (req, res) => {
     try {
         // Check if already a member with active or pending status
         const [existing] = await pool.query(
@@ -301,7 +301,7 @@ router.post('/:id/join', auth, roleCheck('student', 'officer'), async (req, res)
 });
 
 // Leave organization (Student)
-router.delete('/:id/leave', auth, roleCheck('student', 'officer'), async (req, res) => {
+router.delete('/:id/leave', auth, roleCheck('student'), async (req, res) => {
     try {
         // Delete the membership record
         const result = await pool.query(
@@ -573,7 +573,7 @@ router.get('/:id/activities', async (req, res) => {
 });
 
 // Submit activity proposal (Officer)
-router.post('/:id/activities', auth, roleCheck('officer'), [
+router.post('/:id/activities', auth, [
     body('activityTitle').notEmpty().trim(),
     body('activityType').isIn(['seminar', 'workshop', 'competition', 'social', 'fundraising', 'community_service', 'other']),
     body('startDate').isISO8601(),
@@ -585,8 +585,8 @@ router.post('/:id/activities', auth, roleCheck('officer'), [
             return res.status(400).json({ success: false, errors: errors.array() });
         }
 
-        // Check if officer role - verify they are actually an officer of THIS organization
-        if (req.user.role === 'officer') {
+        // Check if current user is actually an officer of THIS organization unless they are CESSCA/Admin
+        if (!['cessca_staff', 'admin'].includes(req.user.role)) {
             const [officerCheck] = await pool.query(
                 `SELECT officer_id FROM organization_officers 
                  WHERE org_id = ? AND user_id = ? AND status = 'active'`,
@@ -657,7 +657,7 @@ router.put('/activities/:activityId/review', auth, roleCheck('cessca_staff', 'ad
 });
 
 // Delete activity (Officer who created it OR CESSCA/Admin)
-router.delete('/activities/:activityId', auth, roleCheck('officer', 'cessca_staff', 'admin'), async (req, res) => {
+router.delete('/activities/:activityId', auth, async (req, res) => {
     try {
         // Get activity details
         const [activity] = await pool.query(
@@ -728,7 +728,7 @@ router.post('/:id/officers', auth, roleCheck('cessca_staff', 'admin'), [
 
         const { userId, position, termStart, termEnd } = req.body;
 
-        // Check if user exists and has officer role
+        // Check if user exists and is a student account
         const [users] = await pool.query(
             'SELECT user_id, role FROM users WHERE user_id = ?',
             [userId]
@@ -741,10 +741,10 @@ router.post('/:id/officers', auth, roleCheck('cessca_staff', 'admin'), [
             });
         }
 
-        if (users[0].role !== 'officer') {
+        if (users[0].role !== 'student') {
             return res.status(400).json({ 
                 success: false, 
-                message: 'User must have officer role to be appointed as an officer' 
+                message: 'User must be a student to be appointed as an officer' 
             });
         }
 
@@ -831,7 +831,7 @@ router.delete('/:id/officers/:officerId', auth, roleCheck('cessca_staff', 'admin
     }
 });
 
-// Get potential officers (users with officer role not yet assigned to this org)
+// Get potential officers (students not yet assigned to this org)
 router.get('/:id/potential-officers', auth, roleCheck('cessca_staff', 'admin'), async (req, res) => {
     try {
         const [users] = await pool.query(
@@ -840,7 +840,7 @@ router.get('/:id/potential-officers', auth, roleCheck('cessca_staff', 'admin'), 
              JOIN user_profiles up ON u.user_id = up.user_id
              LEFT JOIN organization_officers oo ON u.user_id = oo.user_id 
                 AND oo.org_id = ? AND oo.status = 'active'
-             WHERE u.role = 'officer' AND u.status = 'active' AND oo.officer_id IS NULL
+             WHERE u.role = 'student' AND u.status = 'active' AND oo.officer_id IS NULL
              ORDER BY up.last_name, up.first_name`,
             [req.params.id]
         );
