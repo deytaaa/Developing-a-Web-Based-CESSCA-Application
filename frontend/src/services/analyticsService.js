@@ -16,15 +16,6 @@ export const analyticsService = {
     return response.data;
   },
 
-  getAlumniReports: async () => {
-    const response = await api.get('/analytics/alumni/reports');
-    return response.data;
-  },
-
-  getDisciplineSummary: async () => {
-    const response = await api.get('/analytics/discipline/summary');
-    return response.data;
-  },
 
   getSportsStats: async () => {
     const response = await api.get('/analytics/sports/stats');

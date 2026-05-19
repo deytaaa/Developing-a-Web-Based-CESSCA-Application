@@ -4,9 +4,9 @@ Render can host the Node.js backend, and Supabase can host the PostgreSQL databa
 
 ## Important
 
-- Render does not provide a local PostgreSQL service inside the web process
+- Render is IPv4-only for this deployment path, so Supabase's direct database host may show as not IPv4 compatible
+- Use the Supabase Session Pooler connection string for Render, or buy the Supabase IPv4 add-on
 - `DB_HOST=localhost` will fail on Render unless you are connecting to a VM you control
-- Use the Supabase PostgreSQL connection string or another hosted PostgreSQL database
 
 ## Backend Service
 
@@ -29,7 +29,7 @@ Set these in the Render dashboard:
 ```env
 NODE_ENV=production
 PORT=10000
-DATABASE_URL=postgresql://postgres:your_password@db.your-project-ref.supabase.co:5432/postgres
+DATABASE_URL=postgresql://postgres.qpidhsjgymvjkkitmfnc:your_supabase_db_password@<session-pooler-host>:5432/postgres
 DB_SSL=true
 JWT_SECRET=your_long_random_secret
 CORS_ORIGIN=https://your-frontend-domain.vercel.app
@@ -50,6 +50,7 @@ Make sure uploaded files are stored on a persistent disk or in object storage if
 ## Common Error
 
 If you see a connection error during startup, confirm that the Supabase `DATABASE_URL` is correct and that `DB_SSL=true` is set in Render.
+If Render says the database is not IPv4 compatible, switch to the Supabase Session Pooler URL from the dashboard.
 
 ## Your Current `.env`
 
@@ -64,11 +65,11 @@ DB_NAME=cessca_db
 CORS_ORIGIN=https://cessca.vercel.app
 ```
 
-On Render with Supabase, replace the database block with your Supabase PostgreSQL connection string:
+On Render with Supabase, replace the database block with your Supabase Session Pooler connection string:
 
 ```env
-DATABASE_URL=postgresql://postgres:your_password@db.your-project-ref.supabase.co:5432/postgres
+DATABASE_URL=postgresql://postgres.qpidhsjgymvjkkitmfnc:your_supabase_db_password@<session-pooler-host>:5432/postgres
 DB_SSL=true
 ```
 
-If you do not have the Supabase connection string yet, Render will keep failing even if the backend deploys successfully.
+If you do not have the Supabase Session Pooler connection string yet, Render will keep failing even if the backend deploys successfully.

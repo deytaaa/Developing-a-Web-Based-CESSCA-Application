@@ -8,10 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Organizations from './pages/Organizations';
 import OrganizationDetails from './pages/OrganizationDetails';
 import Activities from './pages/Activities';
-import Alumni from './pages/Alumni';
-import AlumniProfile from './pages/AlumniProfile';
-import Discipline from './pages/Discipline';
-import CaseDetails from './pages/CaseDetails';
+// CaseDetails removed with Discipline module
 import Sports from './pages/Sports';
 import EventDetails from './pages/EventDetails';
 import Gallery from './pages/Gallery';
@@ -40,13 +37,7 @@ function App() {
             <Route path="/organizations/:id" element={<ProtectedRoute roles={['student', 'officer', 'cessca_staff', 'admin']}><OrganizationDetails /></ProtectedRoute>} />
             <Route path="/activities" element={<ProtectedRoute roles={['officer', 'cessca_staff', 'admin']}><Activities /></ProtectedRoute>} />
             
-            {/* Alumni */}
-            <Route path="/alumni" element={<ProtectedRoute roles={['alumni', 'cessca_staff', 'admin']}><Alumni /></ProtectedRoute>} />
-            <Route path="/alumni/:id" element={<ProtectedRoute roles={['alumni', 'cessca_staff', 'admin']}><AlumniProfile /></ProtectedRoute>} />
-            
-            {/* Discipline */}
-            <Route path="/discipline" element={<ProtectedRoute roles={['student', 'officer', 'cessca_staff', 'admin']}><Discipline /></ProtectedRoute>} />
-            <Route path="/discipline/cases/:id" element={<ProtectedRoute roles={['student', 'officer', 'cessca_staff', 'admin']}><CaseDetails /></ProtectedRoute>} />
+            {/* Alumni and Discipline modules removed */}
             
             {/* Sports & Arts */}
             <Route path="/sports" element={<ProtectedRoute roles={['student', 'officer', 'cessca_staff', 'admin']}><Sports /></ProtectedRoute>} />

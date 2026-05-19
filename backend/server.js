@@ -11,8 +11,6 @@ const { testConnection } = require('./config/database');
 // Import routes
 const authRoutes = require('./routes/auth.routes');
 const organizationRoutes = require('./routes/organizations.routes');
-const alumniRoutes = require('./routes/alumni.routes');
-const disciplineRoutes = require('./routes/discipline.routes');
 const sportsRoutes = require('./routes/sports.routes');
 const adminRoutes = require('./routes/admin.routes');
 
@@ -77,8 +75,7 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/organizations', organizationRoutes);
-app.use('/api/alumni', alumniRoutes);
-app.use('/api/discipline', disciplineRoutes);
+// Alumni and Discipline modules removed per project request
 app.use('/api/sports', sportsRoutes);
 app.use('/api/admin', adminRoutes);
 

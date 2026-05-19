@@ -16,12 +16,12 @@ router.get('/dashboard', auth, roleCheck('cessca_staff', 'admin', 'officer'), as
 
         // Organization statistics
         const [orgStats] = await pool.query(
-            'SELECT * FROM v_organization_stats WHERE status = "active"'
+            "SELECT * FROM v_organization_stats WHERE status = 'active'"
         );
 
         // Total organizations
         const [orgCount] = await pool.query(
-            'SELECT COUNT(*) as total FROM organizations WHERE status = "active"'
+            "SELECT COUNT(*) as total FROM organizations WHERE status = 'active'"
         );
 
         // Recent activities
