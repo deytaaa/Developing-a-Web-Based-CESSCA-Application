@@ -11,12 +11,8 @@ const { testConnection } = require('./config/database');
 // Import routes
 const authRoutes = require('./routes/auth.routes');
 const organizationRoutes = require('./routes/organizations.routes');
-const alumniRoutes = require('./routes/alumni.routes');
-const disciplineRoutes = require('./routes/discipline.routes');
 const sportsRoutes = require('./routes/sports.routes');
 const adminRoutes = require('./routes/admin.routes');
-
-const analyticsRoutes = require('./routes/analytics.routes');
 const achievementsRoutes = require('./routes/achievements.routes');
 const aboutRoutes = require('./routes/about.routes');
 const aboutUploadRoutes = require('./routes/aboutUpload.routes');
@@ -51,9 +47,10 @@ app.use(helmet({
 }));
 
 // Rate limiting
+const isProduction = process.env.NODE_ENV === 'production';
 const limiter = rateLimit({
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000, // 15 minutes
+    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || (isProduction ? 100 : 1000)
 });
 app.use('/api/', limiter);
 
@@ -77,12 +74,9 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/organizations', organizationRoutes);
-app.use('/api/alumni', alumniRoutes);
-app.use('/api/discipline', disciplineRoutes);
+// Alumni and Discipline modules removed per project request
 app.use('/api/sports', sportsRoutes);
 app.use('/api/admin', adminRoutes);
-
-app.use('/api/analytics', analyticsRoutes);
 app.use('/api/achievements', achievementsRoutes);
 app.use('/api/about', aboutRoutes);
 app.use('/api/about', aboutUploadRoutes);

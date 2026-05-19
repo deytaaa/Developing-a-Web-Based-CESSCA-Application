@@ -7,7 +7,7 @@ The Center for Student Service, Sports, Culture, and the Arts (CESSCA) Web Appli
 
 ### 🔐 Authentication & Role-Based Access
 - Secure JWT authentication
-- Role-based dashboards for Students, Organization Officers, Alumni, CESSCA Personnel, and System Administrator
+- Role-based home views for Students, Organization Officers, Alumni, CESSCA Personnel, and System Administrator
 
 ### 🎓 Student Organization Management
 - View accredited organizations (JPCS, JPASAPS, IMAGE, etc.)
@@ -21,12 +21,12 @@ The Center for Student Service, Sports, Culture, and the Arts (CESSCA) Web Appli
 - Profile management
 - Academic achievements tracking (Masteral, Doctoral)
 - Career milestone recording
-- Success monitoring dashboard
+- Success monitoring view
 
 ### 📋 Discipline & Consultation
 - Secure complaint submission
 - Consultation request system
-- Case tracking dashboard
+- Case tracking view
 - Status monitoring (Pending, Ongoing, Resolved)
 - Confidential data access control
 
@@ -37,7 +37,7 @@ The Center for Student Service, Sports, Culture, and the Arts (CESSCA) Web Appli
 - Photo gallery with year/category filtering
 
 ### 📊 Centralized Reporting & Analytics
-- Real-time data dashboard
+- Real-time reporting
 - Organization participation statistics
 - Alumni employment reports
 - Discipline case summaries
@@ -206,10 +206,7 @@ After running the initial setup, you can login with these default credentials:
 - `POST /api/sports/gallery` - Upload photos
 
 ### Analytics Endpoints
-- `GET /api/analytics/dashboard` - Get dashboard data
-- `GET /api/analytics/organizations` - Organization statistics
-- `GET /api/analytics/alumni` - Alumni reports
-- `GET /api/analytics/discipline` - Discipline summaries
+Analytics endpoints were removed from the current build. Use the Organizations, Sports, Admin, and Achievements sections for operational data.
 
 ## User Roles & Permissions
 

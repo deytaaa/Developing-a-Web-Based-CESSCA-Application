@@ -527,7 +527,11 @@ const AchievementCard = ({ achievement: a, user, onEdit, onDelete, featured }) =
         {a.image_url ? (
           <img
             src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${a.image_url}`}
-            onError={e => { e.target.onerror = null; e.target.src = '/default-achievement.png'; }}
+            onError={e => {
+              e.target.onerror = null;
+              const svg = encodeURIComponent(`<?xml version="1.0" encoding="UTF-8"?><svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><rect width='100%' height='100%' fill='%23f3f4f6'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-family='Arial' font-size='24'>Image not available</text></svg>`);
+              e.target.src = `data:image/svg+xml;utf8,${svg}`;
+            }}
             alt={a.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 group-hover:opacity-80"
           />

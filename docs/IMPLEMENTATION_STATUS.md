@@ -8,7 +8,7 @@ Removed from system scope:
 - Student Services module
 - Support Center module
 
-These modules are no longer mounted in backend routes, no longer exposed in frontend routing/navigation, and no longer included in dashboard/analytics payloads.
+These modules are no longer mounted in backend routes, no longer exposed in frontend routing/navigation, and no longer included in reporting payloads.
 
 ## Current Implemented Scope
 
@@ -21,14 +21,14 @@ Core functional areas currently active:
 - Gallery management
 - Alumni management, including post-graduate education tracking
 - Admin user management and approvals
-- Analytics and dashboard views for in-scope modules
+- Reporting and summary views for in-scope modules
 
 ## Backend Status
 
 Implemented and active:
 - Express API routes for in-scope modules
 - Auth middleware and role checks
-- Analytics endpoints updated to remove out-of-scope aggregations
+- Reporting endpoints updated to remove out-of-scope aggregations
 
 Removed:
 - Deprecated student-service and support endpoint groups
@@ -38,7 +38,7 @@ Removed:
 Implemented and active:
 - Protected routes for in-scope modules
 - Sidebar navigation for in-scope modules only
-- Dashboard and analytics pages aligned to capstone scope
+- Home and reporting pages aligned to capstone scope
 
 Removed:
 - Service request pages/services

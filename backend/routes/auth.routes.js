@@ -9,6 +9,8 @@ const upload = require('../middleware/upload');
 const path = require('path');
 const fs = require('fs');
 
+const normalizeRole = (role) => (role === 'officer' ? 'student' : role);
+
 // Login
 router.post('/login', [
     body('email').isEmail().normalizeEmail(),
@@ -74,11 +76,12 @@ router.post('/login', [
         );
 
         // Generate JWT token
+        const normalizedRole = normalizeRole(user.role);
         const token = jwt.sign(
             { 
                 userId: user.user_id, 
                 email: user.email, 
-                role: user.role 
+                role: normalizedRole 
             },
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRE || '7d' }
@@ -91,7 +94,7 @@ router.post('/login', [
             user: {
                 userId: user.user_id,
                 email: user.email,
-                role: user.role,
+                role: normalizedRole,
                 profile: profiles[0] || null
             }
         });
@@ -110,7 +113,7 @@ router.post('/login', [
 router.post('/register', [
     body('email').isEmail().normalizeEmail(),
     body('password').isLength({ min: 6 }),
-    body('role').isIn(['student', 'officer', 'alumni']),
+    body('role').isIn(['student', 'alumni']),
     body('firstName').notEmpty().trim(),
     body('lastName').notEmpty().trim()
 ], async (req, res) => {

@@ -142,8 +142,6 @@ const Register = () => {
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
               >
                 <option value="student">Student</option>
-                <option value="officer">Organization Officer</option>
-                <option value="alumni">Alumni</option>
               </select>
             </div>
 

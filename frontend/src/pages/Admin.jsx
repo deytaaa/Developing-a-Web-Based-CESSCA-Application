@@ -1224,7 +1224,6 @@ const Admin = () => {
                 onChange={(e) => setCreateUserForm({ ...createUserForm, role: e.target.value })}
               >
                 <option value="student">Student</option>
-                <option value="officer">Officer</option>
                 <option value="alumni">Alumni</option>
                 <option value="cessca_staff">CESSCA Staff</option>
                 <option value="admin">Admin</option>
@@ -1357,7 +1356,6 @@ const Admin = () => {
               onChange={(e) => setEditUserForm({ ...editUserForm, role: e.target.value })}
             >
               <option value="student">Student</option>
-              <option value="officer">Officer</option>
               <option value="alumni">Alumni</option>
               <option value="cessca_staff">CESSCA Staff</option>
               <option value="admin">Admin</option>

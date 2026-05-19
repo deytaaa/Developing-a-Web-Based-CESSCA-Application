@@ -76,7 +76,22 @@ export const organizationService = {
 
   // Officer Management
   addOfficer: async (orgId, officerData) => {
-    const response = await api.post(`/organizations/${orgId}/officers`, officerData);
+    // Format dates to YYYY-MM-DD (ISO 8601) before sending to backend.
+    // The browser date input returns MM/DD/YYYY which the backend validator rejects.
+    const formatDate = (date) => {
+      if (!date) return undefined;
+      const d = new Date(date);
+      if (isNaN(d.getTime())) return undefined;
+      return d.toISOString().split('T')[0];
+    };
+
+    const formatted = {
+      ...officerData,
+      termStart: formatDate(officerData.termStart),
+      termEnd: formatDate(officerData.termEnd),
+    };
+
+    const response = await api.post(`/organizations/${orgId}/officers`, formatted);
     return response.data;
   },
 

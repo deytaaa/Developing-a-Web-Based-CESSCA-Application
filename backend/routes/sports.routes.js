@@ -12,14 +12,31 @@ router.get('/events', async (req, res) => {
         const { status, eventType, year } = req.query;
         
         let query = `
-            SELECT se.*, u.email as created_by_email,
-                   up.first_name as created_by_first_name, up.last_name as created_by_last_name,
-                   COUNT(DISTINCT ep.participant_id) as participant_count
-            FROM sports_events se
-            JOIN users u ON se.created_by = u.user_id
-            JOIN user_profiles up ON u.user_id = up.user_id
-            LEFT JOIN event_participants ep ON se.event_id = ep.event_id
-            WHERE 1=1
+            WITH event_summary AS (
+                SELECT
+                    se.event_id,
+                    se.event_name,
+                    se.event_type,
+                    se.description,
+                    se.venue,
+                    se.event_date,
+                    se.start_time,
+                    se.end_time,
+                    se.organizer,
+                    se.target_participants,
+                    se.status,
+                    se.created_by,
+                    se.created_at,
+                    se.updated_at,
+                    u.email AS created_by_email,
+                    up.first_name AS created_by_first_name,
+                    up.last_name AS created_by_last_name,
+                    COUNT(DISTINCT ep.participant_id) AS participant_count
+                FROM sports_events se
+                JOIN users u ON se.created_by = u.user_id
+                JOIN user_profiles up ON u.user_id = up.user_id
+                LEFT JOIN event_participants ep ON se.event_id = ep.event_id
+                WHERE 1=1
         `;
         const params = [];
 
@@ -36,7 +53,30 @@ router.get('/events', async (req, res) => {
             params.push(year);
         }
 
-        query += ' GROUP BY se.event_id ORDER BY se.event_date DESC';
+        query += `
+            GROUP BY
+                se.event_id,
+                se.event_name,
+                se.event_type,
+                se.description,
+                se.venue,
+                se.event_date,
+                se.start_time,
+                se.end_time,
+                se.organizer,
+                se.target_participants,
+                se.status,
+                se.created_by,
+                se.created_at,
+                se.updated_at,
+                u.email,
+                up.first_name,
+                up.last_name
+            )
+            SELECT *
+            FROM event_summary
+            ORDER BY event_date DESC
+        `;
 
         const [events] = await pool.query(query, params);
 
@@ -225,7 +265,7 @@ router.delete('/events/:id', auth, roleCheck('cessca_staff', 'admin'), async (re
 });
 
 // Register for event
-router.post('/events/:id/register', auth, roleCheck('student', 'officer'), async (req, res) => {
+router.post('/events/:id/register', auth, roleCheck('student'), async (req, res) => {
     try {
         const { teamName, participationType } = req.body;
 
@@ -300,29 +340,28 @@ router.get('/gallery', async (req, res) => {
     try {
         const { category, year, featured } = req.query;
         
-        // Get albums with cover photo (first photo of each album)
+        // Build the album summary in a CTE, then look up the cover photo separately.
         let query = `
-            SELECT sg.album_id, 
-                   MAX(sg.title) as title, 
-                   MAX(sg.description) as description, 
-                   MAX(sg.category) as category, 
-                   MAX(sg.year) as year, 
-                   MAX(sg.featured) as featured,
-                   MAX(sg.uploaded_at) as uploaded_at, 
-                   MAX(sg.uploaded_by) as uploaded_by,
-                   MAX(u.email) as uploaded_by_email,
-                   MAX(up.first_name) as uploaded_by_first_name, 
-                   MAX(up.last_name) as uploaded_by_last_name,
-                   MAX(se.event_name) as event_name,
-                   (SELECT image_url FROM sports_gallery 
-                    WHERE album_id = sg.album_id 
-                    ORDER BY photo_order ASC LIMIT 1) as cover_image,
-                   COUNT(*) as photo_count
-            FROM sports_gallery sg
-            JOIN users u ON sg.uploaded_by = u.user_id
-            JOIN user_profiles up ON u.user_id = up.user_id
-            LEFT JOIN sports_events se ON sg.event_id = se.event_id
-            WHERE 1=1
+            WITH album_summary AS (
+                SELECT
+                    sg.album_id,
+                    MAX(sg.title) AS title,
+                    MAX(sg.description) AS description,
+                    MAX(sg.category) AS category,
+                    MAX(sg.year) AS year,
+                    BOOL_OR(sg.featured) AS featured,
+                    MAX(sg.uploaded_at) AS uploaded_at,
+                    MAX(sg.uploaded_by) AS uploaded_by,
+                    MAX(u.email) AS uploaded_by_email,
+                    MAX(up.first_name) AS uploaded_by_first_name,
+                    MAX(up.last_name) AS uploaded_by_last_name,
+                    MAX(se.event_name) AS event_name,
+                    COUNT(*) AS photo_count
+                FROM sports_gallery sg
+                JOIN users u ON sg.uploaded_by = u.user_id
+                JOIN user_profiles up ON u.user_id = up.user_id
+                LEFT JOIN sports_events se ON sg.event_id = se.event_id
+                WHERE 1=1
         `;
         const params = [];
 
@@ -339,7 +378,22 @@ router.get('/gallery', async (req, res) => {
             params.push(featured === 'true' ? 1 : 0);
         }
 
-        query += ' GROUP BY sg.album_id ORDER BY MAX(sg.uploaded_at) DESC';
+        query += `
+                GROUP BY sg.album_id
+            )
+            SELECT
+                a.*,
+                cover.image_url AS cover_image
+            FROM album_summary a
+            LEFT JOIN LATERAL (
+                SELECT image_url
+                FROM sports_gallery
+                WHERE album_id = a.album_id
+                ORDER BY photo_order ASC, gallery_id ASC
+                LIMIT 1
+            ) cover ON TRUE
+            ORDER BY a.uploaded_at DESC
+        `;
 
         const [gallery] = await pool.query(query, params);
 
