@@ -13,6 +13,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { authService } from '../services/authService';
 import api from '../services/api';
 import { getAssetUrl } from '../utils/assetUrl';
+import { defaultAvatarImage } from '../utils/defaultImages';
 import { FiCamera, FiTrash2, FiUser } from 'react-icons/fi';
 
 const Profile = () => {
@@ -183,7 +184,7 @@ const Profile = () => {
                   src={getProfilePictureUrl()}
                   alt="Profile"
                   className="w-32 h-32 rounded-full object-cover border-4 border-green-600"
-                  onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
+                  onError={e => { e.target.onerror = null; e.target.src = defaultAvatarImage; }}
                 />
               ) : (
                 <div className="w-32 h-32 rounded-full bg-gray-100 border-4 border-gray-300 flex items-center justify-center text-gray-400">

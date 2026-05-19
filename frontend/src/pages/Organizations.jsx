@@ -8,11 +8,12 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { organizationService } from '../services/organizationService';
 import { useAuth } from '../contexts/AuthContext';
 import { getAssetUrl } from '../utils/assetUrl';
+import { defaultOrgImage } from '../utils/defaultImages';
 import { FiSettings, FiUsers } from 'react-icons/fi';
 
 // Helper to get the correct logo URL
 const getLogoUrl = (logoPath) => {
-  if (!logoPath) return '/default-org.png';
+  if (!logoPath) return defaultOrgImage;
   if (logoPath.startsWith('http')) return logoPath;
   return getAssetUrl(logoPath);
 };
