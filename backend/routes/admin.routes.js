@@ -540,6 +540,15 @@ router.get('/settings', auth, roleCheck('admin'), async (req, res) => {
 
     } catch (error) {
         console.error('Get settings error:', error);
+
+        if (error.message && /system_settings/i.test(error.message) && /does not exist/i.test(error.message)) {
+            return res.json({
+                success: true,
+                count: 0,
+                settings: []
+            });
+        }
+
         res.status(500).json({ 
             success: false, 
             message: 'Failed to fetch settings',

@@ -28,24 +28,6 @@ const Profile = () => {
     address: '',
   });
 
-  // Alumni-specific state
-  const [alumniData, setAlumniData] = useState({
-    graduationYear: '',
-    degreeProgram: '',
-    currentEmploymentStatus: '',
-    companyName: '',
-    jobPosition: '',
-    industry: '',
-    employmentStartDate: '',
-    currentAddress: '',
-    permanentAddress: '',
-    contactEmail: '',
-    contactNumber: '',
-    linkedinProfile: '',
-  });
-  
-  const isAlumni = user?.role === 'alumni';
-
   useEffect(() => {
     if (user?.profile) {
       // Only update if we have actual profile data
@@ -57,56 +39,13 @@ const Profile = () => {
         address: user.profile.address ?? prev.address,
       }));
     }
-    
-    // Fetch alumni profile if user is alumni
-    if (isAlumni) {
-      fetchAlumniProfile();
-    }
-  }, [user, isAlumni]);
-  
-  const fetchAlumniProfile = async () => {
-    try {
-      const response = await api.get('/alumni/profile');
-      if (response.data.success && response.data.alumni) {
-        const alum = response.data.alumni;
-        setAlumniData({
-          graduationYear: alum.graduation_year || '',
-          degreeProgram: alum.degree_program || '',
-          currentEmploymentStatus: alum.current_employment_status || '',
-          companyName: alum.company_name || '',
-          jobPosition: alum.job_position || '',
-          industry: alum.industry || '',
-          employmentStartDate: alum.employment_start_date || '',
-          currentAddress: alum.current_address || '',
-          permanentAddress: alum.permanent_address || '',
-          contactEmail: alum.contact_email || '',
-          contactNumber: alum.contact_number || '',
-          linkedinProfile: alum.linkedin_profile || '',
-        });
-      }
-    } catch (error) {
-      console.error('Failed to fetch alumni profile:', error);
-    }
-  };
+  }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       // Save basic profile
       await authService.updateProfile(formData);
-
-      // Save alumni profile if user is alumni
-      if (isAlumni) {
-        // Format employmentStartDate as 'YYYY-MM-DD' if present
-        let alumniPayload = { ...alumniData };
-        if (alumniPayload.employmentStartDate) {
-          const date = new Date(alumniPayload.employmentStartDate);
-          if (!isNaN(date.getTime())) {
-            alumniPayload.employmentStartDate = date.toISOString().split('T')[0];
-          }
-        }
-        await api.post('/alumni/profile', alumniPayload);
-      }
 
       const updated = await authService.getProfile();
       updateUser(updated.user);
@@ -212,45 +151,20 @@ const Profile = () => {
                   onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
                 />
               ) : (
-                <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center border-4 border-green-600">
-                  <FiUser className="w-16 h-16 text-gray-400" />
+                <div className="w-32 h-32 rounded-full bg-gray-100 border-4 border-gray-300 flex items-center justify-center text-gray-400">
+                  <FiUser className="w-12 h-12" />
                 </div>
               )}
-              {uploadingPicture && (
-                <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-                  <div className="text-white text-sm">Uploading...</div>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex gap-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleProfilePictureUpload}
-                className="hidden"
-              />
               <Button
-                type="button"
-                variant="secondary"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadingPicture}
+                variant="danger"
+                size="sm"
+                className="mt-3"
+                onClick={handleDeleteProfilePicture}
+                disabled={uploadingPicture || !getProfilePictureUrl()}
               >
-                <FiCamera className="inline mr-2" />
-                {getProfilePictureUrl() ? 'Change Picture' : 'Upload Picture'}
+                <FiTrash2 className="inline mr-2" />
+                Remove
               </Button>
-              {getProfilePictureUrl() && (
-                <Button
-                  type="button"
-                  variant="danger"
-                  onClick={handleDeleteProfilePicture}
-                  disabled={uploadingPicture}
-                >
-                  <FiTrash2 className="inline mr-2" />
-                  Remove
-                </Button>
-              )}
             </div>
             <p className="text-sm text-gray-600">Recommended: Square image, max 5MB (JPG, PNG, GIF)</p>
           </div>

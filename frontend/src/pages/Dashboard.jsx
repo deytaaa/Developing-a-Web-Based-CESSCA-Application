@@ -20,11 +20,32 @@ import {
   FiCalendar,
 } from 'react-icons/fi';
 
+const StatCard = ({ icon, iconBg, label, value, linkTo, linkLabel }) => (
+  <Card className="!p-0 overflow-hidden border-0 shadow-[0_16px_40px_rgba(16,185,129,0.10)]">
+    <div className="relative h-full bg-gradient-to-br from-white via-white to-emerald-50/70 p-6">
+     
+      <div className="flex items-center gap-4">
+        <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${iconBg} ring-1 ring-black/5 shadow-sm`}>
+          {icon}
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-slate-500">{label}</p>
+          <p className="mt-1 text-3xl font-extrabold tracking-tight text-slate-900">{value}</p>
+          {linkTo && (
+            <Link to={linkTo} className="mt-2 inline-flex items-center text-xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline">
+              {linkLabel} →
+            </Link>
+          )}
+        </div>
+      </div>
+    </div>
+  </Card>
+);
+
 // Officer: Summary Cards
 const OfficerSummaryCards = () => {
   const [orgs, setOrgs] = useState([]);
   const [activities, setActivities] = useState([]);
-  const [discipline, setDiscipline] = useState([]);
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -38,11 +59,10 @@ const OfficerSummaryCards = () => {
           if (Array.isArray(acts.activities)) allActs = allActs.concat(acts.activities);
         }
         setActivities(allActs);
-        setDiscipline([]); // Placeholder
         const achRes = await achievementService.getAll({ recent: true, limit: 3 });
         setAchievements(achRes.achievements || []);
       } catch (e) {
-        setOrgs([]); setActivities([]); setDiscipline([]); setAchievements([]);
+        setOrgs([]); setActivities([]); setAchievements([]);
       } finally {
         setLoading(false);
       }
@@ -50,7 +70,7 @@ const OfficerSummaryCards = () => {
   }, []);
   if (loading) return <LoadingSpinner size="sm" />;
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
       <Card className="!p-6">
         <div className="flex items-center">
           <div className="flex-shrink-0 bg-green-100 rounded-lg p-3"><FiUsers className="h-6 w-6 text-green-600" /></div>
@@ -62,19 +82,10 @@ const OfficerSummaryCards = () => {
       </Card>
       <Card className="!p-6">
         <div className="flex items-center">
-          <div className="flex-shrink-0 bg-indigo-100 rounded-lg p-3"><FiCalendar className="h-6 w-6 h-6 w-6 text-green-600" /></div>
+          <div className="flex-shrink-0 bg-indigo-100 rounded-lg p-3"><FiCalendar className="h-6 w-6 text-green-600" /></div>
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-600">Upcoming Activities</p>
             <p className="text-2xl font-bold text-gray-900">{activities.length}</p>
-          </div>
-        </div>
-      </Card>
-      <Card className="!p-6">
-        <div className="flex items-center">
-          <div className="flex-shrink-0 bg-yellow-100 rounded-lg p-3"><FiAlertCircle className="h-6 w-6 text-yellow-600" /></div>
-          <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600">Active Discipline Cases</p>
-            <p className="text-2xl font-bold text-gray-900">{discipline.length}</p>
           </div>
         </div>
       </Card>
@@ -150,14 +161,12 @@ const Dashboard = () => {
       .slice(0, 3);
   }
 
-  // Banner for student, officer, alumni
-  const showBanner = ["student", "officer", "alumni"].includes(user.role);
+  // Banner for student and officer
+  const showBanner = ["student", "officer"].includes(user.role);
   const bannerTitle = user.role === "student"
     ? "Student Dashboard"
     : user.role === "officer"
     ? "Officer Dashboard"
-    : user.role === "alumni"
-    ? "Alumni Dashboard"
     : "Dashboard";
 
   return (
@@ -168,7 +177,7 @@ const Dashboard = () => {
             className="relative rounded-2xl overflow-hidden mb-2"
             style={{ minHeight: 140, background: `url(${artsBanner}) center/cover, #166534` }}
           >
-            <div className="absolute inset-0 bg-green-900 bg-opacity-70" />
+       
             <div className="relative z-10 px-8 py-8 flex flex-col justify-center h-full">
               <div className="text-xs text-yellow-200 font-semibold mb-1">PTC CESSCA</div>
               <h1 className="text-3xl md:text-4xl font-bold text-yellow-400 drop-shadow mb-1">
@@ -181,86 +190,43 @@ const Dashboard = () => {
 
         {dashboard && ['cessca_staff', 'admin'].includes(user.role) && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="!p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-green-100 rounded-lg p-3">
-                    <FiAlertCircle className="h-6 w-6 h-6 w-6 text-green-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Pending Cases</p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {dashboard.disciplineStats?.find((s) => s.status === 'pending')?.count || 0}
-                    </p>
-                    <Link to="/discipline" className="text-xs text-green-600 hover:underline">
-                      View all →
-                    </Link>
-                  </div>
-                </div>
-              </Card>
-              <Card className="!p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-green-100 rounded-lg p-3">
-                    <FiUsers className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Active Orgs</p>
-                    <p className="text-2xl font-bold text-gray-900">{dashboard.organizations?.total || 0}</p>
-                    <Link to="/organizations" className="text-xs text-green-600 hover:underline">
-                      View all →
-                    </Link>
-                  </div>
-                </div>
-              </Card>
-              <Card className="!p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-green-100 rounded-lg p-3">
-                    <FiCalendar className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Upcoming Events</p>
-                    <p className="text-2xl font-bold text-gray-900">{dashboard.upcomingEvents?.length || 0}</p>
-                    <Link to="/sports" className="text-xs h-6 w-6 text-green-600 hover:underline">
-                      View all →
-                    </Link>
-                  </div>
-                </div>
-              </Card>
-              <Card className="!p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 bg-green-100 rounded-lg p-3">
-                    <FiAward className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Alumni Records</p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {dashboard.alumniStats?.reduce((acc, s) => acc + s.count, 0) || 0}
-                    </p>
-                    <Link to="/alumni" className="text-xs h-6 w-6 text-green-600 hover:underline">
-                      View all →
-                    </Link>
-                  </div>
-                </div>
-              </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <StatCard
+                icon={<FiUsers className="h-6 w-6 text-emerald-600" />}
+                iconBg="bg-emerald-100"
+                label="Active Orgs"
+                value={dashboard.organizations?.total || 0}
+                linkTo="/organizations"
+                linkLabel="View all"
+              />
+              <StatCard
+                icon={<FiCalendar className="h-6 w-6 text-emerald-600" />}
+                iconBg="bg-emerald-100"
+                label="Upcoming Events"
+                value={dashboard.upcomingEvents?.length || 0}
+                linkTo="/sports"
+                linkLabel="View all"
+              />
             </div>
             <Card title="Quick Access">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Link to="/analytics" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
-                  <FiBarChart2 className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-gray-900">Analytics</p>
-                </Link>
-                <Link to="/gallery" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
-                  <FiImage className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-gray-900">Gallery</p>
-                </Link>
-                <Link to="/sports" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
-                  <FiTrendingUp className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-gray-900">Sports & Arts</p>
-                </Link>
-                <Link to="/activities" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
-                  <FiCalendar className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-gray-900">Activities</p>
-                </Link>
+                {[
+                  { to: '/analytics', label: 'Analytics', icon: <FiBarChart2 className="h-6 w-6 text-emerald-600" />, tint: 'from-emerald-50 to-white' },
+                  { to: '/gallery', label: 'Gallery', icon: <FiImage className="h-6 w-6 text-emerald-600" />, tint: 'from-sky-50 to-white' },
+                  { to: '/sports', label: 'Sports & Arts', icon: <FiTrendingUp className="h-6 w-6 text-emerald-600" />, tint: 'from-lime-50 to-white' },
+                  { to: '/activities', label: 'Activities', icon: <FiCalendar className="h-6 w-6 text-emerald-600" />, tint: 'from-amber-50 to-white' },
+                ].map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={`group rounded-2xl border border-gray-200 bg-gradient-to-br ${item.tint} p-4 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-100`}
+                  >
+                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/5 transition-transform duration-300 group-hover:scale-105">
+                      {item.icon}
+                    </div>
+                    <p className="text-sm font-semibold text-slate-900">{item.label}</p>
+                  </Link>
+                ))}
               </div>
             </Card>
           </>
@@ -313,7 +279,7 @@ const Dashboard = () => {
                   <p className="text-sm font-medium text-gray-900">My Organizations</p>
                 </Link>
                 <Link to="/activities" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">
-                  <FiCalendar className="h-6 w-6 h-6 w-6 text-green-600 mx-auto mb-2" />
+                  <FiCalendar className="h-6 w-6 text-green-600 mx-auto mb-2" />
                   <p className="text-sm font-medium text-gray-900">Manage Activities</p>
                 </Link>
                 <Link to="/achievements" className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 text-center">

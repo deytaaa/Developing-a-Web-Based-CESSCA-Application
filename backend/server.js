@@ -49,9 +49,10 @@ app.use(helmet({
 }));
 
 // Rate limiting
+const isProduction = process.env.NODE_ENV === 'production';
 const limiter = rateLimit({
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000, // 15 minutes
+    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || (isProduction ? 100 : 1000)
 });
 app.use('/api/', limiter);
 
