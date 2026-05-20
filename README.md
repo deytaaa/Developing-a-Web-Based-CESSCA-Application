@@ -7,7 +7,7 @@ The Center for Student Service, Sports, Culture, and the Arts (CESSCA) Web Appli
 
 ### 🔐 Authentication & Role-Based Access
 - Secure JWT authentication
-- Role-based home views for Students, Organization Officers, Alumni, CESSCA Personnel, and System Administrator
+- Role-based home views for Students, Organization Officers, , CESSCA Personnel, and System Administrator
 
 ### 🎓 Student Organization Management
 - View accredited organizations (JPCS, JPASAPS, IMAGE, etc.)
@@ -15,34 +15,13 @@ The Center for Student Service, Sports, Culture, and the Arts (CESSCA) Web Appli
 - Membership and officer management
 - Activity proposal submission and approval workflow
 - Performance tracking
-
-### 👥 Alumni Profile & Achievement Tracking
-- Alumni registration portal
-- Profile management
-- Academic achievements tracking (Masteral, Doctoral)
-- Career milestone recording
-- Success monitoring view
-
-### 📋 Discipline & Consultation
-- Secure complaint submission
-- Consultation request system
-- Case tracking view
-- Status monitoring (Pending, Ongoing, Resolved)
-- Confidential data access control
-
+- 
 ### 🏆 Sports, Culture & Arts
 - Event posting
 - Competition results tracking
 - Achievement documentation
 - Photo gallery with year/category filtering
-
-### 📊 Centralized Reporting & Analytics
-- Real-time reporting
-- Organization participation statistics
-- Alumni employment reports
-- Discipline case summaries
-- Exportable reports (PDF/Excel)
-
+- 
 ### ⚙️ Administrative Portal
 - User management
 - Registration approval
@@ -79,8 +58,6 @@ cessca-app/
 │   ├── routes/
 │   │   ├── auth.routes.js
 │   │   ├── organizations.routes.js
-│   │   ├── alumni.routes.js
-│   │   ├── discipline.routes.js
 │   │   ├── sports.routes.js
 │   │   └── admin.routes.js
 │   ├── controllers/
@@ -187,40 +164,22 @@ After running the initial setup, you can login with these default credentials:
 - `POST /api/organizations/:id/members` - Add member
 - `POST /api/organizations/:id/activities` - Submit activity proposal
 
-### Alumni Endpoints
-- `GET /api/alumni` - Get all alumni
-- `POST /api/alumni/profile` - Create/update alumni profile
-- `GET /api/alumni/:id` - Get alumni profile
-- `POST /api/alumni/:id/achievements` - Add achievement
-
-### Discipline Endpoints
-- `POST /api/discipline/complaints` - Submit complaint
-- `GET /api/discipline/cases` - Get cases
-- `GET /api/discipline/cases/:id` - Get case details
-- `PUT /api/discipline/cases/:id` - Update case status
-
 ### Sports & Arts Endpoints
 - `GET /api/sports/events` - Get events
 - `POST /api/sports/events` - Create event
 - `POST /api/sports/events/:id/results` - Add results
 - `POST /api/sports/gallery` - Upload photos
 
-### Analytics Endpoints
-Analytics endpoints were removed from the current build. Use the Organizations, Sports, Admin, and Achievements sections for operational data.
-
 ## User Roles & Permissions
 
-| Feature | Student | Officer | Alumni | CESSCA | Admin |
-|---------|---------|---------|--------|--------|-------|
+| Feature | Student | CESSCA | Admin |
+|---------|---------|---------|--------|
 | View Organizations | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Join Organization | ✓ | ✓ | - | - | - |
 | Manage Organization | - | ✓ | - | - | ✓ |
 | Submit Activities | - | ✓ | - | - | - |
 | Approve Activities | - | - | - | ✓ | ✓ |
-| Alumni Profile | - | - | ✓ | ✓ | ✓ |
-| Submit Complaint | ✓ | ✓ | - | - | - |
 | Manage Cases | - | - | - | ✓ | ✓ |
-| View Analytics | - | ✓ | - | ✓ | ✓ |
 | User Management | - | - | - | - | ✓ |
 
 ## Security Features
