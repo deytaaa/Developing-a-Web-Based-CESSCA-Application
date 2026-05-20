@@ -887,6 +887,8 @@ router.get('/:id/potential-officers', auth, roleCheck('cessca_staff', 'admin'), 
 // Upload organization logo (CESSCA/Admin only)
 router.post('/:id/logo', auth, roleCheck('cessca_staff', 'admin'), upload.single('logo'), async (req, res) => {
     try {
+        console.log('Logo upload attempt:', { org_id: req.params.id, file: req.file?.originalname });
+        
         if (!req.file) {
             return res.status(400).json({
                 success: false,
@@ -899,6 +901,8 @@ router.post('/:id/logo', auth, roleCheck('cessca_staff', 'admin'), upload.single
             'SELECT logo_url FROM organizations WHERE org_id = $1',
             [req.params.id]
         );
+
+        console.log('Organization query result:', { org_id: req.params.id, found: existing.length > 0 });
 
         if (existing.length === 0) {
             return res.status(404).json({ success: false, message: 'Organization not found' });
@@ -918,6 +922,8 @@ router.post('/:id/logo', auth, roleCheck('cessca_staff', 'admin'), upload.single
             'UPDATE organizations SET logo_url = $1, updated_at = NOW() WHERE org_id = $2',
             [logoPath, req.params.id]
         );
+
+        console.log('Logo updated successfully:', { org_id: req.params.id, logoPath });
 
         res.json({
             success: true,
